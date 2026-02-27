@@ -9,6 +9,7 @@ import CommandPalette from '../components/search/CommandPalette';
 import { useProjects, useProjectDetail } from '../hooks/useProjects';
 import { useCommandPalette } from '../hooks/useCommandPalette';
 import { useToast } from '../hooks/useToast';
+import { useActiveSessions } from '../hooks/useSessions';
 
 export default function Home() {
   const { addToast } = useToast();
@@ -27,6 +28,7 @@ export default function Home() {
   );
 
   const { projects, loading } = useProjects(handleRefresh);
+  const { sessions: activeSessions, getSessionForProject } = useActiveSessions();
   const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings'>('dashboard');
   const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(null);
   const { project: selectedProject } = useProjectDetail(
@@ -92,7 +94,12 @@ export default function Home() {
         onOpenSearch={() => setOpen(true)}
       >
         {currentPage === 'dashboard' && (
-          <Dashboard projects={projects} onSelectProject={handleSelectProject} />
+          <Dashboard
+            projects={projects}
+            onSelectProject={handleSelectProject}
+            activeSessions={activeSessions}
+            getSessionForProject={getSessionForProject}
+          />
         )}
         {currentPage === 'project' && selectedProject && (
           <ProjectDetail

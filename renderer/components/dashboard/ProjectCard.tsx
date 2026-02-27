@@ -9,6 +9,7 @@ interface ProjectCardProps {
   onClick: (project: Project) => void;
   onOpenTerminal: (path: string) => void;
   onOpenEditor: (path: string) => void;
+  isLive?: boolean;
 }
 
 // Stack detection mapping
@@ -77,6 +78,7 @@ export default function ProjectCard({
   onClick,
   onOpenTerminal,
   onOpenEditor,
+  isLive,
 }: ProjectCardProps) {
   const stack = detectStack(project);
   const activeTasks = project.tasks.filter((t) => t.status === 'in_progress' || t.status === 'pending').length;
@@ -98,8 +100,14 @@ export default function ProjectCard({
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-2 min-w-0">
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors truncate">
+          <h3 className="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors truncate flex items-center gap-1">
             {project.name}
+            {isLive && (
+              <span className="relative flex h-2 w-2 ml-1 flex-shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-active opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-status-active" />
+              </span>
+            )}
           </h3>
           <p className="text-[11px] font-mono text-text-tertiary truncate mt-0.5">
             {shortenPath(project.path)}
