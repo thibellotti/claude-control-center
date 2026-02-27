@@ -50,6 +50,12 @@ export interface PackageJsonInfo {
   devDependencies: Record<string, string>;
 }
 
+export interface ProjectHealth {
+  uncommittedCount: number;
+  daysSinceLastCommit: number | null;
+  hasOutdatedDeps: boolean;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -64,6 +70,7 @@ export interface Project {
   lastActivity: number;
   status: 'active' | 'idle';
   hasClaudeDir: boolean;
+  health: ProjectHealth | null;
 }
 
 export interface SessionEntry {

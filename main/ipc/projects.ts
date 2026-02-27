@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron';
-import { readdirSync, readFileSync, existsSync, statSync } from 'fs';
+import { readdirSync, readFileSync, existsSync, statSync, promises as fsPromises } from 'fs';
 import path from 'path';
 import os from 'os';
 import { simpleGit } from 'simple-git';
@@ -8,6 +8,7 @@ import {
   IPC_CHANNELS,
   Project,
   GitInfo,
+  ProjectHealth,
   TaskItem,
   Team,
   PackageJsonInfo,
@@ -159,6 +160,14 @@ async function buildProjectSummary(projectPath: string): Promise<Project | null>
     // Get git info
     const git = await getGitInfo(projectPath);
 
+    // Get project health indicators (only meaningful for git repos)
+    let health: ProjectHealth | null = null;
+    const gitDir = path.join(projectPath, '.git');
+    if (existsSync(gitDir)) {
+      const gitInstance = simpleGit(projectPath);
+      health = await getProjectHealth(projectPath, gitInstance);
+    }
+
     // Get package.json info
     const packageJson = readPackageJson(projectPath);
 
@@ -204,6 +213,7 @@ async function buildProjectSummary(projectPath: string): Promise<Project | null>
       lastActivity,
       status,
       hasClaudeDir,
+      health,
     };
   } catch {
     return null;
@@ -250,6 +260,55 @@ async function getGitInfo(projectPath: string): Promise<GitInfo | null> {
       ahead: statusResult?.ahead || 0,
       behind: statusResult?.behind || 0,
     };
+  } catch {
+    return null;
+  }
+}
+
+async function getProjectHealth(
+  projectPath: string,
+  git: ReturnType<typeof simpleGit>
+): Promise<ProjectHealth | null> {
+  try {
+    // Count uncommitted files (modified + staged + untracked + deleted)
+    let uncommittedCount = 0;
+    try {
+      const statusResult = await git.status();
+      uncommittedCount = statusResult.files.length;
+    } catch {
+      // If git status fails, leave at 0
+    }
+
+    // Calculate days since last commit
+    let daysSinceLastCommit: number | null = null;
+    try {
+      const logResult = await git.log({ maxCount: 1 });
+      if (logResult?.latest?.date) {
+        const lastCommitTime = new Date(logResult.latest.date).getTime();
+        const msPerDay = 24 * 60 * 60 * 1000;
+        daysSinceLastCommit = Math.floor((Date.now() - lastCommitTime) / msPerDay);
+      }
+    } catch {
+      // Leave as null if log fails
+    }
+
+    // Check if package.json is newer than package-lock.json (deps may be outdated)
+    let hasOutdatedDeps = false;
+    try {
+      const pkgPath = path.join(projectPath, 'package.json');
+      const lockPath = path.join(projectPath, 'package-lock.json');
+      if (existsSync(pkgPath) && existsSync(lockPath)) {
+        const [pkgStat, lockStat] = await Promise.all([
+          fsPromises.stat(pkgPath),
+          fsPromises.stat(lockPath),
+        ]);
+        hasOutdatedDeps = pkgStat.mtimeMs > lockStat.mtimeMs;
+      }
+    } catch {
+      // Leave as false if stat fails
+    }
+
+    return { uncommittedCount, daysSinceLastCommit, hasOutdatedDeps };
   } catch {
     return null;
   }
