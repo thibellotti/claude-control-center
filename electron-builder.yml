@@ -1,18 +1,29 @@
 appId: com.thxtype.claude-control-center
 productName: Claude Control Center
 copyright: Copyright © 2026 THXType Studio
+
 mac:
   category: public.app-category.developer-tools
+  identity: null
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: resources/entitlements.mac.plist
+  entitlementsInherit: resources/entitlements.mac.plist
   target:
     - target: dmg
       arch:
         - arm64
+
+afterSign: scripts/notarize.js
+
 directories:
   output: dist
   buildResources: resources
+
 files:
   - from: .
     filter:
       - package.json
       - app
+
 publish: null
