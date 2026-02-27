@@ -28,16 +28,6 @@ function ChevronLeftIcon() {
   );
 }
 
-function TerminalIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="2" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M4 6l2 1.5L4 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M8 9h2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 function EditorIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -164,13 +154,6 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
           >
             <ClaudeIcon />
             Launch Claude
-          </button>
-          <button
-            onClick={() => window.api.openInTerminal(project.path)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-button bg-surface-2 border border-border-subtle text-xs text-text-secondary hover:text-text-primary hover:border-border-default transition-colors"
-          >
-            <TerminalIcon />
-            Terminal
           </button>
           <button
             onClick={() => window.api.openInEditor(project.path)}

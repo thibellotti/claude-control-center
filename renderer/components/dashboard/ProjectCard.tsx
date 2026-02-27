@@ -7,7 +7,6 @@ import HealthBadge from '../shared/HealthBadge';
 interface ProjectCardProps {
   project: Project;
   onClick: (project: Project) => void;
-  onOpenTerminal: (path: string) => void;
   onOpenEditor: (path: string) => void;
   isLive?: boolean;
 }
@@ -49,15 +48,6 @@ function shortenPath(path: string): string {
   return path;
 }
 
-function TerminalIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="2" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M4 6l2 1.5L4 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M8 9h2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 function EditorIcon() {
   return (
@@ -86,7 +76,6 @@ function ClaudeIcon() {
 export default function ProjectCard({
   project,
   onClick,
-  onOpenTerminal,
   onOpenEditor,
   isLive,
 }: ProjectCardProps) {
@@ -180,16 +169,6 @@ export default function ProjectCard({
           title="Launch Claude Code"
         >
           <ClaudeIcon />
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenTerminal(project.path);
-          }}
-          className="p-1.5 rounded-button bg-surface-3 text-text-tertiary hover:text-text-primary hover:bg-surface-4 transition-colors"
-          title="Open in terminal"
-        >
-          <TerminalIcon />
         </button>
         <button
           onClick={(e) => {

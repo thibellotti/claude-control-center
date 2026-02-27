@@ -51,10 +51,6 @@ export default function Dashboard({ projects, onSelectProject, activeSessions, g
     };
   }, [projects]);
 
-  const handleOpenTerminal = (path: string) => {
-    window.api.openInTerminal(path);
-  };
-
   const handleOpenEditor = (path: string) => {
     window.api.openInEditor(path);
   };
@@ -94,7 +90,7 @@ export default function Dashboard({ projects, onSelectProject, activeSessions, g
                 key={project.path}
                 project={project}
                 onClick={onSelectProject}
-                onOpenTerminal={handleOpenTerminal}
+
                 onOpenEditor={handleOpenEditor}
                 isLive={!!getSessionForProject?.(project.path)}
               />
@@ -115,7 +111,7 @@ export default function Dashboard({ projects, onSelectProject, activeSessions, g
                 key={project.path}
                 project={project}
                 onClick={onSelectProject}
-                onOpenTerminal={handleOpenTerminal}
+
                 onOpenEditor={handleOpenEditor}
                 isLive={!!getSessionForProject?.(project.path)}
               />
