@@ -1,16 +1,42 @@
 import React from 'react';
-import type { Viewport } from '../../hooks/usePreview';
+import type { EnhancedPreviewState } from '../../../shared/types';
+import type { ViewportState } from '../../hooks/usePreview';
+
+// ---------------------------------------------------------------------------
+// Props
+// ---------------------------------------------------------------------------
 
 interface PreviewToolbarProps {
-  url: string | null;
-  isRunning: boolean;
-  isStarting: boolean;
-  viewport: Viewport;
-  onViewportChange: (v: Viewport) => void;
-  onRefresh: () => void;
+  state: EnhancedPreviewState;
+  viewport: ViewportState;
+  showConsole: boolean;
+  consoleCount: number;
   onStart: () => void;
   onStop: () => void;
-  onOpenExternal: () => void;
+  onRefresh: () => void;
+  onViewportChange: (mode: string, width?: number) => void;
+  onToggleConsole: () => void;
+  onOpenBrowser: () => void;
+}
+
+// ---------------------------------------------------------------------------
+// Inline SVG icons
+// ---------------------------------------------------------------------------
+
+function PlayIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 1.5v9l7.5-4.5L3 1.5z" fill="currentColor" />
+    </svg>
+  );
+}
+
+function StopIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="2" width="8" height="8" rx="1" fill="currentColor" />
+    </svg>
+  );
 }
 
 function RefreshIcon() {
@@ -87,103 +113,163 @@ function ExternalLinkIcon() {
   );
 }
 
-function PlayIcon() {
+function ConsoleIcon() {
   return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 1.5v9l7.5-4.5L3 1.5z" fill="currentColor" />
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 5l2.5 2L3 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M7 9h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
     </svg>
   );
 }
 
-function StopIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="2" y="2" width="8" height="8" rx="1" fill="currentColor" />
-    </svg>
-  );
+// ---------------------------------------------------------------------------
+// Status dot color helper
+// ---------------------------------------------------------------------------
+
+function statusDotClass(status: EnhancedPreviewState['status']): string {
+  switch (status) {
+    case 'idle':
+      return 'bg-text-tertiary';
+    case 'detecting':
+    case 'installing':
+    case 'starting':
+      return 'bg-status-dirty';
+    case 'ready':
+      return 'bg-status-active';
+    case 'error':
+      return 'bg-[#FF6B6B]';
+    default:
+      return 'bg-text-tertiary';
+  }
 }
+
+// ---------------------------------------------------------------------------
+// URL / status label
+// ---------------------------------------------------------------------------
+
+function urlLabel(state: EnhancedPreviewState): string {
+  if (state.status === 'ready' && state.url) return state.url;
+  if (state.status === 'idle') return 'Not running';
+  if (state.status === 'detecting') return 'Detecting framework...';
+  if (state.status === 'installing') return 'Installing dependencies...';
+  if (state.status === 'starting') return 'Starting server...';
+  if (state.status === 'error') return state.error ?? 'Error';
+  return 'Not running';
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export default function PreviewToolbar({
-  url,
-  isRunning,
-  isStarting,
+  state,
   viewport,
-  onViewportChange,
-  onRefresh,
+  showConsole,
+  consoleCount,
   onStart,
   onStop,
-  onOpenExternal,
+  onRefresh,
+  onViewportChange,
+  onToggleConsole,
+  onOpenBrowser,
 }: PreviewToolbarProps) {
-  return (
-    <div className="flex items-center gap-2 px-3 py-2 bg-surface-1 border-b border-border-subtle">
-      {/* Start / Stop toggle */}
-      <button
-        onClick={isRunning ? onStop : onStart}
-        disabled={isStarting}
-        className={`flex items-center justify-center w-7 h-7 rounded-button transition-colors shrink-0 ${
-          isRunning
-            ? 'bg-red-500/15 text-red-400 hover:bg-red-500/25'
-            : 'bg-green-500/15 text-green-400 hover:bg-green-500/25'
-        } ${isStarting ? 'opacity-50 cursor-not-allowed' : ''}`}
-        title={isRunning ? 'Stop dev server' : 'Start dev server'}
-      >
-        {isRunning ? <StopIcon /> : <PlayIcon />}
-      </button>
+  const isRunning = state.status !== 'idle' && state.status !== 'error';
+  const isReady = state.status === 'ready';
 
-      {/* URL display */}
+  return (
+    <div className="flex items-center gap-2 px-3 py-2 bg-surface-1 border-b border-border-subtle shrink-0">
+      {/* Left: status dot + start/stop */}
+      <div className="flex items-center gap-2 shrink-0">
+        {/* Status dot */}
+        <span className={`w-2 h-2 rounded-full shrink-0 ${statusDotClass(state.status)}`} />
+
+        {/* Start / Stop button */}
+        <button
+          onClick={isRunning ? onStop : onStart}
+          className={`flex items-center justify-center w-7 h-7 rounded-button transition-colors ${
+            isRunning
+              ? 'bg-red-500/15 text-red-400 hover:bg-red-500/25'
+              : 'bg-green-500/15 text-green-400 hover:bg-green-500/25'
+          }`}
+          title={isRunning ? 'Stop dev server' : 'Start dev server'}
+        >
+          {isRunning ? <StopIcon /> : <PlayIcon />}
+        </button>
+      </div>
+
+      {/* Center: URL display */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center h-7 px-3 rounded-button bg-surface-2 border border-border-subtle">
           <span className="text-xs font-mono text-text-tertiary truncate">
-            {url || 'Not running'}
+            {urlLabel(state)}
           </span>
         </div>
       </div>
 
-      {/* Refresh */}
-      <button
-        onClick={onRefresh}
-        disabled={!url}
-        className="flex items-center justify-center w-7 h-7 rounded-button text-text-tertiary hover:text-text-primary hover:bg-surface-2 transition-colors disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
-        title="Refresh preview"
-      >
-        <RefreshIcon />
-      </button>
+      {/* Right: actions */}
+      <div className="flex items-center gap-1 shrink-0">
+        {/* Refresh */}
+        <button
+          onClick={onRefresh}
+          disabled={!isReady}
+          className="flex items-center justify-center w-7 h-7 rounded-button text-text-tertiary hover:text-text-primary hover:bg-surface-2 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          title="Refresh preview"
+        >
+          <RefreshIcon />
+        </button>
 
-      {/* Separator */}
-      <div className="w-px h-4 bg-border-subtle shrink-0" />
+        {/* Separator */}
+        <div className="w-px h-4 bg-border-subtle mx-0.5" />
 
-      {/* Viewport presets */}
-      <div className="flex items-center gap-0.5 shrink-0">
-        {(['desktop', 'tablet', 'mobile'] as Viewport[]).map((v) => (
+        {/* Viewport presets */}
+        {(['desktop', 'tablet', 'mobile'] as const).map((v) => (
           <button
             key={v}
             onClick={() => onViewportChange(v)}
             className={`flex items-center justify-center w-7 h-7 rounded-button transition-colors ${
-              viewport === v
-                ? 'text-accent bg-accent-muted'
+              viewport.mode === v
+                ? 'text-accent bg-accent/10'
                 : 'text-text-tertiary hover:text-text-primary hover:bg-surface-2'
             }`}
             title={`${v.charAt(0).toUpperCase() + v.slice(1)} viewport`}
           >
-            {v === 'desktop' && <DesktopIcon active={viewport === v} />}
-            {v === 'tablet' && <TabletIcon active={viewport === v} />}
-            {v === 'mobile' && <MobileIcon active={viewport === v} />}
+            {v === 'desktop' && <DesktopIcon active={viewport.mode === v} />}
+            {v === 'tablet' && <TabletIcon active={viewport.mode === v} />}
+            {v === 'mobile' && <MobileIcon active={viewport.mode === v} />}
           </button>
         ))}
+
+        {/* Separator */}
+        <div className="w-px h-4 bg-border-subtle mx-0.5" />
+
+        {/* Console toggle */}
+        <button
+          onClick={onToggleConsole}
+          className={`flex items-center justify-center w-7 h-7 rounded-button transition-colors relative ${
+            showConsole
+              ? 'text-accent bg-accent/10'
+              : 'text-text-tertiary hover:text-text-primary hover:bg-surface-2'
+          }`}
+          title="Toggle console"
+        >
+          <ConsoleIcon />
+          {consoleCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] flex items-center justify-center px-0.5 rounded-full bg-accent text-[9px] font-bold text-white leading-none">
+              {consoleCount > 99 ? '99+' : consoleCount}
+            </span>
+          )}
+        </button>
+
+        {/* Open in browser */}
+        <button
+          onClick={onOpenBrowser}
+          disabled={!isReady}
+          className="flex items-center justify-center w-7 h-7 rounded-button text-text-tertiary hover:text-text-primary hover:bg-surface-2 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          title="Open in browser"
+        >
+          <ExternalLinkIcon />
+        </button>
       </div>
-
-      {/* Separator */}
-      <div className="w-px h-4 bg-border-subtle shrink-0" />
-
-      {/* Open in browser */}
-      <button
-        onClick={onOpenExternal}
-        disabled={!url}
-        className="flex items-center justify-center w-7 h-7 rounded-button text-text-tertiary hover:text-text-primary hover:bg-surface-2 transition-colors disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
-        title="Open in browser"
-      >
-        <ExternalLinkIcon />
-      </button>
     </div>
   );
 }
