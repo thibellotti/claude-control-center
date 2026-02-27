@@ -2,6 +2,7 @@ import React from 'react';
 import type { Project } from '../../../shared/types';
 import StatusBadge from '../shared/StatusBadge';
 import GitBadge from '../shared/GitBadge';
+import HealthBadge from '../shared/HealthBadge';
 
 interface ProjectCardProps {
   project: Project;
@@ -141,6 +142,13 @@ export default function ProjectCard({
         {project.plan && <span>Has plan</span>}
         {project.hasClaudeDir && <span>.claude</span>}
       </div>
+
+      {/* Health indicators */}
+      {project.health && (
+        <div className="mt-2">
+          <HealthBadge health={project.health} compact />
+        </div>
+      )}
 
       {/* Quick actions (visible on hover) */}
       <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity">

@@ -2,6 +2,7 @@ import React from 'react';
 import type { Project } from '../../../shared/types';
 import GitBadge from '../shared/GitBadge';
 import MarkdownView from '../shared/MarkdownView';
+import HealthBadge from '../shared/HealthBadge';
 
 interface ProjectOverviewProps {
   project: Project;
@@ -33,6 +34,14 @@ function SectionHeader({ title }: { title: string }) {
 export default function ProjectOverview({ project }: ProjectOverviewProps) {
   return (
     <div className="space-y-8 py-6">
+      {/* Health section */}
+      {project.health && (
+        <section>
+          <SectionHeader title="Health" />
+          <HealthBadge health={project.health} />
+        </section>
+      )}
+
       {/* Repository section */}
       {project.git && (
         <section>
