@@ -40,6 +40,11 @@ export default function ActiveSessions({ sessions }: ActiveSessionsProps) {
                   PID {session.pid}
                 </span>
               </div>
+              {session.sessionLabel && (
+                <p className="text-xs text-text-secondary truncate mt-0.5">
+                  {session.sessionLabel}
+                </p>
+              )}
               <p className="text-[10px] text-text-tertiary font-mono truncate mt-0.5">
                 {shortenPath(session.projectPath)}
               </p>

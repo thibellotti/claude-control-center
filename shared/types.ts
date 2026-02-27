@@ -79,6 +79,7 @@ export interface ActiveSession {
   projectName: string;
   startTime: number;
   command: string;
+  sessionLabel: string | null; // first user prompt, truncated
 }
 
 export interface SessionEntry {
