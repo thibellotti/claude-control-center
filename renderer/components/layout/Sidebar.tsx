@@ -45,6 +45,18 @@ function PromptsIcon() {
   );
 }
 
+function WorkspacesIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="1" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="9" y="1" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="1" y="7" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="9" y="7" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="1" y="13" width="14" height="2" rx="0.5" stroke="currentColor" strokeWidth="1" />
+    </svg>
+  );
+}
+
 function ChevronLeftIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -72,6 +84,7 @@ export default function Sidebar({
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
+    { id: 'workspaces', label: 'Workspaces', icon: <WorkspacesIcon /> },
     { id: 'prompts', label: 'Prompts', icon: <PromptsIcon /> },
     { id: 'settings', label: 'Settings', icon: <SettingsIcon /> },
   ];

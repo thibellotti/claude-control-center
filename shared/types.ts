@@ -117,6 +117,16 @@ export interface PreviewState {
   error: string | null;
 }
 
+export interface Workspace {
+  id: string;
+  name: string;
+  description: string;
+  color: string; // hex color for the workspace dot/accent
+  projectPaths: string[];
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface Prompt {
   id: string;
   title: string;
@@ -157,4 +167,7 @@ export const IPC_CHANNELS = {
   START_DEV_SERVER: 'start-dev-server',
   STOP_DEV_SERVER: 'stop-dev-server',
   GET_DEV_SERVER_STATUS: 'get-dev-server-status',
+  GET_WORKSPACES: 'get-workspaces',
+  SAVE_WORKSPACE: 'save-workspace',
+  DELETE_WORKSPACE: 'delete-workspace',
 } as const;

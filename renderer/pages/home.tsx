@@ -6,6 +6,7 @@ import Dashboard from '../components/dashboard/Dashboard';
 import ProjectDetail from '../components/project/ProjectDetail';
 import SettingsPage from '../components/settings/SettingsPage';
 import PromptLibrary from '../components/prompts/PromptLibrary';
+import WorkspaceBoard from '../components/workspace/WorkspaceBoard';
 import CommandPalette from '../components/search/CommandPalette';
 import { useProjects, useProjectDetail } from '../hooks/useProjects';
 import { useCommandPalette } from '../hooks/useCommandPalette';
@@ -33,7 +34,7 @@ export default function Home() {
 
   const { projects, loading } = useProjects(handleRefresh);
   const { sessions: activeSessions, getSessionForProject } = useActiveSessions();
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts'>('dashboard');
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts' | 'workspaces'>('dashboard');
   const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(null);
   const { project: selectedProject } = useProjectDetail(
     currentPage === 'project' ? selectedProjectPath : null
@@ -48,7 +49,7 @@ export default function Home() {
   }, []);
 
   const handleNavigate = useCallback((page: string) => {
-    if (page === 'dashboard' || page === 'settings' || page === 'prompts') {
+    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'workspaces') {
       setCurrentPage(page);
       setSelectedProjectPath(null);
     }
@@ -75,6 +76,8 @@ export default function Home() {
       ? 'Settings'
       : currentPage === 'prompts'
       ? 'Prompt Library'
+      : currentPage === 'workspaces'
+      ? 'Workspaces'
       : selectedProject?.name || 'Project';
 
   if (loading) {
@@ -111,6 +114,12 @@ export default function Home() {
           <ProjectDetail
             project={selectedProject}
             onBack={() => handleNavigate('dashboard')}
+          />
+        )}
+        {currentPage === 'workspaces' && (
+          <WorkspaceBoard
+            projects={projects}
+            onSelectProject={handleSelectProject}
           />
         )}
         {currentPage === 'prompts' && <PromptLibrary />}
