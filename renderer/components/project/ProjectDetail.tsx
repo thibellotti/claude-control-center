@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Project } from '../../../shared/types';
 import StatusBadge from '../shared/StatusBadge';
 import Tabs from '../shared/Tabs';
@@ -6,6 +6,7 @@ import ProjectOverview from './ProjectOverview';
 import TaskList from './TaskList';
 import TeamView from './TeamView';
 import SessionList from './SessionList';
+import TokenStudio from '../tokens/TokenStudio';
 
 interface ProjectDetailProps {
   project: Project;
@@ -73,6 +74,27 @@ function shortenPath(path: string): string {
 
 export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
   const [activeTab, setActiveTab] = useState('overview');
+  const [hasTailwindConfig, setHasTailwindConfig] = useState(false);
+
+  // Detect tailwind config file
+  useEffect(() => {
+    async function checkTailwindConfig() {
+      const candidates = ['tailwind.config.js', 'tailwind.config.ts'];
+      for (const name of candidates) {
+        try {
+          const result = await window.api.readFile(`${project.path}/${name}`);
+          if (result !== null) {
+            setHasTailwindConfig(true);
+            return;
+          }
+        } catch {
+          // File doesn't exist
+        }
+      }
+      setHasTailwindConfig(false);
+    }
+    checkTailwindConfig();
+  }, [project.path]);
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
@@ -83,6 +105,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
     },
     { id: 'teams', label: 'Teams', count: project.teams.length },
     { id: 'sessions', label: 'Sessions' },
+    ...(hasTailwindConfig ? [{ id: 'tokens', label: 'Tokens' }] : []),
   ];
 
   return (
@@ -147,6 +170,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
         {activeTab === 'tasks' && <TaskList tasks={project.tasks} />}
         {activeTab === 'teams' && <TeamView teams={project.teams} />}
         {activeTab === 'sessions' && <SessionList projectPath={project.path} />}
+        {activeTab === 'tokens' && <TokenStudio projectPath={project.path} />}
       </div>
     </div>
   );

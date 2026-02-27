@@ -120,6 +120,15 @@ export interface Prompt {
   updatedAt: number;
 }
 
+export interface DesignTokens {
+  colors: Record<string, string | Record<string, string>>;
+  spacing: Record<string, string>;
+  fontFamily: Record<string, string[]>;
+  fontSize: Record<string, string | [string, { lineHeight?: string }]>;
+  borderRadius: Record<string, string>;
+  raw: string; // the full tailwind config content for raw editing
+}
+
 export const IPC_CHANNELS = {
   GET_PROJECTS: 'get-projects',
   GET_PROJECT_DETAIL: 'get-project-detail',
