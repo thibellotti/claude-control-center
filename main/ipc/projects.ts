@@ -336,6 +336,9 @@ function getTasksForProject(projectPath: string): TaskItem[] {
             // Check if this task is related to the project
             // Tasks may reference the project in their metadata or description
             if (parsed && typeof parsed === 'object') {
+              // Skip deleted tasks entirely
+              if (parsed.status === 'deleted') continue;
+
               const task: TaskItem = {
                 id: parsed.id || file.replace('.json', ''),
                 subject: parsed.subject || '',

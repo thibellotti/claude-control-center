@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type { Project } from '../../shared/types';
 import type { CommandResult } from '../hooks/useCommandPalette';
 import AppLayout from '../components/layout/AppLayout';
@@ -13,16 +13,19 @@ import { useActiveSessions } from '../hooks/useSessions';
 
 export default function Home() {
   const { addToast } = useToast();
+  const lastToastTime = useRef(0);
 
+  // Only show toasts for settings changes; suppress routine task/team updates
   const handleRefresh = useCallback(
     (hints: string[]) => {
+      const now = Date.now();
+      if (now - lastToastTime.current < 15000) return; // Max 1 toast per 15s
+      lastToastTime.current = now;
+
       if (hints.includes('__settings__')) {
         addToast('Settings updated', 'info');
-      } else if (hints.includes('__all__')) {
-        addToast('Projects refreshed', 'info');
-      } else {
-        addToast('Project activity detected', 'info');
       }
+      // Silently refresh for task/team changes — no toast needed
     },
     [addToast]
   );

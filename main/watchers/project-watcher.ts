@@ -91,7 +91,7 @@ export function startProjectWatcher(mainWindow: BrowserWindow) {
       } catch {
         // Window may have been destroyed between check and send
       }
-    }, 500);
+    }, 2000); // 2s debounce to batch rapid changes during active Claude sessions
   });
 
   watcher.on('error', (err) => {
