@@ -1,9 +1,12 @@
 import { ipcMain } from 'electron';
-import { spawn, execSync } from 'child_process';
+import { spawn, exec, execSync } from 'child_process';
+import { promisify } from 'util';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import path from 'path';
 import os from 'os';
-import { IPC_CHANNELS, DeployConfig, DeployResult } from '../../shared/types';
+import { IPC_CHANNELS, DeployConfig, DeployResult, VercelDeployment, VercelProjectInfo } from '../../shared/types';
+
+const execAsync = promisify(exec);
 
 const HOME = os.homedir();
 const DEPLOYS_DIR = path.join(HOME, '.claude', 'studio', 'deploys');
@@ -196,6 +199,121 @@ export function registerDeployHandlers() {
     async (_event, projectPath: string): Promise<DeployResult[]> => {
       const projectId = projectIdFromPath(projectPath);
       return readHistory(projectId);
+    }
+  );
+
+  // -------------------------------------------------------
+  // GET_VERCEL_DEPLOYMENTS
+  // -------------------------------------------------------
+  ipcMain.handle(
+    IPC_CHANNELS.GET_VERCEL_DEPLOYMENTS,
+    async (_event, projectPath: string): Promise<{ deployments: VercelDeployment[] }> => {
+      try {
+        const { stdout } = await execAsync('vercel ls --json 2>/dev/null', {
+          cwd: projectPath,
+          env: { ...process.env },
+          timeout: 15000,
+        });
+
+        const parsed = JSON.parse(stdout);
+
+        // vercel ls --json returns an array of deployment objects
+        const deployments: VercelDeployment[] = (Array.isArray(parsed) ? parsed : parsed.deployments || [])
+          .slice(0, 20)
+          .map((d: Record<string, unknown>) => ({
+            url: (d.url as string) || (d.inspectorUrl as string) || '',
+            state: ((d.state as string) || (d.readyState as string) || 'UNKNOWN').toUpperCase(),
+            createdAt: typeof d.createdAt === 'number' ? d.createdAt : (typeof d.created === 'number' ? d.created : Date.parse(d.createdAt as string || d.created as string || '') || 0),
+            source: (d.source as string) || (d.meta && typeof d.meta === 'object' && (d.meta as Record<string, unknown>).source as string) || 'cli',
+          }));
+
+        return { deployments };
+      } catch {
+        return { deployments: [] };
+      }
+    }
+  );
+
+  // -------------------------------------------------------
+  // GET_VERCEL_PROJECT_INFO
+  // -------------------------------------------------------
+  ipcMain.handle(
+    IPC_CHANNELS.GET_VERCEL_PROJECT_INFO,
+    async (_event, projectPath: string): Promise<VercelProjectInfo> => {
+      const result: VercelProjectInfo = {
+        detected: false,
+        projectName: null,
+        productionUrl: null,
+        framework: null,
+      };
+
+      try {
+        // Check .vercel/project.json for project details
+        const vercelProjectPath = path.join(projectPath, '.vercel', 'project.json');
+        if (existsSync(vercelProjectPath)) {
+          result.detected = true;
+          try {
+            const projectJson = JSON.parse(readFileSync(vercelProjectPath, 'utf-8'));
+            result.projectName = projectJson.projectId || null;
+          } catch {
+            // Ignore parse errors
+          }
+        }
+
+        // Check vercel.json for additional config
+        const vercelJsonPath = path.join(projectPath, 'vercel.json');
+        if (existsSync(vercelJsonPath)) {
+          result.detected = true;
+          try {
+            const vercelJson = JSON.parse(readFileSync(vercelJsonPath, 'utf-8'));
+            if (vercelJson.framework) {
+              result.framework = vercelJson.framework;
+            }
+          } catch {
+            // Ignore parse errors
+          }
+        }
+
+        // Try vercel inspect for richer info
+        if (cliExists('vercel')) {
+          result.detected = true;
+          try {
+            const { stdout } = await execAsync('vercel inspect --json 2>/dev/null', {
+              cwd: projectPath,
+              env: { ...process.env },
+              timeout: 15000,
+            });
+
+            const inspectData = JSON.parse(stdout);
+            if (inspectData.name) result.projectName = inspectData.name;
+            if (inspectData.alias && inspectData.alias.length > 0) {
+              result.productionUrl = inspectData.alias[0];
+            } else if (inspectData.url) {
+              result.productionUrl = inspectData.url;
+            }
+            if (inspectData.framework) result.framework = inspectData.framework;
+          } catch {
+            // vercel inspect may fail if not linked; that is okay
+          }
+        }
+
+        // Fallback: try to derive name from package.json
+        if (!result.projectName) {
+          const pkgPath = path.join(projectPath, 'package.json');
+          if (existsSync(pkgPath)) {
+            try {
+              const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+              result.projectName = pkg.name || null;
+            } catch {
+              // Ignore
+            }
+          }
+        }
+
+        return result;
+      } catch {
+        return result;
+      }
     }
   );
 }

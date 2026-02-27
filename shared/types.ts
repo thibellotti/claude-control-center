@@ -252,6 +252,63 @@ export interface UsageSummary {
   totalSessions: number;
 }
 
+// === Live Preview + Integration Panel Types ===
+
+export type PreviewStatus = 'idle' | 'detecting' | 'installing' | 'starting' | 'ready' | 'error';
+
+export interface EnhancedPreviewState {
+  status: PreviewStatus;
+  url: string | null;
+  port: number | null;
+  output: string[];
+  error: string | null;
+  scriptName: string | null;
+}
+
+export interface ConsoleEntry {
+  level: 'log' | 'warn' | 'error' | 'info';
+  message: string;
+  timestamp: number;
+}
+
+export interface VercelDeployment {
+  url: string;
+  state: string;
+  createdAt: number;
+  source: string;
+}
+
+export interface VercelProjectInfo {
+  detected: boolean;
+  projectName: string | null;
+  productionUrl: string | null;
+  framework: string | null;
+}
+
+export interface GitHubCommitInfo {
+  hash: string;
+  message: string;
+  author: string;
+  date: string;
+}
+
+export interface GitHubPRInfo {
+  number: number;
+  title: string;
+  state: string;
+  author: string;
+  updatedAt: string;
+  url: string;
+}
+
+export interface GitHubRepoInfo {
+  owner: string;
+  repo: string;
+  remoteUrl: string;
+  commits: GitHubCommitInfo[];
+  pullRequests: GitHubPRInfo[];
+}
+
 export const IPC_CHANNELS = {
   GET_PROJECTS: 'get-projects',
   GET_PROJECT_DETAIL: 'get-project-detail',
@@ -291,4 +348,22 @@ export const IPC_CHANNELS = {
   DEPLOY_PROJECT: 'deploy-project',
   GET_DEPLOY_HISTORY: 'get-deploy-history',
   GET_USAGE_STATS: 'get-usage-stats',
+  PTY_CREATE: 'pty-create',
+  PTY_WRITE: 'pty-write',
+  PTY_RESIZE: 'pty-resize',
+  PTY_KILL: 'pty-kill',
+  PTY_DATA: 'pty-data',
+  PTY_EXIT: 'pty-exit',
+  PTY_LIST: 'pty-list',
+  LIVE_FEED_START: 'live-feed-start',
+  LIVE_FEED_STOP: 'live-feed-stop',
+  LIVE_FEED_DATA: 'live-feed-data',
+  PREVIEW_FILE_CHANGED: 'preview-file-changed',
+  PREVIEW_STATUS_UPDATE: 'preview-status-update',
+  PREVIEW_START_WATCHING: 'preview-start-watching',
+  PREVIEW_STOP_WATCHING: 'preview-stop-watching',
+  GET_SUPABASE_INFO: 'get-supabase-info',
+  GET_VERCEL_DEPLOYMENTS: 'get-vercel-deployments',
+  GET_VERCEL_PROJECT_INFO: 'get-vercel-project-info',
+  GET_GITHUB_INFO: 'get-github-info',
 } as const;

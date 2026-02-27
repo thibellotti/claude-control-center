@@ -40,7 +40,10 @@ const api = {
   detectDeployProvider: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.DETECT_DEPLOY_PROVIDER, projectPath),
   deployProject: (projectPath: string, provider: 'vercel' | 'netlify') => ipcRenderer.invoke(IPC_CHANNELS.DEPLOY_PROJECT, projectPath, provider),
   getDeployHistory: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_DEPLOY_HISTORY, projectPath),
+  getVercelDeployments: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_VERCEL_DEPLOYMENTS, projectPath),
+  getVercelProjectInfo: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_VERCEL_PROJECT_INFO, projectPath),
   getUsageStats: (days: number) => ipcRenderer.invoke(IPC_CHANNELS.GET_USAGE_STATS, days),
+  getSupabaseInfo: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_SUPABASE_INFO, projectPath),
 
   // Terminal (PTY)
   ptyCreate: (opts: { cwd?: string; command?: string }) => ipcRenderer.invoke(IPC_CHANNELS.PTY_CREATE, opts),

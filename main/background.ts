@@ -17,6 +17,9 @@ import { registerFigmaHandlers } from './ipc/figma'
 import { registerHandoffHandlers } from './ipc/handoff'
 import { registerDeployHandlers } from './ipc/deploy'
 import { registerUsageHandlers } from './ipc/usage'
+import { registerTerminalHandlers, cleanupTerminalSessions } from './ipc/terminal'
+import { registerLiveFeedHandlers, cleanupLiveFeed } from './ipc/live-feed'
+import { registerSupabaseHandlers } from './ipc/supabase-info'
 import { startProjectWatcher } from './watchers/project-watcher'
 
 const isProd = process.env.NODE_ENV === 'production'
@@ -46,6 +49,9 @@ if (isProd) {
   registerHandoffHandlers()
   registerDeployHandlers()
   registerUsageHandlers()
+  registerTerminalHandlers()
+  registerLiveFeedHandlers()
+  registerSupabaseHandlers()
 
   const mainWindow = createWindow('main', {
     width: 1400,
@@ -67,6 +73,8 @@ if (isProd) {
   app.on('before-quit', () => {
     watcher.close()
     cleanupPreviewServers()
+    cleanupTerminalSessions()
+    cleanupLiveFeed()
   })
 
   if (isProd) {
