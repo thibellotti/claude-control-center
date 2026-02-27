@@ -1,6 +1,25 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Project } from '../../shared/types';
 
+export function useProjectDetail(projectPath: string | null) {
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!projectPath) {
+      setProject(null);
+      return;
+    }
+    setLoading(true);
+    window.api
+      .getProjectDetail(projectPath)
+      .then(setProject)
+      .finally(() => setLoading(false));
+  }, [projectPath]);
+
+  return { project, loading };
+}
+
 export function useProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
