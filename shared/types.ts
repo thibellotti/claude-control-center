@@ -112,4 +112,5 @@ export const IPC_CHANNELS = {
   PROJECT_UPDATED: 'project-updated',
   REFRESH_PROJECTS: 'refresh-projects',
   GET_ACTIVE_SESSIONS: 'get-active-sessions',
+  LAUNCH_CLAUDE: 'launch-claude',
 } as const;

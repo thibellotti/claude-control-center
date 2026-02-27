@@ -11,6 +11,7 @@ const api = {
   openInFinder: (path: string) => ipcRenderer.invoke('open-in-finder', path),
   refreshProjects: () => ipcRenderer.invoke('refresh-projects'),
   getActiveSessions: () => ipcRenderer.invoke(IPC_CHANNELS.GET_ACTIVE_SESSIONS),
+  launchClaude: (path: string) => ipcRenderer.invoke(IPC_CHANNELS.LAUNCH_CLAUDE, path),
   onProjectUpdated: (callback: (data: { refresh?: boolean } | Record<string, unknown>) => void) => {
     ipcRenderer.on('project-updated', (_, project) => callback(project));
     return () => { ipcRenderer.removeAllListeners('project-updated'); };

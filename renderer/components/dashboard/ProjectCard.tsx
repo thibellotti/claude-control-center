@@ -73,6 +73,16 @@ function EditorIcon() {
   );
 }
 
+function ClaudeIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M4 5l2.5 2L4 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M7.5 9H10" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export default function ProjectCard({
   project,
   onClick,
@@ -160,6 +170,17 @@ export default function ProjectCard({
 
       {/* Quick actions (visible on hover) */}
       <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            window.api.launchClaude(project.path);
+          }}
+          className="p-1.5 rounded-button bg-surface-3 text-text-tertiary hover:text-accent hover:bg-surface-4 transition-colors"
+          aria-label="Launch Claude Code"
+          title="Launch Claude Code"
+        >
+          <ClaudeIcon />
+        </button>
         <button
           onClick={(e) => {
             e.stopPropagation();
