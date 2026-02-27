@@ -8,6 +8,7 @@ import { registerSettingsHandlers } from './ipc/settings'
 import { registerSessionHandlers } from './ipc/sessions'
 import { registerFileHandlers } from './ipc/files'
 import { registerPromptHandlers } from './ipc/prompts'
+import { registerPreviewHandlers, cleanupPreviewServers } from './ipc/preview'
 import { startProjectWatcher } from './watchers/project-watcher'
 
 const isProd = process.env.NODE_ENV === 'production'
@@ -28,6 +29,7 @@ if (isProd) {
   registerSessionHandlers()
   registerFileHandlers()
   registerPromptHandlers()
+  registerPreviewHandlers()
 
   const mainWindow = createWindow('main', {
     width: 1400,
@@ -48,6 +50,7 @@ if (isProd) {
   // Close watcher before quit to prevent FSEvents native crash
   app.on('before-quit', () => {
     watcher.close()
+    cleanupPreviewServers()
   })
 
   if (isProd) {

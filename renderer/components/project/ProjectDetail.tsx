@@ -7,6 +7,7 @@ import TaskList from './TaskList';
 import TeamView from './TeamView';
 import SessionList from './SessionList';
 import TokenStudio from '../tokens/TokenStudio';
+import PreviewPanel from '../preview/PreviewPanel';
 
 interface ProjectDetailProps {
   project: Project;
@@ -96,6 +97,13 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
     checkTailwindConfig();
   }, [project.path]);
 
+  // Check if the project has a dev/start/serve script for preview
+  const hasPreviewScript = (() => {
+    const scripts = project.packageJson?.scripts;
+    if (!scripts) return false;
+    return !!(scripts.dev || scripts.start || scripts.serve);
+  })();
+
   const tabs = [
     { id: 'overview', label: 'Overview' },
     {
@@ -105,6 +113,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
     },
     { id: 'teams', label: 'Teams', count: project.teams.length },
     { id: 'sessions', label: 'Sessions' },
+    ...(hasPreviewScript ? [{ id: 'preview', label: 'Preview' }] : []),
     ...(hasTailwindConfig ? [{ id: 'tokens', label: 'Tokens' }] : []),
   ];
 
@@ -170,6 +179,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
         {activeTab === 'tasks' && <TaskList tasks={project.tasks} />}
         {activeTab === 'teams' && <TeamView teams={project.teams} />}
         {activeTab === 'sessions' && <SessionList projectPath={project.path} />}
+        {activeTab === 'preview' && <PreviewPanel projectPath={project.path} />}
         {activeTab === 'tokens' && <TokenStudio projectPath={project.path} />}
       </div>
     </div>

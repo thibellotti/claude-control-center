@@ -109,6 +109,14 @@ export interface ClaudeMdBlock {
   language?: string;
 }
 
+export interface PreviewState {
+  url: string | null;
+  isRunning: boolean;
+  port: number | null;
+  output: string[];
+  error: string | null;
+}
+
 export interface Prompt {
   id: string;
   title: string;
@@ -146,4 +154,7 @@ export const IPC_CHANNELS = {
   GET_PROMPTS: 'get-prompts',
   SAVE_PROMPT: 'save-prompt',
   DELETE_PROMPT: 'delete-prompt',
+  START_DEV_SERVER: 'start-dev-server',
+  STOP_DEV_SERVER: 'stop-dev-server',
+  GET_DEV_SERVER_STATUS: 'get-dev-server-status',
 } as const;
