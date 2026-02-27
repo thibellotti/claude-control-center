@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSettings } from '../../hooks/useSettings';
+import { useTheme } from '../../hooks/useTheme';
 
 /**
  * SettingsPage — displays Claude Code global settings.
@@ -27,6 +28,39 @@ function SectionHeader({ title, count }: { title: string; count?: number }) {
         </span>
       )}
     </div>
+  );
+}
+
+function AppearanceSection() {
+  const { theme, setTheme } = useTheme();
+
+  const options: { value: 'light' | 'dark' | 'system'; label: string }[] = [
+    { value: 'light', label: 'Light' },
+    { value: 'dark', label: 'Dark' },
+    { value: 'system', label: 'System' },
+  ];
+
+  return (
+    <section>
+      <SectionHeader title="Appearance" />
+      <div className="bg-surface-1 border border-border-subtle rounded-card p-4">
+        <div className="flex gap-2">
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setTheme(opt.value)}
+              className={`px-4 py-1.5 rounded-button text-xs font-medium transition-colors ${
+                theme === opt.value
+                  ? 'bg-accent text-white'
+                  : 'bg-surface-2 text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -62,6 +96,9 @@ export default function SettingsPage() {
 
   return (
     <div className="p-6 space-y-8 max-w-[800px]">
+      {/* Appearance */}
+      <AppearanceSection />
+
       {/* Allowed Permissions */}
       <section>
         <SectionHeader title="Allowed Permissions" count={permissions.length} />
