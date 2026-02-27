@@ -1,9 +1,9 @@
 {
   "private": true,
-  "name": "my-nextron-app",
-  "description": "My application description",
+  "name": "claude-control-center",
+  "description": "Visual control center for Claude Code projects",
   "version": "1.0.0",
-  "author": "Yoshihide Shiono <shiono.yoshihide@gmail.com>",
+  "author": "THXType Studio <hello@thxtype.com>",
   "main": "app/background.js",
   "scripts": {
     "dev": "nextron",

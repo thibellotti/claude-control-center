@@ -1,6 +1,12 @@
-appId: com.example.nextron
-productName: My Nextron App
-copyright: Copyright © 2018 Yoshihide Shiono
+appId: com.thxtype.claude-control-center
+productName: Claude Control Center
+copyright: Copyright © 2026 THXType Studio
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - target: dmg
+      arch:
+        - arm64
 directories:
   output: dist
   buildResources: resources

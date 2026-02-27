@@ -31,19 +31,18 @@ if (isProd) {
     titleBarStyle: 'hiddenInset',
     trafficLightPosition: { x: 16, y: 18 },
     backgroundColor: '#0A0A0A',
-    show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
   })
 
-  // Show window only when ready to prevent white flash
-  mainWindow.once('ready-to-show', () => {
-    mainWindow.show()
-  })
-
   // Start filesystem watcher for live updates
-  startProjectWatcher(mainWindow)
+  const watcher = startProjectWatcher(mainWindow)
+
+  // Close watcher before quit to prevent FSEvents native crash
+  app.on('before-quit', () => {
+    watcher.close()
+  })
 
   if (isProd) {
     await mainWindow.loadURL('app://./home')

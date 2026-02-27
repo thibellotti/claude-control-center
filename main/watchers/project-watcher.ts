@@ -30,10 +30,18 @@ export function startProjectWatcher(mainWindow: BrowserWindow) {
   watcher.on('all', () => {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => {
-      if (!mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('project-updated', { refresh: true });
+      try {
+        if (!mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('project-updated', { refresh: true });
+        }
+      } catch {
+        // Window may have been destroyed between check and send
       }
     }, 500);
+  });
+
+  watcher.on('error', (err) => {
+    console.error('File watcher error:', err);
   });
 
   return watcher;

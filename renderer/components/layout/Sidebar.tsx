@@ -71,8 +71,11 @@ export default function Sidebar({
         collapsed ? 'w-16' : 'w-60'
       }`}
     >
-      {/* Header — pt-8 clears macOS traffic lights (hiddenInset titlebar) */}
-      <div className="flex items-center justify-between h-[52px] px-4 pt-8 border-b border-border-subtle shrink-0">
+      {/* Spacer for macOS traffic lights */}
+      <div className="h-[52px] shrink-0 drag-region" />
+
+      {/* Header — below traffic lights */}
+      <div className="flex items-center justify-between px-4 pb-3 shrink-0">
         {!collapsed && (
           <span className="text-xs font-semibold tracking-wider uppercase text-text-secondary">
             Control Center
