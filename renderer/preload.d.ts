@@ -1,7 +1,7 @@
-import { IpcHandler } from '../main/preload'
+import { ElectronAPI } from '../main/preload'
 
 declare global {
   interface Window {
-    ipc: IpcHandler
+    api: ElectronAPI
   }
 }

@@ -1,20 +1,20 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron';
 
-const handler = {
-  send(channel: string, value: unknown) {
-    ipcRenderer.send(channel, value)
+const api = {
+  getProjects: () => ipcRenderer.invoke('get-projects'),
+  getProjectDetail: (path: string) => ipcRenderer.invoke('get-project-detail', path),
+  getClaudeSettings: () => ipcRenderer.invoke('get-claude-settings'),
+  getSessions: (projectPath?: string) => ipcRenderer.invoke('get-sessions', projectPath),
+  openInTerminal: (path: string) => ipcRenderer.invoke('open-in-terminal', path),
+  openInEditor: (path: string) => ipcRenderer.invoke('open-in-editor', path),
+  openInFinder: (path: string) => ipcRenderer.invoke('open-in-finder', path),
+  refreshProjects: () => ipcRenderer.invoke('refresh-projects'),
+  onProjectUpdated: (callback: (project: any) => void) => {
+    ipcRenderer.on('project-updated', (_, project) => callback(project));
+    return () => { ipcRenderer.removeAllListeners('project-updated'); };
   },
-  on(channel: string, callback: (...args: unknown[]) => void) {
-    const subscription = (_event: IpcRendererEvent, ...args: unknown[]) =>
-      callback(...args)
-    ipcRenderer.on(channel, subscription)
+};
 
-    return () => {
-      ipcRenderer.removeListener(channel, subscription)
-    }
-  },
-}
+contextBridge.exposeInMainWorld('api', api);
 
-contextBridge.exposeInMainWorld('ipc', handler)
-
-export type IpcHandler = typeof handler
+export type ElectronAPI = typeof api;
