@@ -73,6 +73,14 @@ export interface Project {
   health: ProjectHealth | null;
 }
 
+export interface ActiveSession {
+  pid: number;
+  projectPath: string;
+  projectName: string;
+  startTime: number;
+  command: string;
+}
+
 export interface SessionEntry {
   display: string;
   timestamp: number;
@@ -103,4 +111,5 @@ export const IPC_CHANNELS = {
   OPEN_IN_FINDER: 'open-in-finder',
   PROJECT_UPDATED: 'project-updated',
   REFRESH_PROJECTS: 'refresh-projects',
+  GET_ACTIVE_SESSIONS: 'get-active-sessions',
 } as const;
