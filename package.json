@@ -11,7 +11,7 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
-    "chokidar": "^5.0.0",
+    "chokidar": "^3.6.0",
     "electron-serve": "^1.3.0",
     "electron-store": "^8.2.0",
     "simple-git": "^3.32.3"
