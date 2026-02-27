@@ -217,6 +217,21 @@ export interface ComponentInfo {
   directory: string; // parent directory name for grouping
 }
 
+export interface DeployConfig {
+  provider: 'vercel' | 'netlify' | 'none';
+  lastDeployUrl?: string;
+  lastDeployTime?: number;
+  lastDeployStatus?: 'success' | 'error';
+}
+
+export interface DeployResult {
+  success: boolean;
+  url?: string;
+  error?: string;
+  output: string[];
+  timestamp: number;
+}
+
 export const IPC_CHANNELS = {
   GET_PROJECTS: 'get-projects',
   GET_PROJECT_DETAIL: 'get-project-detail',
@@ -252,4 +267,7 @@ export const IPC_CHANNELS = {
   DELETE_FIGMA_LINK: 'delete-figma-link',
   GENERATE_HANDOFF: 'generate-handoff',
   EXPORT_HANDOFF: 'export-handoff',
+  DETECT_DEPLOY_PROVIDER: 'detect-deploy-provider',
+  DEPLOY_PROJECT: 'deploy-project',
+  GET_DEPLOY_HISTORY: 'get-deploy-history',
 } as const;

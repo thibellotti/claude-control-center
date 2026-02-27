@@ -13,6 +13,7 @@ import ComponentGallery from '../gallery/ComponentGallery';
 import VisualDiff from '../diff/VisualDiff';
 import FigmaBridge from '../figma/FigmaBridge';
 import HandoffExport from '../handoff/HandoffExport';
+import DeployPanel from '../deploy/DeployPanel';
 
 interface ProjectDetailProps {
   project: Project;
@@ -131,6 +132,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
     ...(hasReact ? [{ id: 'components', label: 'Components' }] : []),
     ...(hasPreviewScript ? [{ id: 'preview', label: 'Preview' }] : []),
     ...(hasTailwindConfig ? [{ id: 'tokens', label: 'Tokens' }] : []),
+    ...(project.packageJson ? [{ id: 'deploy', label: 'Deploy' }] : []),
     { id: 'handoff', label: 'Handoff' },
   ];
 
@@ -202,6 +204,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
         {activeTab === 'components' && <ComponentGallery projectPath={project.path} />}
         {activeTab === 'preview' && <PreviewPanel projectPath={project.path} />}
         {activeTab === 'tokens' && <TokenStudio projectPath={project.path} />}
+        {activeTab === 'deploy' && <DeployPanel projectPath={project.path} />}
         {activeTab === 'handoff' && <HandoffExport projectPath={project.path} />}
       </div>
     </div>

@@ -37,6 +37,9 @@ const api = {
   deleteFigmaLink: (projectId: string, linkId: string) => ipcRenderer.invoke(IPC_CHANNELS.DELETE_FIGMA_LINK, projectId, linkId),
   generateHandoff: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.GENERATE_HANDOFF, projectPath),
   exportHandoff: (projectPath: string, format: 'markdown' | 'json') => ipcRenderer.invoke(IPC_CHANNELS.EXPORT_HANDOFF, projectPath, format),
+  detectDeployProvider: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.DETECT_DEPLOY_PROVIDER, projectPath),
+  deployProject: (projectPath: string, provider: 'vercel' | 'netlify') => ipcRenderer.invoke(IPC_CHANNELS.DEPLOY_PROJECT, projectPath, provider),
+  getDeployHistory: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_DEPLOY_HISTORY, projectPath),
   onProjectUpdated: (callback: (data: { refresh?: boolean } | Record<string, unknown>) => void) => {
     ipcRenderer.on('project-updated', (_, project) => callback(project));
     return () => { ipcRenderer.removeAllListeners('project-updated'); };
