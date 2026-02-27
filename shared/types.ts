@@ -185,6 +185,21 @@ export interface FigmaLink {
   createdAt: number;
 }
 
+export interface HandoffPackage {
+  projectName: string;
+  projectPath: string;
+  generatedAt: number;
+  overview: string | null;
+  plan: string | null;
+  gitBranch: string | null;
+  gitStatus: string | null;
+  recentCommits: { hash: string; message: string; date: string; author: string }[];
+  tasks: { subject: string; status: string; owner: string }[];
+  fileTree: string;
+  techStack: string[];
+  dependencies: Record<string, string>;
+}
+
 export interface ComponentProp {
   name: string;
   type: string;
@@ -235,4 +250,6 @@ export const IPC_CHANNELS = {
   GET_FIGMA_LINKS: 'get-figma-links',
   SAVE_FIGMA_LINK: 'save-figma-link',
   DELETE_FIGMA_LINK: 'delete-figma-link',
+  GENERATE_HANDOFF: 'generate-handoff',
+  EXPORT_HANDOFF: 'export-handoff',
 } as const;

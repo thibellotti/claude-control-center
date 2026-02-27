@@ -12,6 +12,7 @@ import PreviewPanel from '../preview/PreviewPanel';
 import ComponentGallery from '../gallery/ComponentGallery';
 import VisualDiff from '../diff/VisualDiff';
 import FigmaBridge from '../figma/FigmaBridge';
+import HandoffExport from '../handoff/HandoffExport';
 
 interface ProjectDetailProps {
   project: Project;
@@ -130,6 +131,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
     ...(hasReact ? [{ id: 'components', label: 'Components' }] : []),
     ...(hasPreviewScript ? [{ id: 'preview', label: 'Preview' }] : []),
     ...(hasTailwindConfig ? [{ id: 'tokens', label: 'Tokens' }] : []),
+    { id: 'handoff', label: 'Handoff' },
   ];
 
   return (
@@ -200,6 +202,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
         {activeTab === 'components' && <ComponentGallery projectPath={project.path} />}
         {activeTab === 'preview' && <PreviewPanel projectPath={project.path} />}
         {activeTab === 'tokens' && <TokenStudio projectPath={project.path} />}
+        {activeTab === 'handoff' && <HandoffExport projectPath={project.path} />}
       </div>
     </div>
   );
