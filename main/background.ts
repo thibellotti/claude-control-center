@@ -16,6 +16,7 @@ import { registerScreenshotHandlers } from './ipc/screenshots'
 import { registerFigmaHandlers } from './ipc/figma'
 import { registerHandoffHandlers } from './ipc/handoff'
 import { registerDeployHandlers } from './ipc/deploy'
+import { registerUsageHandlers } from './ipc/usage'
 import { startProjectWatcher } from './watchers/project-watcher'
 
 const isProd = process.env.NODE_ENV === 'production'
@@ -44,6 +45,7 @@ if (isProd) {
   registerFigmaHandlers()
   registerHandoffHandlers()
   registerDeployHandlers()
+  registerUsageHandlers()
 
   const mainWindow = createWindow('main', {
     width: 1400,

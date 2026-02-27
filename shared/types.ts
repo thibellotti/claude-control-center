@@ -232,6 +232,25 @@ export interface DeployResult {
   timestamp: number;
 }
 
+export interface UsageEntry {
+  date: string; // YYYY-MM-DD
+  projectPath: string;
+  projectName: string;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  estimatedCostUSD: number;
+  sessionCount: number;
+}
+
+export interface UsageSummary {
+  entries: UsageEntry[];
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalCostUSD: number;
+  totalSessions: number;
+}
+
 export const IPC_CHANNELS = {
   GET_PROJECTS: 'get-projects',
   GET_PROJECT_DETAIL: 'get-project-detail',
@@ -270,4 +289,5 @@ export const IPC_CHANNELS = {
   DETECT_DEPLOY_PROVIDER: 'detect-deploy-provider',
   DEPLOY_PROJECT: 'deploy-project',
   GET_DEPLOY_HISTORY: 'get-deploy-history',
+  GET_USAGE_STATS: 'get-usage-stats',
 } as const;

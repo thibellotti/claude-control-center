@@ -57,6 +57,16 @@ function WorkspacesIcon() {
   );
 }
 
+function UsageIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1.5" y="9" width="3" height="5.5" rx="0.5" stroke="currentColor" strokeWidth="1.3" />
+      <rect x="6.5" y="5" width="3" height="9.5" rx="0.5" stroke="currentColor" strokeWidth="1.3" />
+      <rect x="11.5" y="1.5" width="3" height="13" rx="0.5" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
+
 function ChevronLeftIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -86,6 +96,7 @@ export default function Sidebar({
     { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
     { id: 'workspaces', label: 'Workspaces', icon: <WorkspacesIcon /> },
     { id: 'prompts', label: 'Prompts', icon: <PromptsIcon /> },
+    { id: 'usage', label: 'Usage', icon: <UsageIcon /> },
     { id: 'settings', label: 'Settings', icon: <SettingsIcon /> },
   ];
 
