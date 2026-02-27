@@ -25,8 +25,11 @@ export default function SessionList({ projectPath }: SessionListProps) {
 
   if (loading) {
     return (
-      <div className="py-16 text-center">
-        <p className="text-text-tertiary text-sm">Loading sessions...</p>
+      <div className="py-16 flex items-center justify-center">
+        <div className="flex items-center gap-2 text-text-tertiary text-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-text-tertiary animate-pulse" />
+          Loading sessions...
+        </div>
       </div>
     );
   }

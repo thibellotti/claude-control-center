@@ -71,8 +71,8 @@ export default function Sidebar({
         collapsed ? 'w-16' : 'w-60'
       }`}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between h-[52px] px-4 border-b border-border-subtle shrink-0">
+      {/* Header — pt-8 clears macOS traffic lights (hiddenInset titlebar) */}
+      <div className="flex items-center justify-between h-[52px] px-4 pt-8 border-b border-border-subtle shrink-0">
         {!collapsed && (
           <span className="text-xs font-semibold tracking-wider uppercase text-text-secondary">
             Control Center
@@ -80,7 +80,10 @@ export default function Sidebar({
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 rounded-button text-text-tertiary hover:text-text-secondary hover:bg-surface-3 transition-colors"
+          className={`p-1.5 rounded-button text-text-tertiary hover:text-text-secondary hover:bg-surface-3 transition-colors ${
+            collapsed ? 'mx-auto' : ''
+          }`}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
@@ -100,6 +103,7 @@ export default function Sidebar({
                   ? 'bg-surface-3 text-text-primary'
                   : 'text-text-secondary hover:text-text-primary hover:bg-surface-2'
               } ${collapsed ? 'justify-center' : ''}`}
+              aria-label={item.label}
               title={collapsed ? item.label : undefined}
             >
               <span className="shrink-0">{item.icon}</span>
@@ -115,7 +119,7 @@ export default function Sidebar({
       </div>
 
       {/* Project list */}
-      <div className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 space-y-0.5">
         {!collapsed && (
           <span className="block px-3 pb-2 text-[10px] font-semibold tracking-wider uppercase text-text-tertiary">
             Projects
@@ -132,6 +136,7 @@ export default function Sidebar({
                   ? 'bg-accent-muted text-accent'
                   : 'text-text-secondary hover:text-text-primary hover:bg-surface-2'
               } ${collapsed ? 'justify-center' : ''}`}
+              aria-label={project.name}
               title={collapsed ? project.name : undefined}
             >
               <span

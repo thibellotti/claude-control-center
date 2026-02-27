@@ -36,7 +36,10 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="p-6">
-        <p className="text-sm text-text-tertiary">Loading settings...</p>
+        <div className="flex items-center gap-2 text-text-tertiary text-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-text-tertiary animate-pulse" />
+          Loading settings...
+        </div>
       </div>
     );
   }

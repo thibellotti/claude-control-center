@@ -21,10 +21,10 @@ export default function Tabs({ tabs, activeTab, onChange }: TabsProps) {
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
-            className={`relative px-4 py-2.5 text-sm font-medium transition-colors ${
+            className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 ${
               isActive
-                ? 'text-text-primary'
-                : 'text-text-tertiary hover:text-text-secondary'
+                ? 'text-text-primary border-accent'
+                : 'text-text-tertiary hover:text-text-secondary border-transparent'
             }`}
           >
             <span className="flex items-center gap-2">
@@ -41,9 +41,6 @@ export default function Tabs({ tabs, activeTab, onChange }: TabsProps) {
                 </span>
               )}
             </span>
-            {isActive && (
-              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent rounded-full" />
-            )}
           </button>
         );
       })}

@@ -1,12 +1,27 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { Project } from '../../shared/types';
 
-export interface CommandResult {
-  type: 'project' | 'task' | 'plan';
+interface CommandResultBase {
   title: string;
   subtitle: string;
-  data: any;
 }
+
+interface ProjectCommandResult extends CommandResultBase {
+  type: 'project';
+  data: Project;
+}
+
+interface PlanCommandResult extends CommandResultBase {
+  type: 'plan';
+  data: Project;
+}
+
+interface TaskCommandResult extends CommandResultBase {
+  type: 'task';
+  data: { project: Project; [key: string]: unknown };
+}
+
+export type CommandResult = ProjectCommandResult | PlanCommandResult | TaskCommandResult;
 
 const MAX_RESULTS = 10;
 

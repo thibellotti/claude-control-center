@@ -21,6 +21,7 @@ export default function TopBar({ pageTitle, onOpenSearch }: TopBarProps) {
 
       <button
         onClick={onOpenSearch}
+        aria-label="Search projects (Cmd+K)"
         className="no-drag flex items-center gap-2 px-3 py-1.5 rounded-button bg-surface-2 border border-border-subtle text-text-tertiary hover:text-text-secondary hover:border-border-default transition-colors text-xs"
       >
         <SearchIcon />

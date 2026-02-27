@@ -9,7 +9,7 @@ const api = {
   openInEditor: (path: string) => ipcRenderer.invoke('open-in-editor', path),
   openInFinder: (path: string) => ipcRenderer.invoke('open-in-finder', path),
   refreshProjects: () => ipcRenderer.invoke('refresh-projects'),
-  onProjectUpdated: (callback: (project: any) => void) => {
+  onProjectUpdated: (callback: (data: { refresh?: boolean } | Record<string, unknown>) => void) => {
     ipcRenderer.on('project-updated', (_, project) => callback(project));
     return () => { ipcRenderer.removeAllListeners('project-updated'); };
   },

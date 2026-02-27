@@ -82,12 +82,21 @@ export default function ProjectCard({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={() => onClick(project)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick(project);
+        }
+      }}
+      aria-label={project.name}
       className="group relative bg-surface-1 border border-border-subtle rounded-card p-4 cursor-pointer hover:border-border-default transition-colors"
     >
       {/* Header */}
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <div className="min-w-0">
+      <div className="flex items-start justify-between gap-2 mb-2 min-w-0">
+        <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors truncate">
             {project.name}
           </h3>
@@ -134,7 +143,7 @@ export default function ProjectCard({
       </div>
 
       {/* Quick actions (visible on hover) */}
-      <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity">
         <button
           onClick={(e) => {
             e.stopPropagation();

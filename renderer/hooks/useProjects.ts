@@ -57,8 +57,8 @@ export function useProjects() {
     // Listen for project updates from the file watcher.
     // The watcher sends { refresh: true } for filesystem changes,
     // but individual handlers may send a full Project object.
-    const cleanup = window.api.onProjectUpdated((data: any) => {
-      if (data && data.refresh) {
+    const cleanup = window.api.onProjectUpdated((data: { refresh?: boolean } | Project) => {
+      if (data && 'refresh' in data && data.refresh) {
         // Generic refresh signal from file watcher — re-fetch all projects
         fetchProjects();
       } else {

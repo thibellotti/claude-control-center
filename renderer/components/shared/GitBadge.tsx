@@ -18,9 +18,9 @@ function BranchIcon() {
 
 export default function GitBadge({ branch, status }: GitBadgeProps) {
   return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-3 text-[11px] font-mono text-text-secondary">
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-3 text-[11px] font-mono text-text-secondary min-w-0 overflow-hidden max-w-[150px]">
       <BranchIcon />
-      <span className="truncate max-w-[120px]">{branch}</span>
+      <span className="truncate">{branch}</span>
       <span
         className={`w-1.5 h-1.5 rounded-full shrink-0 ${
           status === 'clean' ? 'bg-status-clean' : 'bg-status-dirty'

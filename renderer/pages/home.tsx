@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { Project } from '../../shared/types';
+import type { CommandResult } from '../hooks/useCommandPalette';
 import AppLayout from '../components/layout/AppLayout';
 import Dashboard from '../components/dashboard/Dashboard';
 import ProjectDetail from '../components/project/ProjectDetail';
@@ -32,7 +33,7 @@ export default function Home() {
   }, []);
 
   const handleSearchSelect = useCallback(
-    (result: any) => {
+    (result: CommandResult) => {
       if (result.type === 'project' || result.type === 'plan') {
         setSelectedProjectPath(result.data.path);
         setCurrentPage('project');
@@ -55,7 +56,10 @@ export default function Home() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-surface-0">
-        <div className="text-text-tertiary text-sm">Loading projects...</div>
+        <div className="flex items-center gap-2 text-text-tertiary text-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-text-tertiary animate-pulse" />
+          Loading projects...
+        </div>
       </div>
     );
   }

@@ -4,26 +4,54 @@ interface MarkdownViewProps {
   content: string;
 }
 
-// Simple markdown renderer using string replacement only -- no external libraries
-function renderMarkdown(md: string): string {
-  // Escape HTML entities first
-  let html = md
+function escapeHtml(str: string): string {
+  return str
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
-  // Code blocks (triple backtick)
-  html = html.replace(
+// Simple markdown renderer using string replacement only -- no external libraries
+function renderMarkdown(md: string): string {
+  // Extract code blocks before escaping so their content is preserved literally
+  const codeBlocks: string[] = [];
+  let processed = md.replace(
     /```(\w*)\n([\s\S]*?)```/g,
-    (_match, _lang, code) =>
-      `<pre class="bg-surface-3 border border-border-subtle rounded-card p-3 overflow-x-auto my-3"><code class="text-[12px] font-mono text-text-secondary">${code.trim()}</code></pre>`
+    (_match, _lang, code) => {
+      const idx = codeBlocks.length;
+      // Escape code block content separately (only HTML entities, not markdown)
+      codeBlocks.push(
+        `<pre class="bg-surface-3 border border-border-subtle rounded-card p-3 overflow-x-auto my-3"><code class="text-[12px] font-mono text-text-secondary">${escapeHtml(code.trim())}</code></pre>`
+      );
+      return `%%CODEBLOCK_${idx}%%`;
+    }
   );
 
-  // Inline code (single backtick)
-  html = html.replace(
+  // Extract inline code before escaping
+  const inlineCode: string[] = [];
+  processed = processed.replace(
     /`([^`]+)`/g,
-    '<code class="bg-surface-3 px-1.5 py-0.5 rounded text-[12px] font-mono text-text-secondary">$1</code>'
+    (_match, code) => {
+      const idx = inlineCode.length;
+      inlineCode.push(
+        `<code class="bg-surface-3 px-1.5 py-0.5 rounded text-[12px] font-mono text-text-secondary">${escapeHtml(code)}</code>`
+      );
+      return `%%INLINECODE_${idx}%%`;
+    }
   );
+
+  // Escape remaining HTML entities
+  let html = escapeHtml(processed);
+
+  // Restore code blocks and inline code
+  codeBlocks.forEach((block, idx) => {
+    html = html.replace(`%%CODEBLOCK_${idx}%%`, block);
+  });
+  inlineCode.forEach((code, idx) => {
+    html = html.replace(`%%INLINECODE_${idx}%%`, code);
+  });
 
   // Headers
   html = html.replace(
@@ -63,14 +91,14 @@ function renderMarkdown(md: string): string {
 
   // Paragraphs: wrap remaining lines that aren't already wrapped in HTML tags
   const lines = html.split('\n');
-  const processed = lines.map((line) => {
+  const wrappedLines = lines.map((line) => {
     const trimmed = line.trim();
     if (!trimmed) return '';
     if (trimmed.startsWith('<')) return line;
     return `<p class="text-sm text-text-secondary my-1">${trimmed}</p>`;
   });
 
-  return processed.join('\n');
+  return wrappedLines.join('\n');
 }
 
 export default function MarkdownView({ content }: MarkdownViewProps) {

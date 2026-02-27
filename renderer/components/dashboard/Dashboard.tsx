@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Project } from '../../../shared/types';
 import ProjectCard from './ProjectCard';
 
@@ -30,17 +30,23 @@ function StatCard({ label, value, accent, warn }: StatCardProps) {
 }
 
 export default function Dashboard({ projects, onSelectProject }: DashboardProps) {
-  const activeProjects = projects.filter((p) => p.status === 'active');
-  const idleProjects = projects.filter((p) => p.status === 'idle');
-
-  const totalTasks = projects.reduce((sum, p) => sum + p.tasks.length, 0);
-  const activeTasks = projects.reduce(
-    (sum, p) => sum + p.tasks.filter((t) => t.status === 'in_progress').length,
-    0
-  );
-  const uncommitted = projects.filter(
-    (p) => p.git && p.git.status === 'dirty'
-  ).length;
+  const { activeProjects, idleProjects, totalTasks, activeTasks, uncommitted } = useMemo(() => {
+    const active = projects.filter((p) => p.status === 'active');
+    const idle = projects.filter((p) => p.status === 'idle');
+    const total = projects.reduce((sum, p) => sum + p.tasks.length, 0);
+    const activeT = projects.reduce(
+      (sum, p) => sum + p.tasks.filter((t) => t.status === 'in_progress').length,
+      0
+    );
+    const dirty = projects.filter((p) => p.git && p.git.status === 'dirty').length;
+    return {
+      activeProjects: active,
+      idleProjects: idle,
+      totalTasks: total,
+      activeTasks: activeT,
+      uncommitted: dirty,
+    };
+  }, [projects]);
 
   const handleOpenTerminal = (path: string) => {
     window.api.openInTerminal(path);
