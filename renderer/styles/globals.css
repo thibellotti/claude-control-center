@@ -61,7 +61,8 @@
   }
 
   ::selection {
-    @apply bg-accent/30 text-text-primary;
+    background-color: rgba(59, 130, 246, 0.3);
+    color: var(--text-primary);
   }
 
   body {
