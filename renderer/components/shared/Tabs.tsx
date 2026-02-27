@@ -1,0 +1,52 @@
+import React from 'react';
+
+interface Tab {
+  id: string;
+  label: string;
+  count?: number;
+}
+
+interface TabsProps {
+  tabs: Tab[];
+  activeTab: string;
+  onChange: (tabId: string) => void;
+}
+
+export default function Tabs({ tabs, activeTab, onChange }: TabsProps) {
+  return (
+    <div className="flex items-center gap-0 border-b border-border-subtle">
+      {tabs.map((tab) => {
+        const isActive = activeTab === tab.id;
+        return (
+          <button
+            key={tab.id}
+            onClick={() => onChange(tab.id)}
+            className={`relative px-4 py-2.5 text-sm font-medium transition-colors ${
+              isActive
+                ? 'text-text-primary'
+                : 'text-text-tertiary hover:text-text-secondary'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              {tab.label}
+              {tab.count !== undefined && (
+                <span
+                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
+                    isActive
+                      ? 'bg-accent-muted text-accent'
+                      : 'bg-surface-3 text-text-tertiary'
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              )}
+            </span>
+            {isActive && (
+              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent rounded-full" />
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
