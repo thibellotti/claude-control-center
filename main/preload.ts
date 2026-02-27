@@ -32,6 +32,9 @@ const api = {
   deleteScreenshot: (opts: { projectId: string; screenshotId: string }) =>
     ipcRenderer.invoke(IPC_CHANNELS.DELETE_SCREENSHOT, opts),
   getScreenshotImage: (imagePath: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_SCREENSHOT_IMAGE, imagePath),
+  getFigmaLinks: (projectId: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_FIGMA_LINKS, projectId),
+  saveFigmaLink: (projectId: string, link: unknown) => ipcRenderer.invoke(IPC_CHANNELS.SAVE_FIGMA_LINK, projectId, link),
+  deleteFigmaLink: (projectId: string, linkId: string) => ipcRenderer.invoke(IPC_CHANNELS.DELETE_FIGMA_LINK, projectId, linkId),
   onProjectUpdated: (callback: (data: { refresh?: boolean } | Record<string, unknown>) => void) => {
     ipcRenderer.on('project-updated', (_, project) => callback(project));
     return () => { ipcRenderer.removeAllListeners('project-updated'); };

@@ -176,6 +176,15 @@ export interface ScreenshotEntry {
   commitMessage?: string;
 }
 
+export interface FigmaLink {
+  id: string;
+  figmaUrl: string;
+  nodeId: string;
+  fileKey: string;
+  label: string;
+  createdAt: number;
+}
+
 export interface ComponentProp {
   name: string;
   type: string;
@@ -223,4 +232,7 @@ export const IPC_CHANNELS = {
   GET_SCREENSHOTS: 'get-screenshots',
   DELETE_SCREENSHOT: 'delete-screenshot',
   GET_SCREENSHOT_IMAGE: 'get-screenshot-image',
+  GET_FIGMA_LINKS: 'get-figma-links',
+  SAVE_FIGMA_LINK: 'save-figma-link',
+  DELETE_FIGMA_LINK: 'delete-figma-link',
 } as const;

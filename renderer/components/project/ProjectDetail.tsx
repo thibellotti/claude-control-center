@@ -11,6 +11,7 @@ import TokenStudio from '../tokens/TokenStudio';
 import PreviewPanel from '../preview/PreviewPanel';
 import ComponentGallery from '../gallery/ComponentGallery';
 import VisualDiff from '../diff/VisualDiff';
+import FigmaBridge from '../figma/FigmaBridge';
 
 interface ProjectDetailProps {
   project: Project;
@@ -125,6 +126,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
     { id: 'sessions', label: 'Sessions' },
     { id: 'replay', label: 'Replay' },
     { id: 'diff', label: 'Diff' },
+    { id: 'design', label: 'Design' },
     ...(hasReact ? [{ id: 'components', label: 'Components' }] : []),
     ...(hasPreviewScript ? [{ id: 'preview', label: 'Preview' }] : []),
     ...(hasTailwindConfig ? [{ id: 'tokens', label: 'Tokens' }] : []),
@@ -194,6 +196,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
         {activeTab === 'sessions' && <SessionList projectPath={project.path} />}
         {activeTab === 'replay' && <SessionReplay projectPath={project.path} />}
         {activeTab === 'diff' && <VisualDiff projectId={project.id} projectPath={project.path} />}
+        {activeTab === 'design' && <FigmaBridge projectId={project.id} />}
         {activeTab === 'components' && <ComponentGallery projectPath={project.path} />}
         {activeTab === 'preview' && <PreviewPanel projectPath={project.path} />}
         {activeTab === 'tokens' && <TokenStudio projectPath={project.path} />}
