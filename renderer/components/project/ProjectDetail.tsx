@@ -9,6 +9,7 @@ import SessionList from './SessionList';
 import SessionReplay from '../sessions/SessionReplay';
 import TokenStudio from '../tokens/TokenStudio';
 import PreviewPanel from '../preview/PreviewPanel';
+import ComponentGallery from '../gallery/ComponentGallery';
 
 interface ProjectDetailProps {
   project: Project;
@@ -98,6 +99,13 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
     checkTailwindConfig();
   }, [project.path]);
 
+  // Check if project has React in dependencies (for Components tab)
+  const hasReact = (() => {
+    const deps = project.packageJson?.dependencies;
+    const devDeps = project.packageJson?.devDependencies;
+    return !!(deps?.react || devDeps?.react);
+  })();
+
   // Check if the project has a dev/start/serve script for preview
   const hasPreviewScript = (() => {
     const scripts = project.packageJson?.scripts;
@@ -115,6 +123,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
     { id: 'teams', label: 'Teams', count: project.teams.length },
     { id: 'sessions', label: 'Sessions' },
     { id: 'replay', label: 'Replay' },
+    ...(hasReact ? [{ id: 'components', label: 'Components' }] : []),
     ...(hasPreviewScript ? [{ id: 'preview', label: 'Preview' }] : []),
     ...(hasTailwindConfig ? [{ id: 'tokens', label: 'Tokens' }] : []),
   ];
@@ -182,6 +191,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
         {activeTab === 'teams' && <TeamView teams={project.teams} />}
         {activeTab === 'sessions' && <SessionList projectPath={project.path} />}
         {activeTab === 'replay' && <SessionReplay projectPath={project.path} />}
+        {activeTab === 'components' && <ComponentGallery projectPath={project.path} />}
         {activeTab === 'preview' && <PreviewPanel projectPath={project.path} />}
         {activeTab === 'tokens' && <TokenStudio projectPath={project.path} />}
       </div>

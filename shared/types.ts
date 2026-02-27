@@ -165,6 +165,23 @@ export interface SessionTimeline {
   actions: SessionAction[];
 }
 
+export interface ComponentProp {
+  name: string;
+  type: string;
+  required: boolean;
+}
+
+export interface ComponentInfo {
+  name: string;
+  filePath: string;
+  relativePath: string;
+  exportType: 'default' | 'named';
+  props: ComponentProp[];
+  lineCount: number;
+  hasTests: boolean;
+  directory: string; // parent directory name for grouping
+}
+
 export const IPC_CHANNELS = {
   GET_PROJECTS: 'get-projects',
   GET_PROJECT_DETAIL: 'get-project-detail',
@@ -190,4 +207,5 @@ export const IPC_CHANNELS = {
   DELETE_WORKSPACE: 'delete-workspace',
   GET_SESSION_TIMELINES: 'get-session-timelines',
   GET_SESSION_TIMELINE_DETAIL: 'get-session-timeline-detail',
+  SCAN_COMPONENTS: 'scan-components',
 } as const;
