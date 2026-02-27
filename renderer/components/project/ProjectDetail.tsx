@@ -10,6 +10,7 @@ import SessionReplay from '../sessions/SessionReplay';
 import TokenStudio from '../tokens/TokenStudio';
 import PreviewPanel from '../preview/PreviewPanel';
 import ComponentGallery from '../gallery/ComponentGallery';
+import VisualDiff from '../diff/VisualDiff';
 
 interface ProjectDetailProps {
   project: Project;
@@ -123,6 +124,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
     { id: 'teams', label: 'Teams', count: project.teams.length },
     { id: 'sessions', label: 'Sessions' },
     { id: 'replay', label: 'Replay' },
+    { id: 'diff', label: 'Diff' },
     ...(hasReact ? [{ id: 'components', label: 'Components' }] : []),
     ...(hasPreviewScript ? [{ id: 'preview', label: 'Preview' }] : []),
     ...(hasTailwindConfig ? [{ id: 'tokens', label: 'Tokens' }] : []),
@@ -191,6 +193,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
         {activeTab === 'teams' && <TeamView teams={project.teams} />}
         {activeTab === 'sessions' && <SessionList projectPath={project.path} />}
         {activeTab === 'replay' && <SessionReplay projectPath={project.path} />}
+        {activeTab === 'diff' && <VisualDiff projectId={project.id} projectPath={project.path} />}
         {activeTab === 'components' && <ComponentGallery projectPath={project.path} />}
         {activeTab === 'preview' && <PreviewPanel projectPath={project.path} />}
         {activeTab === 'tokens' && <TokenStudio projectPath={project.path} />}

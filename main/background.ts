@@ -12,6 +12,7 @@ import { registerPreviewHandlers, cleanupPreviewServers } from './ipc/preview'
 import { registerWorkspaceHandlers } from './ipc/workspaces'
 import { registerSessionReplayHandlers } from './ipc/session-replay'
 import { registerComponentHandlers } from './ipc/components'
+import { registerScreenshotHandlers } from './ipc/screenshots'
 import { startProjectWatcher } from './watchers/project-watcher'
 
 const isProd = process.env.NODE_ENV === 'production'
@@ -36,6 +37,7 @@ if (isProd) {
   registerWorkspaceHandlers()
   registerSessionReplayHandlers()
   registerComponentHandlers()
+  registerScreenshotHandlers()
 
   const mainWindow = createWindow('main', {
     width: 1400,

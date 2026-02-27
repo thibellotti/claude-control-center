@@ -165,6 +165,17 @@ export interface SessionTimeline {
   actions: SessionAction[];
 }
 
+export interface ScreenshotEntry {
+  id: string;
+  label: string;
+  timestamp: number;
+  imagePath: string; // absolute path to stored PNG
+  url: string;
+  viewport: { width: number; height: number };
+  commitHash?: string;
+  commitMessage?: string;
+}
+
 export interface ComponentProp {
   name: string;
   type: string;
@@ -208,4 +219,8 @@ export const IPC_CHANNELS = {
   GET_SESSION_TIMELINES: 'get-session-timelines',
   GET_SESSION_TIMELINE_DETAIL: 'get-session-timeline-detail',
   SCAN_COMPONENTS: 'scan-components',
+  CAPTURE_SCREENSHOT: 'capture-screenshot',
+  GET_SCREENSHOTS: 'get-screenshots',
+  DELETE_SCREENSHOT: 'delete-screenshot',
+  GET_SCREENSHOT_IMAGE: 'get-screenshot-image',
 } as const;
