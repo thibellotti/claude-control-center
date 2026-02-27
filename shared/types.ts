@@ -81,6 +81,11 @@ export interface ClaudeSettings {
   enabledPlugins: Record<string, boolean>;
 }
 
+export interface RefreshEvent {
+  refresh: boolean;
+  hints?: string[];
+}
+
 export const IPC_CHANNELS = {
   GET_PROJECTS: 'get-projects',
   GET_PROJECT_DETAIL: 'get-project-detail',

@@ -8,9 +8,25 @@ import SettingsPage from '../components/settings/SettingsPage';
 import CommandPalette from '../components/search/CommandPalette';
 import { useProjects, useProjectDetail } from '../hooks/useProjects';
 import { useCommandPalette } from '../hooks/useCommandPalette';
+import { useToast } from '../hooks/useToast';
 
 export default function Home() {
-  const { projects, loading } = useProjects();
+  const { addToast } = useToast();
+
+  const handleRefresh = useCallback(
+    (hints: string[]) => {
+      if (hints.includes('__settings__')) {
+        addToast('Settings updated', 'info');
+      } else if (hints.includes('__all__')) {
+        addToast('Projects refreshed', 'info');
+      } else {
+        addToast('Project activity detected', 'info');
+      }
+    },
+    [addToast]
+  );
+
+  const { projects, loading } = useProjects(handleRefresh);
   const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings'>('dashboard');
   const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(null);
   const { project: selectedProject } = useProjectDetail(
