@@ -6,6 +6,8 @@ import { registerProjectHandlers } from './ipc/projects'
 import { registerLaunchHandlers } from './ipc/launch'
 import { registerSettingsHandlers } from './ipc/settings'
 import { registerSessionHandlers } from './ipc/sessions'
+import { registerFileHandlers } from './ipc/files'
+import { registerPromptHandlers } from './ipc/prompts'
 import { startProjectWatcher } from './watchers/project-watcher'
 
 const isProd = process.env.NODE_ENV === 'production'
@@ -24,6 +26,8 @@ if (isProd) {
   registerLaunchHandlers()
   registerSettingsHandlers()
   registerSessionHandlers()
+  registerFileHandlers()
+  registerPromptHandlers()
 
   const mainWindow = createWindow('main', {
     width: 1400,

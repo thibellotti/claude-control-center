@@ -5,6 +5,7 @@ import AppLayout from '../components/layout/AppLayout';
 import Dashboard from '../components/dashboard/Dashboard';
 import ProjectDetail from '../components/project/ProjectDetail';
 import SettingsPage from '../components/settings/SettingsPage';
+import PromptLibrary from '../components/prompts/PromptLibrary';
 import CommandPalette from '../components/search/CommandPalette';
 import { useProjects, useProjectDetail } from '../hooks/useProjects';
 import { useCommandPalette } from '../hooks/useCommandPalette';
@@ -32,7 +33,7 @@ export default function Home() {
 
   const { projects, loading } = useProjects(handleRefresh);
   const { sessions: activeSessions, getSessionForProject } = useActiveSessions();
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings'>('dashboard');
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts'>('dashboard');
   const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(null);
   const { project: selectedProject } = useProjectDetail(
     currentPage === 'project' ? selectedProjectPath : null
@@ -47,7 +48,7 @@ export default function Home() {
   }, []);
 
   const handleNavigate = useCallback((page: string) => {
-    if (page === 'dashboard' || page === 'settings') {
+    if (page === 'dashboard' || page === 'settings' || page === 'prompts') {
       setCurrentPage(page);
       setSelectedProjectPath(null);
     }
@@ -72,6 +73,8 @@ export default function Home() {
       ? 'Dashboard'
       : currentPage === 'settings'
       ? 'Settings'
+      : currentPage === 'prompts'
+      ? 'Prompt Library'
       : selectedProject?.name || 'Project';
 
   if (loading) {
@@ -92,7 +95,7 @@ export default function Home() {
         selectedPath={selectedProjectPath}
         onSelectProject={handleSelectProject}
         onNavigate={handleNavigate}
-        currentPage={currentPage === 'project' ? 'dashboard' : currentPage}
+        currentPage={currentPage === 'project' ? 'dashboard' : currentPage as string}
         pageTitle={pageTitle}
         onOpenSearch={() => setOpen(true)}
       >
@@ -110,6 +113,7 @@ export default function Home() {
             onBack={() => handleNavigate('dashboard')}
           />
         )}
+        {currentPage === 'prompts' && <PromptLibrary />}
         {currentPage === 'settings' && <SettingsPage />}
       </AppLayout>
 

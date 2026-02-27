@@ -35,6 +35,16 @@ function SettingsIcon() {
   );
 }
 
+function PromptsIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="1.5" width="10" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M5 5h4M5 8h4M5 11h2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M12 4.5h1.5a1 1 0 011 1v9a1 1 0 01-1 1H6a1 1 0 01-1-1V14" stroke="currentColor" strokeWidth="1.2" />
+    </svg>
+  );
+}
+
 function ChevronLeftIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -62,6 +72,7 @@ export default function Sidebar({
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
+    { id: 'prompts', label: 'Prompts', icon: <PromptsIcon /> },
     { id: 'settings', label: 'Settings', icon: <SettingsIcon /> },
   ];
 

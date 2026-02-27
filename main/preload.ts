@@ -12,6 +12,11 @@ const api = {
   refreshProjects: () => ipcRenderer.invoke('refresh-projects'),
   getActiveSessions: () => ipcRenderer.invoke(IPC_CHANNELS.GET_ACTIVE_SESSIONS),
   launchClaude: (path: string) => ipcRenderer.invoke(IPC_CHANNELS.LAUNCH_CLAUDE, path),
+  readFile: (filePath: string) => ipcRenderer.invoke(IPC_CHANNELS.READ_FILE, filePath),
+  writeFile: (filePath: string, content: string) => ipcRenderer.invoke(IPC_CHANNELS.WRITE_FILE, filePath, content),
+  getPrompts: () => ipcRenderer.invoke(IPC_CHANNELS.GET_PROMPTS),
+  savePrompt: (prompt: unknown) => ipcRenderer.invoke(IPC_CHANNELS.SAVE_PROMPT, prompt),
+  deletePrompt: (id: string) => ipcRenderer.invoke(IPC_CHANNELS.DELETE_PROMPT, id),
   onProjectUpdated: (callback: (data: { refresh?: boolean } | Record<string, unknown>) => void) => {
     ipcRenderer.on('project-updated', (_, project) => callback(project));
     return () => { ipcRenderer.removeAllListeners('project-updated'); };

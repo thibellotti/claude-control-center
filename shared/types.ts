@@ -101,6 +101,25 @@ export interface RefreshEvent {
   hints?: string[];
 }
 
+export interface ClaudeMdBlock {
+  id: string;
+  type: 'heading' | 'rule' | 'text' | 'list' | 'code';
+  content: string;
+  level?: number;
+  language?: string;
+}
+
+export interface Prompt {
+  id: string;
+  title: string;
+  content: string;
+  category: string;
+  tags: string[];
+  isFavorite: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export const IPC_CHANNELS = {
   GET_PROJECTS: 'get-projects',
   GET_PROJECT_DETAIL: 'get-project-detail',
@@ -113,4 +132,9 @@ export const IPC_CHANNELS = {
   REFRESH_PROJECTS: 'refresh-projects',
   GET_ACTIVE_SESSIONS: 'get-active-sessions',
   LAUNCH_CLAUDE: 'launch-claude',
+  READ_FILE: 'read-file',
+  WRITE_FILE: 'write-file',
+  GET_PROMPTS: 'get-prompts',
+  SAVE_PROMPT: 'save-prompt',
+  DELETE_PROMPT: 'delete-prompt',
 } as const;
