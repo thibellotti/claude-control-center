@@ -147,6 +147,24 @@ export interface DesignTokens {
   raw: string; // the full tailwind config content for raw editing
 }
 
+export interface SessionAction {
+  id: string;
+  timestamp: string;
+  type: 'file_read' | 'file_write' | 'file_edit' | 'command' | 'text' | 'error';
+  description: string;
+  filePath?: string;
+  detail?: string;
+}
+
+export interface SessionTimeline {
+  sessionId: string;
+  fileName: string;
+  startTime: string;
+  endTime: string;
+  actionCount: number;
+  actions: SessionAction[];
+}
+
 export const IPC_CHANNELS = {
   GET_PROJECTS: 'get-projects',
   GET_PROJECT_DETAIL: 'get-project-detail',
@@ -170,4 +188,6 @@ export const IPC_CHANNELS = {
   GET_WORKSPACES: 'get-workspaces',
   SAVE_WORKSPACE: 'save-workspace',
   DELETE_WORKSPACE: 'delete-workspace',
+  GET_SESSION_TIMELINES: 'get-session-timelines',
+  GET_SESSION_TIMELINE_DETAIL: 'get-session-timeline-detail',
 } as const;

@@ -6,6 +6,7 @@ import ProjectOverview from './ProjectOverview';
 import TaskList from './TaskList';
 import TeamView from './TeamView';
 import SessionList from './SessionList';
+import SessionReplay from '../sessions/SessionReplay';
 import TokenStudio from '../tokens/TokenStudio';
 import PreviewPanel from '../preview/PreviewPanel';
 
@@ -113,6 +114,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
     },
     { id: 'teams', label: 'Teams', count: project.teams.length },
     { id: 'sessions', label: 'Sessions' },
+    { id: 'replay', label: 'Replay' },
     ...(hasPreviewScript ? [{ id: 'preview', label: 'Preview' }] : []),
     ...(hasTailwindConfig ? [{ id: 'tokens', label: 'Tokens' }] : []),
   ];
@@ -179,6 +181,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
         {activeTab === 'tasks' && <TaskList tasks={project.tasks} />}
         {activeTab === 'teams' && <TeamView teams={project.teams} />}
         {activeTab === 'sessions' && <SessionList projectPath={project.path} />}
+        {activeTab === 'replay' && <SessionReplay projectPath={project.path} />}
         {activeTab === 'preview' && <PreviewPanel projectPath={project.path} />}
         {activeTab === 'tokens' && <TokenStudio projectPath={project.path} />}
       </div>
