@@ -9,9 +9,13 @@ const execAsync = promisify(exec);
 
 async function detectActiveSessions(): Promise<ActiveSession[]> {
   try {
-    // Find claude processes — [c]laude trick prevents grep from matching itself
+    // Find only actual "claude" CLI processes — the command field must end with
+    // just "claude" (with optional trailing spaces). This excludes:
+    //  - Claude Desktop (Claude.app)
+    //  - Claude Control Center
+    //  - Subshells spawned by Claude (zsh -c source ~/.claude/shell-snapshots/...)
     const { stdout } = await execAsync(
-      'ps -eo pid,lstart,command | grep -E "[c]laude" | grep -v "Claude Control Center"'
+      'ps -eo pid,lstart,command | grep -E "\\bclaude\\s*$"'
     );
 
     const sessions: ActiveSession[] = [];
