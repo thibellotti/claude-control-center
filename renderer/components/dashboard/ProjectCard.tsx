@@ -105,7 +105,7 @@ export default function ProjectCard({
         }
       }}
       aria-label={project.name}
-      className="group relative bg-surface-1 border border-border-subtle rounded-card p-4 cursor-pointer hover:border-border-default transition-colors"
+      className="group relative min-w-0 bg-surface-1 border border-border-subtle rounded-card p-4 cursor-pointer hover:border-border-default transition-colors"
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-2 min-w-0">

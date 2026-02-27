@@ -94,7 +94,7 @@ export default function CommandPalette({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-center" style={{ paddingTop: '20vh' }}>
+    <div className="fixed inset-0 z-50 flex justify-center px-4" style={{ paddingTop: '20vh' }}>
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60"
@@ -103,7 +103,7 @@ export default function CommandPalette({
 
       {/* Palette */}
       <div
-        className="relative w-[560px] max-h-[400px] bg-surface-1 border border-border-subtle rounded-card shadow-2xl flex flex-col overflow-hidden"
+        className="relative w-full max-w-[560px] max-h-[400px] bg-surface-1 border border-border-subtle rounded-card shadow-2xl flex flex-col overflow-hidden"
         onKeyDown={handleKeyDown}
       >
         {/* Search input */}

@@ -32,11 +32,11 @@ export default function ActiveSessions({ sessions }: ActiveSessionsProps) {
 
             {/* Session info */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0">
                 <span className="text-sm font-medium text-text-primary truncate">
                   {session.projectName}
                 </span>
-                <span className="text-xs text-text-tertiary font-mono flex-shrink-0">
+                <span className="text-xs text-text-tertiary font-mono shrink-0">
                   PID {session.pid}
                 </span>
               </div>

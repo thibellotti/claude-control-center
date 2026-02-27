@@ -127,12 +127,12 @@ export default function SettingsPage() {
           {envEntries.length > 0 ? (
             <div className="space-y-2">
               {envEntries.map(([key, value]) => (
-                <div key={key} className="flex items-baseline gap-2">
+                <div key={key} className="flex items-baseline gap-2 min-w-0">
                   <span className="text-xs font-mono font-medium text-text-secondary shrink-0">
                     {key}
                   </span>
-                  <span className="text-text-tertiary text-xs">=</span>
-                  <span className="text-xs font-mono text-text-tertiary truncate">
+                  <span className="text-text-tertiary text-xs shrink-0">=</span>
+                  <span className="text-xs font-mono text-text-tertiary truncate min-w-0">
                     {maskValue(key, value)}
                   </span>
                 </div>
@@ -151,8 +151,8 @@ export default function SettingsPage() {
           {pluginEntries.length > 0 ? (
             <div className="space-y-2">
               {pluginEntries.map(([name, enabled]) => (
-                <div key={name} className="flex items-center justify-between">
-                  <span className="text-xs font-mono text-text-secondary">{name}</span>
+                <div key={name} className="flex items-center justify-between gap-2 min-w-0">
+                  <span className="text-xs font-mono text-text-secondary truncate min-w-0">{name}</span>
                   <span
                     className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium ${
                       enabled

@@ -106,7 +106,7 @@ export default function MarkdownView({ content }: MarkdownViewProps) {
 
   return (
     <div
-      className="markdown-view text-sm leading-relaxed"
+      className="markdown-view text-sm leading-relaxed min-w-0 overflow-x-hidden"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

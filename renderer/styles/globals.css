@@ -99,3 +99,20 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Prevent horizontal overflow on app root */
+#__next {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+/* Ensure markdown code blocks don't cause horizontal overflow */
+pre {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+code {
+  word-break: break-all;
+}

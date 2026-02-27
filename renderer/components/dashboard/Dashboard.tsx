@@ -23,7 +23,7 @@ function StatCard({ label, value, accent, warn }: StatCardProps) {
   if (warn) valueColor = 'text-status-dirty';
 
   return (
-    <div className="bg-surface-1 border border-border-subtle rounded-card p-4">
+    <div className="flex-1 min-w-[140px] bg-surface-1 border border-border-subtle rounded-card p-4">
       <p className="text-[11px] font-medium uppercase tracking-wider text-text-tertiary mb-1">
         {label}
       </p>
@@ -62,9 +62,9 @@ export default function Dashboard({ projects, onSelectProject, activeSessions, g
   const liveCount = activeSessions?.length ?? 0;
 
   return (
-    <div className="p-6 space-y-8 max-w-[1200px]">
+    <div className="p-6 space-y-8">
       {/* Stats bar */}
-      <div className="grid grid-cols-5 gap-4">
+      <div className="flex flex-wrap gap-4">
         <StatCard label="Projects" value={projects.length} />
         <StatCard label="Active" value={activeProjects.length} accent />
         <StatCard
@@ -88,7 +88,7 @@ export default function Dashboard({ projects, onSelectProject, activeSessions, g
           <h2 className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary mb-4">
             Active
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
             {activeProjects.map((project) => (
               <ProjectCard
                 key={project.path}
@@ -109,7 +109,7 @@ export default function Dashboard({ projects, onSelectProject, activeSessions, g
           <h2 className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary mb-4">
             Idle
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
             {idleProjects.map((project) => (
               <ProjectCard
                 key={project.path}

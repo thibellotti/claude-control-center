@@ -32,8 +32,8 @@ const STATUS_CONFIG: Record<
 function TaskCard({ task }: { task: TaskItem }) {
   return (
     <div className="bg-surface-1 border border-border-subtle rounded-card p-3 space-y-2">
-      <div className="flex items-start justify-between gap-2">
-        <h4 className="text-sm font-medium text-text-primary">{task.subject}</h4>
+      <div className="flex items-start justify-between gap-2 min-w-0">
+        <h4 className="text-sm font-medium text-text-primary truncate min-w-0">{task.subject}</h4>
         {task.owner && (
           <span className="shrink-0 px-2 py-0.5 rounded-full bg-surface-3 text-[10px] font-mono text-text-tertiary">
             {task.owner}

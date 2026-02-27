@@ -86,27 +86,27 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
   ];
 
   return (
-    <div className="p-6 max-w-[1000px]">
+    <div className="p-6 max-w-[1000px] min-w-0">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
+      <div className="mb-6 min-w-0">
+        <div className="flex items-center gap-3 mb-2 min-w-0">
           <button
             onClick={onBack}
-            className="p-1 rounded-button text-text-tertiary hover:text-text-primary hover:bg-surface-2 transition-colors"
+            className="p-1 rounded-button text-text-tertiary hover:text-text-primary hover:bg-surface-2 transition-colors shrink-0"
             title="Back to dashboard"
           >
             <ChevronLeftIcon />
           </button>
-          <h1 className="text-lg font-semibold text-text-primary">{project.name}</h1>
-          <StatusBadge status={project.status} />
+          <h1 className="text-lg font-semibold text-text-primary truncate">{project.name}</h1>
+          <span className="shrink-0"><StatusBadge status={project.status} /></span>
         </div>
 
-        <p className="text-xs font-mono text-text-tertiary ml-8">
+        <p className="text-xs font-mono text-text-tertiary ml-8 truncate">
           {shortenPath(project.path)}
         </p>
 
         {/* Quick action buttons */}
-        <div className="flex items-center gap-2 ml-8 mt-3">
+        <div className="flex flex-wrap items-center gap-2 ml-8 mt-3">
           <button
             onClick={() => window.api.launchClaude(project.path)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
