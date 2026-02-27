@@ -20,6 +20,7 @@ import { registerUsageHandlers } from './ipc/usage'
 import { registerTerminalHandlers, cleanupTerminalSessions } from './ipc/terminal'
 import { registerLiveFeedHandlers, cleanupLiveFeed } from './ipc/live-feed'
 import { registerSupabaseHandlers } from './ipc/supabase-info'
+import { registerGitHubHandlers } from './ipc/github-info'
 import { startProjectWatcher } from './watchers/project-watcher'
 
 const isProd = process.env.NODE_ENV === 'production'
@@ -52,6 +53,7 @@ if (isProd) {
   registerTerminalHandlers()
   registerLiveFeedHandlers()
   registerSupabaseHandlers()
+  registerGitHubHandlers()
 
   const mainWindow = createWindow('main', {
     width: 1400,
