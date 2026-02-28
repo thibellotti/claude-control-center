@@ -1,138 +1,94 @@
-import React, { useEffect, useMemo } from 'react';
-import type { ActiveSession } from '../../../shared/types';
-import type { FeedEntry } from '../../hooks/useTerminal';
-import { useActiveSessions } from '../../hooks/useSessions';
-import { useLiveFeed } from '../../hooks/useTerminal';
+import React, { useCallback, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { useTerminalSessions } from '../../hooks/useTerminal';
+import { PlusIcon, CloseIcon, TerminalIcon, ClaudeIcon } from '../icons';
+
+const XTerminal = dynamic(() => import('../terminal/XTerminal'), { ssr: false });
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Session Tile — interactive terminal in a card
 // ---------------------------------------------------------------------------
 
-function formatTime(ts: number): string {
-  const d = new Date(ts);
-  return d.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+interface SessionTileProps {
+  session: { id: string; title: string; pid: number; cwd: string };
+  onClose: (e: React.MouseEvent, id: string) => void;
+  isFocused: boolean;
+  onFocus: (id: string) => void;
 }
 
-function getTypeColor(type: FeedEntry['type']): string {
-  switch (type) {
-    case 'user': return 'text-accent';
-    case 'assistant': return 'text-text-primary';
-    case 'tool_use': return 'text-status-active';
-    case 'tool_result': return 'text-text-secondary';
-    case 'system': return 'text-text-tertiary';
-    default: return 'text-text-secondary';
-  }
-}
-
-function getTypeLabel(type: FeedEntry['type']): string {
-  switch (type) {
-    case 'user': return 'USR';
-    case 'assistant': return 'CLD';
-    case 'tool_use': return 'RUN';
-    case 'tool_result': return 'RES';
-    case 'system': return 'SYS';
-    default: return '???';
-  }
-}
-
-function shortenPath(path: string): string {
-  const parts = path.split('/');
-  if (parts.length > 3) {
-    return '~/' + parts.slice(-2).join('/');
-  }
-  return path;
-}
-
-function getDisplayName(session: ActiveSession): string {
-  if (session.sessionLabel) return session.sessionLabel;
-  return session.projectName;
-}
-
-function elapsed(startTime: number): string {
-  const secs = Math.floor((Date.now() - startTime) / 1000);
-  if (secs < 60) return `${secs}s`;
-  const mins = Math.floor(secs / 60);
-  if (mins < 60) return `${mins}m`;
-  const hrs = Math.floor(mins / 60);
-  return `${hrs}h ${mins % 60}m`;
-}
-
-// ---------------------------------------------------------------------------
-// Session Card
-// ---------------------------------------------------------------------------
-
-interface SessionCardProps {
-  session: ActiveSession;
-  entries: FeedEntry[];
-}
-
-function SessionCard({ session, entries }: SessionCardProps) {
-  const scrollRef = React.useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [entries.length]);
-
-  const displayName = getDisplayName(session);
-  const recentEntries = entries.slice(-50);
+function SessionTile({ session, onClose, isFocused, onFocus }: SessionTileProps) {
+  const shortCwd = session.cwd.split('/').slice(-2).join('/');
 
   return (
-    <div className="flex flex-col bg-surface-1 border border-border-subtle rounded-card overflow-hidden h-full">
-      {/* Card header */}
-      <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border-subtle shrink-0">
-        <span className="relative flex h-2 w-2 shrink-0">
+    <div
+      className={`flex flex-col bg-surface-0 border rounded-card overflow-hidden h-full transition-colors ${
+        isFocused ? 'border-accent' : 'border-border-subtle'
+      }`}
+      onClick={() => onFocus(session.id)}
+    >
+      {/* Tile header */}
+      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border-subtle bg-surface-1 shrink-0">
+        <span className="relative flex h-1.5 w-1.5 shrink-0">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-active opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-status-active" />
+          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-status-active" />
         </span>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-text-primary truncate">{displayName}</p>
-          <p className="text-micro text-text-tertiary font-mono truncate">
-            {shortenPath(session.projectPath)} &middot; PID {session.pid}
-          </p>
-        </div>
+        <span className="text-xs font-medium text-text-primary truncate flex-1">
+          {session.title}
+        </span>
         <span className="text-micro text-text-tertiary font-mono shrink-0">
-          {elapsed(session.startTime)}
+          {shortCwd}
         </span>
+        <span className="text-micro text-text-tertiary font-mono shrink-0">
+          :{session.pid}
+        </span>
+        <button
+          onClick={(e) => onClose(e, session.id)}
+          className="p-0.5 rounded text-text-tertiary hover:text-status-dirty hover:bg-surface-3 transition-colors shrink-0"
+          title="Close session"
+        >
+          <CloseIcon size={10} />
+        </button>
       </div>
 
-      {/* Feed area */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
-        {recentEntries.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-micro text-text-tertiary">Waiting for activity...</p>
-          </div>
-        ) : (
-          <div>
-            {recentEntries.map((entry, i) => (
-              <div
-                key={`${entry.timestamp}-${i}`}
-                className="flex items-start gap-1.5 px-2.5 py-1 hover:bg-surface-2/50 transition-colors border-b border-border-subtle/20"
-              >
-                <span className="text-micro font-mono text-text-tertiary shrink-0 mt-px w-[50px]">
-                  {formatTime(entry.timestamp)}
-                </span>
-                <span className={`text-micro font-mono font-bold shrink-0 mt-px w-[22px] ${getTypeColor(entry.type)}`}>
-                  {getTypeLabel(entry.type)}
-                </span>
-                <p className="text-micro text-text-secondary leading-snug break-words min-w-0">
-                  {entry.summary}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Card footer — status bar */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-t border-border-subtle bg-surface-0 shrink-0">
-        <span className="text-micro text-text-tertiary">
-          {recentEntries.length} events
-        </span>
-        <span className="text-micro text-status-active font-medium">Active</span>
+      {/* Terminal area */}
+      <div className="flex-1 min-h-0 bg-[#0A0A0A]">
+        <XTerminal sessionId={session.id} isVisible={true} />
       </div>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Add Session Menu
+// ---------------------------------------------------------------------------
+
+interface AddMenuProps {
+  onAddShell: () => void;
+  onAddClaude: () => void;
+  onClose: () => void;
+}
+
+function AddMenu({ onAddShell, onAddClaude, onClose }: AddMenuProps) {
+  return (
+    <>
+      <div className="fixed inset-0 z-40" onClick={onClose} />
+      <div className="absolute right-0 top-full mt-1 z-50 bg-surface-2 border border-border-subtle rounded-card shadow-xl py-1 min-w-[180px]">
+        <button
+          onClick={() => { onAddShell(); onClose(); }}
+          className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-3 transition-colors"
+        >
+          <TerminalIcon size={14} />
+          Shell
+        </button>
+        <button
+          onClick={() => { onAddClaude(); onClose(); }}
+          className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-3 transition-colors"
+        >
+          <ClaudeIcon size={14} />
+          Claude Session
+        </button>
+      </div>
+    </>
   );
 }
 
@@ -140,26 +96,39 @@ function SessionCard({ session, entries }: SessionCardProps) {
 // Empty State
 // ---------------------------------------------------------------------------
 
-function EmptyState() {
+function EmptyState({ onAddShell, onAddClaude }: { onAddShell: () => void; onAddClaude: () => void }) {
   return (
     <div className="flex items-center justify-center h-full">
-      <div className="text-center space-y-3 max-w-sm">
-        <div className="w-12 h-12 rounded-full bg-surface-2 flex items-center justify-center mx-auto">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-text-tertiary">
-            <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-            <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-            <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-            <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 2" />
+      <div className="text-center space-y-4 max-w-md">
+        <div className="w-14 h-14 rounded-xl bg-surface-2 flex items-center justify-center mx-auto">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" className="text-text-tertiary">
+            <rect x="2" y="2" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
+            <rect x="16" y="2" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
+            <rect x="2" y="16" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
+            <rect x="16" y="16" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 2" />
           </svg>
         </div>
         <div>
-          <p className="text-sm font-medium text-text-secondary">No active sessions</p>
+          <p className="text-sm font-medium text-text-secondary">No sessions open</p>
           <p className="text-xs text-text-tertiary mt-1">
-            Start Claude Code in a project terminal to see live session activity here
+            Open multiple terminals and Claude sessions side by side
           </p>
         </div>
-        <div className="text-micro text-text-tertiary font-mono bg-surface-2 rounded-lg px-3 py-2">
-          cd ~/Projects/my-app && claude
+        <div className="flex items-center justify-center gap-3">
+          <button
+            onClick={onAddShell}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-button text-xs font-medium bg-surface-2 border border-border-subtle text-text-secondary hover:text-text-primary hover:border-border-default transition-colors"
+          >
+            <TerminalIcon size={14} />
+            Shell
+          </button>
+          <button
+            onClick={onAddClaude}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+          >
+            <ClaudeIcon size={14} />
+            Claude Session
+          </button>
         </div>
       </div>
     </div>
@@ -167,80 +136,91 @@ function EmptyState() {
 }
 
 // ---------------------------------------------------------------------------
-// Sessions Canvas
+// Sessions Canvas — grid of interactive terminals
 // ---------------------------------------------------------------------------
 
 export default function SessionsCanvas() {
-  const { sessions } = useActiveSessions(5000); // poll every 5s
-  const liveFeed = useLiveFeed();
+  const { sessions, activeId, setActiveId, createSession, killSession } = useTerminalSessions();
+  const [showMenu, setShowMenu] = useState(false);
 
-  // Start live feed
-  useEffect(() => {
-    liveFeed.start();
-    return () => liveFeed.stop();
-  }, []);
+  const handleAddShell = useCallback(async () => {
+    await createSession();
+  }, [createSession]);
 
-  // Group feed entries by projectPath
-  const entriesByProject = useMemo(() => {
-    const map = new Map<string, FeedEntry[]>();
-    for (const entry of liveFeed.entries) {
-      const key = entry.projectPath || '__global__';
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(entry);
-    }
-    return map;
-  }, [liveFeed.entries]);
+  const handleAddClaude = useCallback(async () => {
+    await createSession(undefined, 'claude');
+  }, [createSession]);
 
-  // Determine grid layout based on session count
-  const gridCols = sessions.length <= 1
-    ? 'grid-cols-1'
-    : sessions.length <= 4
-    ? 'grid-cols-2'
-    : sessions.length <= 6
-    ? 'grid-cols-3'
-    : 'grid-cols-4';
+  const handleClose = useCallback(
+    async (e: React.MouseEvent, id: string) => {
+      e.stopPropagation();
+      await killSession(id);
+    },
+    [killSession]
+  );
+
+  // Grid layout based on count
+  const gridClass =
+    sessions.length <= 1
+      ? 'grid-cols-1'
+      : sessions.length <= 4
+      ? 'grid-cols-2'
+      : sessions.length <= 9
+      ? 'grid-cols-3'
+      : 'grid-cols-4';
+
+  // Row height: fill available space
+  const rowClass =
+    sessions.length <= 2
+      ? 'grid-rows-1'
+      : sessions.length <= 4
+      ? 'grid-rows-2'
+      : sessions.length <= 6
+      ? 'grid-rows-2'
+      : 'grid-rows-3';
 
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-border-subtle bg-surface-0 shrink-0">
+      <div className="flex items-center justify-between px-5 py-2.5 border-b border-border-subtle bg-surface-0 shrink-0">
         <div className="flex items-center gap-3">
           <h1 className="text-sm font-semibold text-text-primary">Sessions</h1>
           {sessions.length > 0 && (
-            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-status-active/10 text-status-active text-micro font-medium">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-active opacity-75" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-status-active" />
-              </span>
-              {sessions.length} live
+            <span className="text-micro text-text-tertiary">
+              {sessions.length} open
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-micro text-text-tertiary">
-            {liveFeed.entries.length} events
-          </span>
-          {liveFeed.entries.length > 0 && (
-            <button
-              onClick={liveFeed.clear}
-              className="text-micro text-text-tertiary hover:text-text-secondary transition-colors px-2 py-1 rounded-button hover:bg-surface-2"
-            >
-              Clear
-            </button>
+        <div className="relative">
+          <button
+            onClick={() => setShowMenu(!showMenu)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+          >
+            <PlusIcon size={12} />
+            New
+          </button>
+          {showMenu && (
+            <AddMenu
+              onAddShell={handleAddShell}
+              onAddClaude={handleAddClaude}
+              onClose={() => setShowMenu(false)}
+            />
           )}
         </div>
       </div>
 
-      {/* Canvas area */}
+      {/* Canvas */}
       {sessions.length === 0 ? (
-        <EmptyState />
+        <EmptyState onAddShell={handleAddShell} onAddClaude={handleAddClaude} />
       ) : (
-        <div className={`flex-1 grid ${gridCols} gap-3 p-4 overflow-y-auto auto-rows-fr`}>
+        <div className={`flex-1 grid ${gridClass} ${rowClass} gap-2 p-2 min-h-0 overflow-hidden`}>
           {sessions.map((session) => (
-            <SessionCard
-              key={session.pid}
+            <SessionTile
+              key={session.id}
               session={session}
-              entries={entriesByProject.get(session.projectPath) || []}
+              onClose={handleClose}
+              isFocused={activeId === session.id}
+              onFocus={setActiveId}
             />
           ))}
         </div>
