@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { CellConfigTaskBoard, TaskItem, Team } from '../../../../shared/types';
+import type { CellConfigTaskBoard, Team } from '../../../../shared/types';
 import TaskList from '../../project/TaskList';
 
 interface TaskBoardCellProps {
@@ -7,7 +7,7 @@ interface TaskBoardCellProps {
 }
 
 export default function TaskBoardCell({ config }: TaskBoardCellProps) {
-  const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const [tasks] = useState([]);
   const [team, setTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
 

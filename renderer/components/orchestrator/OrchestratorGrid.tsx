@@ -1,5 +1,5 @@
 import React from 'react';
-import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
+import { Group, Panel, Separator } from 'react-resizable-panels';
 import type { OrchestratorCell, LayoutPreset } from '../../../shared/types';
 import CellRenderer from './CellRenderer';
 
@@ -11,19 +11,19 @@ interface OrchestratorGridProps {
   onFocusCell: (id: string) => void;
 }
 
-function ResizeHandle({ direction }: { direction: 'horizontal' | 'vertical' }) {
+function ResizeHandle({ orientation }: { orientation: 'horizontal' | 'vertical' }) {
   return (
-    <PanelResizeHandle
+    <Separator
       className={`group relative flex items-center justify-center ${
-        direction === 'horizontal' ? 'w-1 mx-0' : 'h-1 my-0'
+        orientation === 'horizontal' ? 'w-1 mx-0' : 'h-1 my-0'
       }`}
     >
       <div
         className={`rounded-full bg-border-subtle group-hover:bg-accent group-active:bg-accent transition-colors ${
-          direction === 'horizontal' ? 'w-0.5 h-8' : 'h-0.5 w-8'
+          orientation === 'horizontal' ? 'w-0.5 h-8' : 'h-0.5 w-8'
         }`}
       />
-    </PanelResizeHandle>
+    </Separator>
   );
 }
 
@@ -79,83 +79,83 @@ export default function OrchestratorGrid({
 
     case 'split':
       return (
-        <PanelGroup direction="horizontal" className="h-full p-1.5 gap-0">
+        <Group orientation="horizontal" className="h-full p-1.5">
           <Panel defaultSize={50} minSize={20}>
             <div className="h-full pr-0.5">
               <CellPanel cell={at(0)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
             </div>
           </Panel>
-          <ResizeHandle direction="horizontal" />
+          <ResizeHandle orientation="horizontal" />
           <Panel defaultSize={50} minSize={20}>
             <div className="h-full pl-0.5">
               <CellPanel cell={at(1)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
             </div>
           </Panel>
-        </PanelGroup>
+        </Group>
       );
 
     case 'quad':
       return (
-        <PanelGroup direction="horizontal" className="h-full p-1.5 gap-0">
+        <Group orientation="horizontal" className="h-full p-1.5">
           <Panel defaultSize={50} minSize={20}>
-            <PanelGroup direction="vertical" className="h-full">
+            <Group orientation="vertical" className="h-full">
               <Panel defaultSize={50} minSize={20}>
                 <div className="h-full pb-0.5 pr-0.5">
                   <CellPanel cell={at(0)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
                 </div>
               </Panel>
-              <ResizeHandle direction="vertical" />
+              <ResizeHandle orientation="vertical" />
               <Panel defaultSize={50} minSize={20}>
                 <div className="h-full pt-0.5 pr-0.5">
                   <CellPanel cell={at(1)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
                 </div>
               </Panel>
-            </PanelGroup>
+            </Group>
           </Panel>
-          <ResizeHandle direction="horizontal" />
+          <ResizeHandle orientation="horizontal" />
           <Panel defaultSize={50} minSize={20}>
-            <PanelGroup direction="vertical" className="h-full">
+            <Group orientation="vertical" className="h-full">
               <Panel defaultSize={50} minSize={20}>
                 <div className="h-full pb-0.5 pl-0.5">
                   <CellPanel cell={at(2)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
                 </div>
               </Panel>
-              <ResizeHandle direction="vertical" />
+              <ResizeHandle orientation="vertical" />
               <Panel defaultSize={50} minSize={20}>
                 <div className="h-full pt-0.5 pl-0.5">
                   <CellPanel cell={at(3)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
                 </div>
               </Panel>
-            </PanelGroup>
+            </Group>
           </Panel>
-        </PanelGroup>
+        </Group>
       );
 
     case 'main-side':
       return (
-        <PanelGroup direction="horizontal" className="h-full p-1.5 gap-0">
+        <Group orientation="horizontal" className="h-full p-1.5">
           <Panel defaultSize={65} minSize={30}>
             <div className="h-full pr-0.5">
               <CellPanel cell={at(0)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
             </div>
           </Panel>
-          <ResizeHandle direction="horizontal" />
+          <ResizeHandle orientation="horizontal" />
           <Panel defaultSize={35} minSize={20}>
-            <PanelGroup direction="vertical" className="h-full">
+            <Group orientation="vertical" className="h-full">
               <Panel defaultSize={50} minSize={20}>
                 <div className="h-full pb-0.5 pl-0.5">
                   <CellPanel cell={at(1)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
                 </div>
               </Panel>
-              <ResizeHandle direction="vertical" />
+              <ResizeHandle orientation="vertical" />
               <Panel defaultSize={50} minSize={20}>
                 <div className="h-full pt-0.5 pl-0.5">
                   <CellPanel cell={at(2)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
                 </div>
               </Panel>
-            </PanelGroup>
+            </Group>
           </Panel>
-        </PanelGroup>
+        </Group>
       );
 
     default:
