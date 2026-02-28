@@ -344,6 +344,51 @@ export interface TranslatedFeedEntry {
   requestId: string;
 }
 
+// -- Orchestrator --
+
+export type LayoutPreset = 'focus' | 'split' | 'quad' | 'main-side';
+
+export type CellType = 'terminal' | 'feed' | 'taskboard' | 'preview';
+
+export interface CellConfigTerminal {
+  type: 'terminal';
+  sessionId: string;
+  label: string;
+  cwd: string;
+  command?: string;
+}
+
+export interface CellConfigFeed {
+  type: 'feed';
+  projectPath: string;
+  label: string;
+}
+
+export interface CellConfigTaskBoard {
+  type: 'taskboard';
+  teamName: string;
+  label: string;
+}
+
+export interface CellConfigPreview {
+  type: 'preview';
+  url: string;
+  label: string;
+  projectPath?: string;
+}
+
+export type OrchestratorCellConfig = CellConfigTerminal | CellConfigFeed | CellConfigTaskBoard | CellConfigPreview;
+
+export interface OrchestratorCell {
+  id: string;
+  config: OrchestratorCellConfig;
+}
+
+export interface OrchestratorWorkspace {
+  cells: OrchestratorCell[];
+  layout: LayoutPreset;
+}
+
 export const IPC_CHANNELS = {
   GET_PROJECTS: 'get-projects',
   GET_PROJECT_DETAIL: 'get-project-detail',
