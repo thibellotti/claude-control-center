@@ -8,8 +8,15 @@ const HOME = os.homedir();
 
 // Validate that a file path is within the user's home directory
 // to prevent arbitrary filesystem access.
+function expandTilde(filePath: string): string {
+  if (filePath.startsWith('~/') || filePath === '~') {
+    return path.join(HOME, filePath.slice(1));
+  }
+  return filePath;
+}
+
 function isPathSafe(filePath: string): boolean {
-  const resolved = path.resolve(filePath);
+  const resolved = path.resolve(expandTilde(filePath));
   return resolved.startsWith(HOME);
 }
 
@@ -19,7 +26,7 @@ export function registerFileHandlers() {
       throw new Error('Access denied: path is outside the home directory');
     }
 
-    const resolved = path.resolve(filePath);
+    const resolved = path.resolve(expandTilde(filePath));
 
     if (!existsSync(resolved)) {
       return null;
@@ -37,7 +44,7 @@ export function registerFileHandlers() {
       throw new Error('Access denied: path is outside the home directory');
     }
 
-    const resolved = path.resolve(filePath);
+    const resolved = path.resolve(expandTilde(filePath));
 
     try {
       writeFileSync(resolved, content, 'utf-8');
