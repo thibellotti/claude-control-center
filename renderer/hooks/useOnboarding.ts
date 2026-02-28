@@ -14,11 +14,8 @@ const DEFAULT_STATE: OnboardingState = {
   tourCompleted: false,
 };
 
+// Use ~ prefix — the main process IPC handler expands it to os.homedir()
 const CONFIG_PATH = '~/.claude/studio/forma-config.json';
-
-function expandPath() {
-  return CONFIG_PATH.replace('~', process.env.HOME || process.env.USERPROFILE || '');
-}
 
 export function useOnboarding() {
   const [state, setState] = useState<OnboardingState>(DEFAULT_STATE);
@@ -27,7 +24,7 @@ export function useOnboarding() {
   useEffect(() => {
     async function load() {
       try {
-        const content = await window.api.readFile(expandPath());
+        const content = await window.api.readFile(CONFIG_PATH);
         if (content) {
           setState(JSON.parse(content));
         }
@@ -42,7 +39,7 @@ export function useOnboarding() {
   const save = useCallback(async (newState: OnboardingState) => {
     setState(newState);
     try {
-      await window.api.writeFile(expandPath(), JSON.stringify(newState, null, 2));
+      await window.api.writeFile(CONFIG_PATH, JSON.stringify(newState, null, 2));
     } catch {
       // Silent fail
     }
@@ -61,7 +58,7 @@ export function useOnboarding() {
         newState.completed = true;
       }
       // Persist async (fire-and-forget from setState)
-      window.api.writeFile(expandPath(), JSON.stringify(newState, null, 2)).catch(() => {});
+      window.api.writeFile(CONFIG_PATH, JSON.stringify(newState, null, 2)).catch(() => {});
       return newState;
     });
   }, []);
