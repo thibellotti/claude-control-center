@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import type { ProjectHealth } from '../../../shared/types';
 
 interface HealthBadgeProps {
@@ -57,7 +57,7 @@ function CompactIndicators({ health }: { health: ProjectHealth }) {
   if (indicators.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-1.5 text-[10px]">
+    <div className="flex items-center gap-1.5 text-micro">
       {indicators}
     </div>
   );
@@ -115,9 +115,9 @@ function FullIndicators({ health }: { health: ProjectHealth }) {
   );
 }
 
-export default function HealthBadge({ health, compact = false }: HealthBadgeProps) {
+export default memo(function HealthBadge({ health, compact = false }: HealthBadgeProps) {
   if (compact) {
     return <CompactIndicators health={health} />;
   }
   return <FullIndicators health={health} />;
-}
+})

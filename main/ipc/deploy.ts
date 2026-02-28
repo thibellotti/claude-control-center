@@ -1,12 +1,21 @@
 import { ipcMain } from 'electron';
-import { spawn, exec, execSync } from 'child_process';
+import { spawn, exec, execFileSync } from 'child_process';
 import { promisify } from 'util';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import path from 'path';
 import os from 'os';
 import { IPC_CHANNELS, DeployConfig, DeployResult, VercelDeployment, VercelProjectInfo } from '../../shared/types';
+import { log } from '../helpers/logger';
 
 const execAsync = promisify(exec);
+
+/** Return a copy of process.env without Claude Code session vars */
+function cleanEnv(): NodeJS.ProcessEnv {
+  const env = { ...process.env };
+  delete env.CLAUDECODE;
+  delete env.CLAUDE_CODE_SESSION;
+  return env;
+}
 
 const HOME = os.homedir();
 const DEPLOYS_DIR = path.join(HOME, '.claude', 'studio', 'deploys');
@@ -26,9 +35,10 @@ function projectIdFromPath(projectPath: string): string {
 // Check whether a CLI tool is available on the system
 function cliExists(name: string): boolean {
   try {
-    execSync(`which ${name}`, { stdio: 'ignore' });
+    execFileSync('which', [name], { stdio: 'ignore' });
     return true;
-  } catch {
+  } catch (error: unknown) {
+    log('warn', 'deploy', `CLI check failed for ${name}`, error);
     return false;
   }
 }
@@ -41,7 +51,8 @@ function readHistory(projectId: string): DeployResult[] {
   try {
     const data = JSON.parse(readFileSync(filePath, 'utf-8'));
     return Array.isArray(data) ? data : [];
-  } catch {
+  } catch (error: unknown) {
+    log('warn', 'deploy', 'Failed to read deploy history', error);
     return [];
   }
 }
@@ -121,7 +132,7 @@ export function registerDeployHandlers() {
 
         const child = spawn('sh', ['-c', command], {
           cwd: projectPath,
-          env: { ...process.env },
+          env: cleanEnv(),
         });
 
         child.stdout?.on('data', (data: Buffer) => {
@@ -211,7 +222,7 @@ export function registerDeployHandlers() {
       try {
         const { stdout } = await execAsync('vercel ls --json 2>/dev/null', {
           cwd: projectPath,
-          env: { ...process.env },
+          env: cleanEnv(),
           timeout: 15000,
         });
 
@@ -228,7 +239,8 @@ export function registerDeployHandlers() {
           }));
 
         return { deployments };
-      } catch {
+      } catch (error: unknown) {
+        log('warn', 'deploy', 'Failed to fetch Vercel deployments', error);
         return { deployments: [] };
       }
     }
@@ -255,8 +267,8 @@ export function registerDeployHandlers() {
           try {
             const projectJson = JSON.parse(readFileSync(vercelProjectPath, 'utf-8'));
             result.projectName = projectJson.projectId || null;
-          } catch {
-            // Ignore parse errors
+          } catch (error: unknown) {
+            log('warn', 'deploy', 'Failed to parse .vercel/project.json', error);
           }
         }
 
@@ -269,8 +281,8 @@ export function registerDeployHandlers() {
             if (vercelJson.framework) {
               result.framework = vercelJson.framework;
             }
-          } catch {
-            // Ignore parse errors
+          } catch (error: unknown) {
+            log('warn', 'deploy', 'Failed to parse vercel.json', error);
           }
         }
 
@@ -280,7 +292,7 @@ export function registerDeployHandlers() {
           try {
             const { stdout } = await execAsync('vercel inspect --json 2>/dev/null', {
               cwd: projectPath,
-              env: { ...process.env },
+              env: cleanEnv(),
               timeout: 15000,
             });
 
@@ -292,8 +304,8 @@ export function registerDeployHandlers() {
               result.productionUrl = inspectData.url;
             }
             if (inspectData.framework) result.framework = inspectData.framework;
-          } catch {
-            // vercel inspect may fail if not linked; that is okay
+          } catch (error: unknown) {
+            log('warn', 'deploy', 'Vercel inspect failed (project may not be linked)', error);
           }
         }
 
@@ -304,14 +316,15 @@ export function registerDeployHandlers() {
             try {
               const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
               result.projectName = pkg.name || null;
-            } catch {
-              // Ignore
+            } catch (error: unknown) {
+              log('warn', 'deploy', 'Failed to parse package.json', error);
             }
           }
         }
 
         return result;
-      } catch {
+      } catch (error: unknown) {
+        log('warn', 'deploy', 'Failed to get Vercel project info', error);
         return result;
       }
     }

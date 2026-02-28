@@ -151,7 +151,7 @@ async function getUsageStats(days: number): Promise<UsageSummary> {
     if (!dirStat.isDirectory()) continue;
 
     // Decode the project path from the encoded directory name
-    const decodedPath = decodeClaudePath(encodedDir);
+    const decodedPath = await decodeClaudePath(encodedDir);
     const projectName = basename(decodedPath);
 
     // List JSONL files in this project directory

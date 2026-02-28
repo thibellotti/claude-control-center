@@ -7,6 +7,7 @@ import {
   PreviewStatus,
   EnhancedPreviewState,
 } from '../../shared/types';
+import { log } from '../helpers/logger';
 
 // Chokidar loaded via require (CJS compat in Electron main process)
 const chokidar = require('chokidar');
@@ -42,8 +43,8 @@ function pushStatusUpdate(state: EnhancedPreviewState): void {
     if (wins.length > 0) {
       wins[0].webContents.send(IPC_CHANNELS.PREVIEW_STATUS_UPDATE, state);
     }
-  } catch {
-    // Window may have been destroyed — ignore
+  } catch (error: unknown) {
+    log('warn', 'preview', 'Failed to push status update', error);
   }
 }
 
@@ -60,8 +61,8 @@ function pushFileChanged(projectPath: string, filePath: string): void {
         filePath,
       });
     }
-  } catch {
-    // ignore
+  } catch (error: unknown) {
+    log('warn', 'preview', 'Failed to push file changed event', error);
   }
 }
 
@@ -75,6 +76,14 @@ function idleState(): EnhancedPreviewState {
     error: null,
     scriptName: null,
   };
+}
+
+/** Return a copy of process.env without Claude Code session vars */
+function cleanEnv(): NodeJS.ProcessEnv {
+  const env = { ...process.env };
+  delete env.CLAUDECODE;
+  delete env.CLAUDE_CODE_SESSION;
+  return env;
 }
 
 const PORT_REGEX = /(?:localhost|127\.0\.0\.1|0\.0\.0\.0):(\d{4,5})/;
@@ -145,7 +154,8 @@ export function registerPreviewHandlers() {
       let pkg: { scripts?: Record<string, string> };
       try {
         pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
-      } catch {
+      } catch (error: unknown) {
+        log('warn', 'preview', 'Failed to parse package.json', error);
         const errState: EnhancedPreviewState = {
           ...idleState(),
           status: 'error',
@@ -187,7 +197,7 @@ export function registerPreviewHandlers() {
       const command = `npm run ${scriptName}`;
       const child = spawn('sh', ['-c', command], {
         cwd: projectPath,
-        env: { ...process.env, BROWSER: 'none', PORT: '0' },
+        env: { ...cleanEnv(), BROWSER: 'none', PORT: '0' },
       });
 
       // Start file watcher for the project

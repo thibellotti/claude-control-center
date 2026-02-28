@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { Project } from '../../../shared/types';
 import GitBadge from '../shared/GitBadge';
 import MarkdownView from '../shared/MarkdownView';
 import HealthBadge from '../shared/HealthBadge';
+import ClaudeMdEditor from '../editor/ClaudeMdEditor';
+import { EditIcon } from '../icons';
 
 interface ProjectOverviewProps {
   project: Project;
@@ -32,6 +34,9 @@ function SectionHeader({ title }: { title: string }) {
 }
 
 export default function ProjectOverview({ project }: ProjectOverviewProps) {
+  const [isEditingClaudeMd, setIsEditingClaudeMd] = useState(false);
+  const claudeMdPath = project.path + '/CLAUDE.md';
+
   return (
     <div className="space-y-8 py-6 min-w-0">
       {/* Health section */}
@@ -112,15 +117,48 @@ export default function ProjectOverview({ project }: ProjectOverviewProps) {
         </section>
       )}
 
-      {/* Claude Config section */}
-      {project.claudeMd && (
-        <section>
-          <SectionHeader title="Claude Config" />
+      {/* Claude Config section — always visible to allow creating CLAUDE.md */}
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
+            Claude Config
+          </h3>
+          {isEditingClaudeMd ? (
+            <button
+              onClick={() => setIsEditingClaudeMd(false)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-button text-[11px] font-medium text-text-secondary hover:text-text-primary bg-surface-2 border border-border-subtle hover:border-border-default transition-colors"
+            >
+              Done
+            </button>
+          ) : (
+            <button
+              onClick={() => setIsEditingClaudeMd(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-button text-[11px] font-medium text-text-tertiary hover:text-text-secondary transition-colors"
+            >
+              <EditIcon />
+              Edit
+            </button>
+          )}
+        </div>
+        {isEditingClaudeMd ? (
+          <ClaudeMdEditor
+            filePath={claudeMdPath}
+            onSave={() => {
+              // The project data will be refreshed by the file watcher
+            }}
+          />
+        ) : project.claudeMd ? (
           <div className="bg-surface-1 border border-border-subtle rounded-card p-4 overflow-y-auto overflow-x-hidden max-h-[400px] min-w-0">
             <MarkdownView content={project.claudeMd} />
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="bg-surface-1 border border-border-subtle rounded-card p-4">
+            <p className="text-xs text-text-tertiary text-center py-4">
+              No CLAUDE.md file found. Click Edit to create one.
+            </p>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

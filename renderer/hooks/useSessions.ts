@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { ActiveSession } from '../../shared/types';
 
-export function useActiveSessions(pollInterval = 5000) {
+export function useActiveSessions(pollInterval = 10000) {
   const [sessions, setSessions] = useState<ActiveSession[]>([]);
 
   const fetchSessions = useCallback(async () => {
@@ -15,8 +15,24 @@ export function useActiveSessions(pollInterval = 5000) {
 
   useEffect(() => {
     fetchSessions();
-    const interval = setInterval(fetchSessions, pollInterval);
-    return () => clearInterval(interval);
+
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        fetchSessions();
+      }
+    }, pollInterval);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchSessions();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [fetchSessions, pollInterval]);
 
   const getSessionForProject = useCallback(

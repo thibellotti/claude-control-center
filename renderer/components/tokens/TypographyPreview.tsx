@@ -79,7 +79,7 @@ export default function TypographyPreview({
               >
                 <div className="flex items-baseline gap-3 mb-3">
                   <span className="text-xs font-semibold text-text-primary">{name}</span>
-                  <span className="text-[10px] font-mono text-text-tertiary">
+                  <span className="text-micro font-mono text-text-tertiary">
                     {families.join(', ')}
                   </span>
                 </div>
@@ -102,13 +102,13 @@ export default function TypographyPreview({
           <div className="space-y-1">
             {/* Header row */}
             <div className="grid grid-cols-[100px_80px_1fr] gap-3 pb-2 border-b border-border-subtle">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">
+              <span className="text-micro font-semibold uppercase tracking-wider text-text-tertiary">
                 Name
               </span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">
+              <span className="text-micro font-semibold uppercase tracking-wider text-text-tertiary">
                 Size
               </span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">
+              <span className="text-micro font-semibold uppercase tracking-wider text-text-tertiary">
                 Sample
               </span>
             </div>
@@ -130,7 +130,7 @@ export default function TypographyPreview({
                   <div className="flex flex-col">
                     <span className="text-xs font-mono text-text-secondary">{size}</span>
                     {lineHeight && (
-                      <span className="text-[10px] font-mono text-text-tertiary">
+                      <span className="text-micro font-mono text-text-tertiary">
                         lh: {lineHeight}
                       </span>
                     )}

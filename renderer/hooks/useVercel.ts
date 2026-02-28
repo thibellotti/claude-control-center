@@ -1,98 +1,53 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { VercelDeployment, VercelProjectInfo, DeployResult } from '../../shared/types';
+import type { VercelDeployment, VercelProjectInfo, DeployConfig, DeployResult } from '../../shared/types';
 
-interface UseVercelReturn {
-  detected: boolean;
-  projectInfo: VercelProjectInfo | null;
+export interface VercelData {
+  projectInfo: VercelProjectInfo;
   deployments: VercelDeployment[];
-  history: DeployResult[];
-  loading: boolean;
-  deploying: boolean;
-  deploy: () => Promise<void>;
-  refresh: () => Promise<void>;
+  deployConfig: DeployConfig;
 }
 
-export function useVercel(projectPath: string): UseVercelReturn {
-  const [detected, setDetected] = useState(false);
-  const [projectInfo, setProjectInfo] = useState<VercelProjectInfo | null>(null);
-  const [deployments, setDeployments] = useState<VercelDeployment[]>([]);
-  const [history, setHistory] = useState<DeployResult[]>([]);
+export function useVercel(projectPath: string) {
+  const [data, setData] = useState<VercelData | null>(null);
   const [loading, setLoading] = useState(true);
   const [deploying, setDeploying] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      // First check if Vercel is detected for this project
-      const config = await window.api.detectDeployProvider(projectPath);
-      const isVercel = config.provider === 'vercel';
-      setDetected(isVercel);
-
-      if (!isVercel) {
-        setProjectInfo(null);
-        setDeployments([]);
-        setHistory([]);
-        setLoading(false);
-        return;
-      }
-
-      // Fetch all Vercel data in parallel
-      const [info, deploymentsResult, deployHistory] = await Promise.all([
-        window.api.getVercelProjectInfo(projectPath),
-        window.api.getVercelDeployments(projectPath),
-        window.api.getDeployHistory(projectPath),
+      const [projectInfo, deploymentsResult, deployConfig] = await Promise.all([
+        window.api.getVercelProjectInfo(projectPath) as Promise<VercelProjectInfo>,
+        window.api.getVercelDeployments(projectPath) as Promise<{ deployments: VercelDeployment[] }>,
+        window.api.detectDeployProvider(projectPath) as Promise<DeployConfig>,
       ]);
-
-      setProjectInfo(info);
-      setDeployments(deploymentsResult.deployments || []);
-      setHistory(deployHistory || []);
+      setData({
+        projectInfo,
+        deployments: deploymentsResult.deployments,
+        deployConfig,
+      });
     } catch {
-      // If anything fails, still show the panel but with empty data
-      setDetected(false);
-      setProjectInfo(null);
-      setDeployments([]);
-      setHistory([]);
+      setData(null);
     } finally {
       setLoading(false);
     }
   }, [projectPath]);
 
-  // Fetch on mount and when projectPath changes
   useEffect(() => {
-    let cancelled = false;
-
-    const run = async () => {
-      await fetchData();
-      if (cancelled) return;
-    };
-
-    run();
-    return () => { cancelled = true; };
+    fetchData();
   }, [fetchData]);
 
-  const deploy = useCallback(async () => {
+  const deploy = useCallback(async (): Promise<DeployResult | null> => {
     setDeploying(true);
     try {
-      await window.api.deployProject(projectPath, 'vercel');
-      // Refresh data after deploy
+      const result = await window.api.deployProject(projectPath, 'vercel') as DeployResult;
       await fetchData();
+      return result;
+    } catch {
+      return null;
     } finally {
       setDeploying(false);
     }
   }, [projectPath, fetchData]);
 
-  const refresh = useCallback(async () => {
-    await fetchData();
-  }, [fetchData]);
-
-  return {
-    detected,
-    projectInfo,
-    deployments,
-    history,
-    loading,
-    deploying,
-    deploy,
-    refresh,
-  };
+  return { data, loading, deploying, refresh: fetchData, deploy };
 }

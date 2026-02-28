@@ -1,14 +1,19 @@
 import { ipcMain, shell } from 'electron';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { IPC_CHANNELS } from '../../shared/types';
+import { log } from '../helpers/logger';
 
 export function registerLaunchHandlers() {
   ipcMain.handle(IPC_CHANNELS.OPEN_IN_TERMINAL, async (_, projectPath: string) => {
-    exec(`open -a Terminal "${projectPath}"`);
+    try {
+      execFile('open', ['-a', 'Terminal', projectPath]);
+    } catch (error: unknown) {
+      log('warn', 'launch', 'Failed to open Terminal', error);
+    }
   });
 
   ipcMain.handle(IPC_CHANNELS.OPEN_IN_EDITOR, async (_, projectPath: string) => {
-    exec(`code "${projectPath}"`, (err) => {
+    execFile('code', [projectPath], (err) => {
       if (err) {
         shell.openPath(projectPath);
       }
@@ -20,11 +25,17 @@ export function registerLaunchHandlers() {
   });
 
   ipcMain.handle(IPC_CHANNELS.LAUNCH_CLAUDE, async (_, projectPath: string) => {
-    // Build an AppleScript that opens Terminal and runs claude in the given directory.
-    // The project path is embedded inside a double-quoted shell string, so we only
-    // need to escape backslashes and double-quotes within the path itself.
-    const safePath = projectPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-    const script = `tell application "Terminal"\n  activate\n  do script "cd \\"${safePath}\\" && claude"\nend tell`;
-    exec(`osascript -e '${script.replace(/'/g, "'\\''")}'`);
+    // Use execFile with -e flag to pass AppleScript safely — no shell interpolation
+    const script = [
+      'tell application "Terminal"',
+      '  activate',
+      `  do script "cd " & quoted form of "${projectPath}" & " && claude"`,
+      'end tell',
+    ].join('\n');
+    execFile('osascript', ['-e', script], (err) => {
+      if (err) {
+        log('warn', 'launch', 'Failed to launch Claude via AppleScript', err);
+      }
+    });
   });
 }

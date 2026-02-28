@@ -1,22 +1,28 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import type { Project } from '../../shared/types';
 import type { CommandResult } from '../hooks/useCommandPalette';
 import AppLayout from '../components/layout/AppLayout';
 import Dashboard from '../components/dashboard/Dashboard';
-import ProjectDetail from '../components/project/ProjectDetail';
 import SettingsPage from '../components/settings/SettingsPage';
 import PromptLibrary from '../components/prompts/PromptLibrary';
 import WorkspaceBoard from '../components/workspace/WorkspaceBoard';
 import CommandPalette from '../components/search/CommandPalette';
 import UsageTracker from '../components/usage/UsageTracker';
+import OnboardingWizard from '../components/dirigir/OnboardingWizard';
+import dynamic from 'next/dynamic';
+
+const TerminalPage = dynamic(() => import('../components/terminal/TerminalPage'), { ssr: false });
 import { useProjects, useProjectDetail } from '../hooks/useProjects';
 import { useCommandPalette } from '../hooks/useCommandPalette';
 import { useToast } from '../hooks/useToast';
 import { useActiveSessions } from '../hooks/useSessions';
+import { ProjectProvider } from '../hooks/useProjectContext';
+import { useOnboarding } from '../hooks/useOnboarding';
 
 export default function Home() {
   const { addToast } = useToast();
   const lastToastTime = useRef(0);
+  const { completed: onboardingCompleted, isLoading: onboardingLoading, completeStep } = useOnboarding();
 
   // Only show toasts for settings changes; suppress routine task/team updates
   const handleRefresh = useCallback(
@@ -35,7 +41,7 @@ export default function Home() {
 
   const { projects, loading } = useProjects(handleRefresh);
   const { sessions: activeSessions, getSessionForProject } = useActiveSessions();
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts' | 'workspaces' | 'usage'>('dashboard');
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts' | 'workspaces' | 'usage' | 'terminal'>('dashboard');
   const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(null);
   const { project: selectedProject } = useProjectDetail(
     currentPage === 'project' ? selectedProjectPath : null
@@ -50,7 +56,7 @@ export default function Home() {
   }, []);
 
   const handleNavigate = useCallback((page: string) => {
-    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'workspaces' || page === 'usage') {
+    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'workspaces' || page === 'usage' || page === 'terminal') {
       setCurrentPage(page);
       setSelectedProjectPath(null);
     }
@@ -81,9 +87,22 @@ export default function Home() {
       ? 'Workspaces'
       : currentPage === 'usage'
       ? 'Usage & Costs'
+      : currentPage === 'terminal'
+      ? 'Terminal'
       : selectedProject?.name || 'Project';
 
-  if (loading) {
+  const contextValue = useMemo(
+    () => ({
+      projects,
+      selectedProjectPath,
+      onSelectProject: handleSelectProject,
+      activeSessions: activeSessions || [],
+      getSessionForProject: getSessionForProject || (() => null),
+    }),
+    [projects, selectedProjectPath, handleSelectProject, activeSessions, getSessionForProject]
+  );
+
+  if (loading || onboardingLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-surface-0">
         <div className="flex items-center gap-2 text-text-tertiary text-sm">
@@ -94,39 +113,30 @@ export default function Home() {
     );
   }
 
+  if (!onboardingCompleted) {
+    return (
+      <OnboardingWizard
+        onComplete={() => completeStep('tourCompleted')}
+        onStepComplete={completeStep}
+      />
+    );
+  }
+
   return (
-    <>
+    <ProjectProvider value={contextValue}>
       <AppLayout
-        projects={projects}
-        selectedPath={selectedProjectPath}
-        onSelectProject={handleSelectProject}
+        selectedProject={currentPage === 'project' ? selectedProject : null}
         onNavigate={handleNavigate}
+        onBack={() => handleNavigate('dashboard')}
         currentPage={currentPage === 'project' ? 'dashboard' : currentPage as string}
         pageTitle={pageTitle}
         onOpenSearch={() => setOpen(true)}
       >
-        {currentPage === 'dashboard' && (
-          <Dashboard
-            projects={projects}
-            onSelectProject={handleSelectProject}
-            activeSessions={activeSessions}
-            getSessionForProject={getSessionForProject}
-          />
-        )}
-        {currentPage === 'project' && selectedProject && (
-          <ProjectDetail
-            project={selectedProject}
-            onBack={() => handleNavigate('dashboard')}
-          />
-        )}
-        {currentPage === 'workspaces' && (
-          <WorkspaceBoard
-            projects={projects}
-            onSelectProject={handleSelectProject}
-          />
-        )}
+        {currentPage === 'dashboard' && <Dashboard />}
+        {currentPage === 'workspaces' && <WorkspaceBoard />}
         {currentPage === 'prompts' && <PromptLibrary />}
         {currentPage === 'usage' && <UsageTracker />}
+        {currentPage === 'terminal' && <TerminalPage />}
         {currentPage === 'settings' && <SettingsPage />}
       </AppLayout>
 
@@ -138,6 +148,6 @@ export default function Home() {
         onClose={() => setOpen(false)}
         onSelect={handleSearchSelect}
       />
-    </>
+    </ProjectProvider>
   );
 }

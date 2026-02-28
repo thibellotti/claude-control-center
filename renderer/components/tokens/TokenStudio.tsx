@@ -3,36 +3,10 @@ import { useTokenStudio } from '../../hooks/useTokenStudio';
 import ColorPalette from './ColorPalette';
 import SpacingScale from './SpacingScale';
 import TypographyPreview from './TypographyPreview';
+import { SaveIcon, TokenFileIcon } from '../icons';
 
 interface TokenStudioProps {
   projectPath: string;
-}
-
-function SaveIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M11 12.5H3a1 1 0 01-1-1v-9a1 1 0 011-1h6.5L12 4v7.5a1 1 0 01-1 1z"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M9.5 12.5v-3.5h-5v3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M4.5 1.5v3h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function TokenFileIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="6" y="4" width="20" height="24" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M11 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M11 16h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M11 20h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
 }
 
 const TOKEN_TABS = [
@@ -105,7 +79,7 @@ export default function TokenStudio({ projectPath }: TokenStudioProps) {
         <div className="flex items-center gap-2">
           <span className="text-xs font-mono text-text-tertiary">{configFileName}</span>
           {isDirty && (
-            <span className="text-[10px] font-medium text-status-dirty px-1.5 py-0.5 bg-surface-2 rounded">
+            <span className="text-micro font-medium text-status-dirty px-1.5 py-0.5 bg-surface-2 rounded">
               Unsaved
             </span>
           )}
@@ -171,7 +145,7 @@ export default function TokenStudio({ projectPath }: TokenStudioProps) {
               className="w-full h-[500px] bg-surface-1 border border-border-subtle rounded-card p-4 font-mono text-xs text-text-primary resize-y outline-none focus:border-border-default transition-colors leading-relaxed"
               spellCheck={false}
             />
-            <p className="text-[10px] text-text-tertiary mt-2">
+            <p className="text-micro text-text-tertiary mt-2">
               Edit the raw Tailwind config file directly. Changes will be written as-is
               when you save.
             </p>

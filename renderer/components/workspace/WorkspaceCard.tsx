@@ -1,5 +1,6 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { memo, useState, useCallback, useMemo } from 'react';
 import type { Workspace, Project } from '../../../shared/types';
+import { PencilIcon, ChevronDownIcon, RemoveIcon } from '../icons';
 
 interface WorkspaceCardProps {
   workspace: Workspace;
@@ -9,37 +10,7 @@ interface WorkspaceCardProps {
   onRemoveProject: (workspaceId: string, projectPath: string) => void;
 }
 
-function EditIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M8.5 2.5l3 3M2 9.5l6.5-6.5 3 3L5 12.5H2v-3z"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ChevronDownIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 4.5l3 3 3-3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function RemoveIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-export default function WorkspaceCard({
+export default memo(function WorkspaceCard({
   workspace,
   projects,
   onEdit,
@@ -79,7 +50,7 @@ export default function WorkspaceCard({
             <h3 className="text-sm font-medium text-text-primary truncate">
               {workspace.name}
             </h3>
-            <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-surface-3 text-[10px] font-medium text-text-secondary">
+            <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-surface-3 text-micro font-medium text-text-secondary">
               {workspaceProjects.length}
             </span>
           </div>
@@ -92,7 +63,7 @@ export default function WorkspaceCard({
             aria-label="Edit workspace"
             title="Edit workspace"
           >
-            <EditIcon />
+            <PencilIcon />
           </button>
         </div>
 
@@ -132,7 +103,7 @@ export default function WorkspaceCard({
                     e.stopPropagation();
                     onRemoveProject(workspace.id, project.path);
                   }}
-                  className="shrink-0 p-0.5 rounded-button text-text-tertiary hover:text-red-400 hover:bg-red-500/10 transition-colors opacity-0 group-hover/project:opacity-100"
+                  className="shrink-0 p-0.5 rounded-button text-text-tertiary hover:text-feedback-error hover:bg-feedback-error-muted transition-colors opacity-0 group-hover/project:opacity-100"
                   aria-label={`Remove ${project.name} from workspace`}
                   title="Remove from workspace"
                 >
@@ -167,4 +138,4 @@ export default function WorkspaceCard({
       </div>
     </div>
   );
-}
+})

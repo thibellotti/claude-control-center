@@ -115,12 +115,12 @@ export default function ScreenshotSlider({
 
       {/* Labels */}
       <div className="absolute top-3 left-3 z-10">
-        <span className="px-2 py-1 rounded text-[10px] font-medium bg-surface-4/80 text-text-primary backdrop-blur-sm">
+        <span className="px-2 py-1 rounded text-micro font-medium bg-surface-4/80 text-text-primary backdrop-blur-sm">
           Before
         </span>
       </div>
       <div className="absolute top-3 right-3 z-10">
-        <span className="px-2 py-1 rounded text-[10px] font-medium bg-surface-4/80 text-text-primary backdrop-blur-sm">
+        <span className="px-2 py-1 rounded text-micro font-medium bg-surface-4/80 text-text-primary backdrop-blur-sm">
           After
         </span>
       </div>

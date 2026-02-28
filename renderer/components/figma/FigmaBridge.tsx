@@ -1,29 +1,10 @@
 import React, { useState } from 'react';
 import { useFigmaBridge, parseFigmaUrl } from '../../hooks/useFigmaBridge';
 import FigmaLinkCard from './FigmaLinkCard';
+import { PlusIcon, FigmaIcon } from '../icons';
 
 interface FigmaBridgeProps {
   projectId: string;
-}
-
-function PlusIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M7 3v8M3 7h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function FigmaIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M11 28a5 5 0 005-5v-5h-5a5 5 0 000 10z" fill="#0ACF83" />
-      <path d="M6 18a5 5 0 015-5h5v10h-5a5 5 0 01-5-5z" fill="#A259FF" />
-      <path d="M6 8a5 5 0 015-5h5v10h-5a5 5 0 01-5-5z" fill="#F24E1E" />
-      <path d="M16 3h5a5 5 0 010 10h-5V3z" fill="#FF7262" />
-      <path d="M26 8a5 5 0 01-5 5 5 5 0 01-5-5 5 5 0 015-5 5 5 0 015 5z" fill="#1ABCFE" />
-    </svg>
-  );
 }
 
 function Spinner() {
@@ -138,7 +119,7 @@ export default function FigmaBridge({ projectId }: FigmaBridgeProps) {
               autoFocus
             />
             {urlError && (
-              <p className="text-xs text-red-400 mt-1.5">{urlError}</p>
+              <p className="text-xs text-feedback-error mt-1.5">{urlError}</p>
             )}
           </div>
 

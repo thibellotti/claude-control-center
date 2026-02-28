@@ -1,33 +1,10 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import type { Project, Workspace } from '../../../shared/types';
+import type { Workspace } from '../../../shared/types';
+import { useProjectContext } from '../../hooks/useProjectContext';
 import { useWorkspaces } from '../../hooks/useWorkspaces';
 import WorkspaceCard from './WorkspaceCard';
 import WorkspaceEditor from './WorkspaceEditor';
-
-interface WorkspaceBoardProps {
-  projects: Project[];
-  onSelectProject: (project: Project) => void;
-}
-
-function PlusIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function BoardEmptyIcon() {
-  return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="4" y="6" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="4" y="26" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="28" y="6" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="28" y="26" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M12 12h0M12 32h0M36 12h0M36 32h0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
+import { PlusIcon, BoardEmptyIcon } from '../icons';
 
 function AssignDropdown({
   workspaces,
@@ -81,7 +58,8 @@ function AssignDropdown({
   );
 }
 
-export default function WorkspaceBoard({ projects, onSelectProject }: WorkspaceBoardProps) {
+export default function WorkspaceBoard() {
+  const { projects, onSelectProject } = useProjectContext();
   const {
     workspaces,
     isLoading,
@@ -210,7 +188,7 @@ export default function WorkspaceBoard({ projects, onSelectProject }: WorkspaceB
                 <h2 className="text-xs font-semibold uppercase tracking-wider text-text-tertiary">
                   Unassigned Projects
                 </h2>
-                <span className="px-1.5 py-0.5 rounded-full bg-surface-3 text-[10px] font-medium text-text-tertiary">
+                <span className="px-1.5 py-0.5 rounded-full bg-surface-3 text-micro font-medium text-text-tertiary">
                   {unassignedProjects.length}
                 </span>
               </div>

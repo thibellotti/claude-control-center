@@ -21,6 +21,10 @@ import { registerTerminalHandlers, cleanupTerminalSessions } from './ipc/termina
 import { registerLiveFeedHandlers, cleanupLiveFeed } from './ipc/live-feed'
 import { registerSupabaseHandlers } from './ipc/supabase-info'
 import { registerGitHubHandlers } from './ipc/github-info'
+import { registerRequestHandlers, cleanupRequests } from './ipc/requests'
+import { registerPageHandlers } from './ipc/pages'
+import { registerTemplateHandlers } from './ipc/templates'
+import { registerAccountHandlers } from './ipc/account'
 import { startProjectWatcher } from './watchers/project-watcher'
 
 const isProd = process.env.NODE_ENV === 'production'
@@ -54,6 +58,10 @@ if (isProd) {
   registerLiveFeedHandlers()
   registerSupabaseHandlers()
   registerGitHubHandlers()
+  registerRequestHandlers()
+  registerPageHandlers()
+  registerTemplateHandlers()
+  registerAccountHandlers()
 
   const mainWindow = createWindow('main', {
     width: 1400,
@@ -77,6 +85,7 @@ if (isProd) {
     cleanupPreviewServers()
     cleanupTerminalSessions()
     cleanupLiveFeed()
+    cleanupRequests()
   })
 
   if (isProd) {

@@ -72,7 +72,7 @@ export default function ActiveSessions({ sessions }: ActiveSessionsProps) {
                   </p>
                 )}
                 {!isHomeDir(session.projectPath) && (
-                  <p className="text-[10px] text-text-tertiary font-mono truncate mt-0.5">
+                  <p className="text-micro text-text-tertiary font-mono truncate mt-0.5">
                     {shortenPath(session.projectPath)}
                   </p>
                 )}

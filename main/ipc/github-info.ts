@@ -26,25 +26,6 @@ function parseGitHubRemote(remoteUrl: string): { owner: string; repo: string } |
   return null;
 }
 
-/**
- * Format relative time from an ISO date string.
- */
-function relativeTime(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diffMs = now - then;
-  const diffMin = Math.floor(diffMs / 60000);
-  const diffHrs = Math.floor(diffMin / 60);
-  const diffDays = Math.floor(diffHrs / 24);
-
-  if (diffMin < 1) return 'Just now';
-  if (diffMin < 60) return `${diffMin}m ago`;
-  if (diffHrs < 24) return `${diffHrs}h ago`;
-  if (diffDays < 30) return `${diffDays}d ago`;
-
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
 export function registerGitHubHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GET_GITHUB_INFO,

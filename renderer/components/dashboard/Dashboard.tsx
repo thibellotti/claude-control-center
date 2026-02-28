@@ -1,14 +1,7 @@
-import React, { useMemo } from 'react';
-import type { Project, ActiveSession } from '../../../shared/types';
+import React, { useCallback, useMemo } from 'react';
+import { useProjectContext } from '../../hooks/useProjectContext';
 import ProjectCard from './ProjectCard';
 import ActiveSessions from './ActiveSessions';
-
-interface DashboardProps {
-  projects: Project[];
-  onSelectProject: (project: Project) => void;
-  activeSessions?: ActiveSession[];
-  getSessionForProject?: (projectPath: string) => ActiveSession | null;
-}
 
 interface StatCardProps {
   label: string;
@@ -32,7 +25,9 @@ function StatCard({ label, value, accent, warn }: StatCardProps) {
   );
 }
 
-export default function Dashboard({ projects, onSelectProject, activeSessions, getSessionForProject }: DashboardProps) {
+export default function Dashboard() {
+  const { projects, onSelectProject, activeSessions, getSessionForProject } = useProjectContext();
+
   const { activeProjects, idleProjects, totalTasks, activeTasks, uncommitted } = useMemo(() => {
     const active = projects.filter((p) => p.status === 'active');
     const idle = projects.filter((p) => p.status === 'idle');
@@ -51,11 +46,11 @@ export default function Dashboard({ projects, onSelectProject, activeSessions, g
     };
   }, [projects]);
 
-  const handleOpenEditor = (path: string) => {
+  const handleOpenEditor = useCallback((path: string) => {
     window.api.openInEditor(path);
-  };
+  }, []);
 
-  const liveCount = activeSessions?.length ?? 0;
+  const liveCount = activeSessions.length;
 
   return (
     <div className="p-6 space-y-8">
@@ -90,9 +85,8 @@ export default function Dashboard({ projects, onSelectProject, activeSessions, g
                 key={project.path}
                 project={project}
                 onClick={onSelectProject}
-
                 onOpenEditor={handleOpenEditor}
-                isLive={!!getSessionForProject?.(project.path)}
+                isLive={!!getSessionForProject(project.path)}
               />
             ))}
           </div>
@@ -111,9 +105,8 @@ export default function Dashboard({ projects, onSelectProject, activeSessions, g
                 key={project.path}
                 project={project}
                 onClick={onSelectProject}
-
                 onOpenEditor={handleOpenEditor}
-                isLive={!!getSessionForProject?.(project.path)}
+                isLive={!!getSessionForProject(project.path)}
               />
             ))}
           </div>

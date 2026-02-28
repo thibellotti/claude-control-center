@@ -79,14 +79,14 @@ export default function UsageChart({ data, mode }: UsageChartProps) {
       <div className="flex justify-between mt-2 px-0">
         {data.length <= 14
           ? data.map((d) => (
-              <span key={d.date} className="text-[10px] text-text-tertiary flex-1 text-center">
+              <span key={d.date} className="text-micro text-text-tertiary flex-1 text-center">
                 {formatDate(d.date)}
               </span>
             ))
           : [0, Math.floor(data.length / 4), Math.floor(data.length / 2), Math.floor((data.length * 3) / 4), data.length - 1].map(
               (idx) =>
                 data[idx] && (
-                  <span key={data[idx].date} className="text-[10px] text-text-tertiary">
+                  <span key={data[idx].date} className="text-micro text-text-tertiary">
                     {formatDate(data[idx].date)}
                   </span>
                 )

@@ -3,37 +3,7 @@ import type { Prompt } from '../../../shared/types';
 import { usePromptLibrary } from '../../hooks/usePromptLibrary';
 import PromptCard from './PromptCard';
 import PromptEditor from './PromptEditor';
-
-function SearchIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M9.5 9.5L13 13" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function PlusIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function StarFilterIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M7 1.5l1.64 3.32 3.66.54-2.65 2.58.63 3.64L7 9.77l-3.28 1.81.63-3.64L1.7 5.36l3.66-.54L7 1.5z"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
+import { SearchIcon, PlusIcon, StarIcon } from '../icons';
 
 export default function PromptLibrary() {
   const {
@@ -135,12 +105,12 @@ export default function PromptLibrary() {
             onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-button text-xs font-medium border transition-colors ${
               showFavoritesOnly
-                ? 'bg-yellow-400/10 border-yellow-400/30 text-yellow-400'
+                ? 'bg-feedback-warning-muted border-feedback-warning/30 text-feedback-warning'
                 : 'bg-surface-1 border-border-subtle text-text-tertiary hover:text-text-secondary hover:border-border-default'
             }`}
             title="Show favorites only"
           >
-            <StarFilterIcon />
+            <StarIcon />
             Favorites
           </button>
         </div>

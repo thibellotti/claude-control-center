@@ -113,7 +113,7 @@ function ColorSwatch({ name, path, value, onUpdate }: ColorSwatchProps) {
       </button>
 
       {/* Color name */}
-      <span className="text-[10px] text-text-tertiary text-center leading-tight max-w-[56px] truncate">
+      <span className="text-micro text-text-tertiary text-center leading-tight max-w-[56px] truncate">
         {name}
       </span>
 
@@ -129,7 +129,7 @@ function ColorSwatch({ name, path, value, onUpdate }: ColorSwatchProps) {
             if (e.key === 'Enter') handleHexSubmit();
             if (e.key === 'Escape') setIsEditing(false);
           }}
-          className="w-16 text-[10px] font-mono text-text-secondary text-center bg-surface-2 border border-border-default rounded px-1 py-0.5 outline-none focus:border-accent"
+          className="w-16 text-micro font-mono text-text-secondary text-center bg-surface-2 border border-border-default rounded px-1 py-0.5 outline-none focus:border-accent"
         />
       ) : (
         <button
@@ -139,7 +139,7 @@ function ColorSwatch({ name, path, value, onUpdate }: ColorSwatchProps) {
               setIsEditing(true);
             }
           }}
-          className="text-[10px] font-mono text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer"
+          className="text-micro font-mono text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer"
           title={isVariable ? 'CSS variable — edit in globals.css' : 'Click to edit'}
         >
           {isVariable ? value.replace(/var\(([^)]+)\)/, '$1') : displayColor}

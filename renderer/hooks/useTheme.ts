@@ -9,7 +9,7 @@ interface ThemeContextValue {
   setTheme: (theme: Theme) => void;
 }
 
-const STORAGE_KEY = 'claude-control-center-theme';
+const STORAGE_KEY = 'forma-theme';
 
 export const ThemeContext = createContext<ThemeContextValue>({
   theme: 'system',

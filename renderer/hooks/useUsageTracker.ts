@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { UsageSummary, UsageEntry } from '../../shared/types';
+import type { UsageSummary } from '../../shared/types';
 
 export interface DailyData {
   date: string;

@@ -58,7 +58,7 @@ export function usePreview(projectPath: string) {
   const [iframeKey, setIframeKey] = useState(0);
   const [showConsole, setShowConsole] = useState(false);
 
-  // Debounce timer for file-change auto-refresh
+  // Debounce timer for cleanup
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Keep consoleEntries in sync whenever state.output changes
@@ -66,15 +66,31 @@ export function usePreview(projectPath: string) {
     setConsoleEntries(parseConsoleEntries(state.output));
   }, [state.output]);
 
+  // Track whether we've already auto-started for this path
+  const autoStartedRef = useRef(false);
+
   // -----------------------------------------------------------------------
-  // On mount: check if server is already running
+  // On mount: check if server is already running, auto-start if idle
   // -----------------------------------------------------------------------
   useEffect(() => {
     let cancelled = false;
+    autoStartedRef.current = false;
     async function checkStatus() {
       try {
         const current = await window.api.getDevServerStatus(projectPath);
-        if (!cancelled) setState(current);
+        if (!cancelled) {
+          setState(current);
+          // Auto-start if idle and hasn't been auto-started yet
+          if (current.status === 'idle' && !autoStartedRef.current) {
+            autoStartedRef.current = true;
+            try {
+              const result = await window.api.startDevServer(projectPath);
+              if (!cancelled) setState(result);
+            } catch {
+              // ignore auto-start failure
+            }
+          }
+        }
       } catch {
         // ignore — server probably not running
       }
@@ -84,34 +100,46 @@ export function usePreview(projectPath: string) {
   }, [projectPath]);
 
   // -----------------------------------------------------------------------
-  // Event-driven: listen for PREVIEW_STATUS_UPDATE
+  // Event-driven: listen for PREVIEW_STATUS_UPDATE (throttled)
+  // Status updates arrive on every stdout/stderr chunk — throttle to avoid
+  // excessive re-renders while still showing status transitions immediately.
   // -----------------------------------------------------------------------
+  const lastStatusRef = useRef<string>('idle');
+  const throttleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingStateRef = useRef<EnhancedPreviewState | null>(null);
+
   useEffect(() => {
-    const cleanup = window.api.onPreviewStatusUpdate((incoming: EnhancedPreviewState) => {
-      setState(incoming);
+    const cleanup = window.api.onPreviewStatusUpdate((_incoming: unknown) => {
+      const incoming = _incoming as EnhancedPreviewState;
+      // Status transitions (idle→starting→ready etc.) are applied immediately
+      if (incoming.status !== lastStatusRef.current) {
+        lastStatusRef.current = incoming.status;
+        setState(incoming);
+        return;
+      }
+      // Output-only updates are throttled to max once per 500ms
+      pendingStateRef.current = incoming;
+      if (!throttleRef.current) {
+        throttleRef.current = setTimeout(() => {
+          throttleRef.current = null;
+          if (pendingStateRef.current) {
+            setState(pendingStateRef.current);
+            pendingStateRef.current = null;
+          }
+        }, 500);
+      }
     });
-    return cleanup;
+    return () => {
+      cleanup();
+      if (throttleRef.current) clearTimeout(throttleRef.current);
+    };
   }, []);
 
   // -----------------------------------------------------------------------
-  // Event-driven: listen for PREVIEW_FILE_CHANGED, debounce 300ms refresh
+  // File-change events: no iframe refresh needed — dev servers (Next.js,
+  // Vite, etc.) handle HMR natively via WebSocket. A full iframe remount
+  // would fight against HMR and cause jarring white-flash reloads.
   // -----------------------------------------------------------------------
-  useEffect(() => {
-    const cleanup = window.api.onPreviewFileChanged((data: { projectPath: string; filePath: string }) => {
-      if (data.projectPath !== projectPath) return;
-
-      // Debounce: wait 300ms after last change before refreshing
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-        setIframeKey((k) => k + 1);
-      }, 300);
-    });
-
-    return () => {
-      cleanup();
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [projectPath]);
 
   // -----------------------------------------------------------------------
   // Actions
@@ -121,8 +149,6 @@ export function usePreview(projectPath: string) {
     try {
       const result = await window.api.startDevServer(projectPath);
       setState(result);
-      // Start file watching once server is starting
-      await window.api.previewStartWatching(projectPath);
     } catch (err) {
       setState((prev) => ({
         ...prev,
@@ -134,7 +160,6 @@ export function usePreview(projectPath: string) {
 
   const stop = useCallback(async () => {
     try {
-      await window.api.previewStopWatching(projectPath);
       await window.api.stopDevServer(projectPath);
       setState(DEFAULT_STATE);
     } catch {

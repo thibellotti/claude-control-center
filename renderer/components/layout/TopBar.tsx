@@ -1,17 +1,9 @@
 import React from 'react';
+import { SearchIcon } from '../icons';
 
 interface TopBarProps {
   pageTitle: string;
   onOpenSearch?: () => void;
-}
-
-function SearchIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M9.5 9.5L13 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
 }
 
 export default function TopBar({ pageTitle, onOpenSearch }: TopBarProps) {
@@ -26,7 +18,7 @@ export default function TopBar({ pageTitle, onOpenSearch }: TopBarProps) {
       >
         <SearchIcon />
         <span>Search</span>
-        <kbd className="ml-1 px-1.5 py-0.5 rounded bg-surface-3 border border-border-subtle text-[10px] font-mono">
+        <kbd className="ml-1 px-1.5 py-0.5 rounded bg-surface-3 border border-border-subtle text-micro font-mono">
           {'\u2318'}K
         </kbd>
       </button>

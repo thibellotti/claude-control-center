@@ -1,9 +1,10 @@
 import { ipcMain } from 'electron';
-import { readdirSync, readFileSync, existsSync, statSync, promises as fsPromises } from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
 import { simpleGit } from 'simple-git';
 import { decodeClaudePath } from '../helpers/decode-path';
+import { log } from '../helpers/logger';
 import {
   IPC_CHANNELS,
   Project,
@@ -26,14 +27,31 @@ const SCAN_DIRS = [
   path.join(HOME, 'Desktop'),
 ];
 
-let cachedProjects: Project[] | null = null;
+// Cache with TTL
+const CACHE_TTL_MS = 60_000;
+let projectCache: { data: Project[]; timestamp: number } | null = null;
+
+async function pathExists(p: string): Promise<boolean> {
+  try {
+    await fs.access(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function invalidateProjectCache(): void {
+  projectCache = null;
+}
 
 export function registerProjectHandlers() {
   ipcMain.handle(IPC_CHANNELS.GET_PROJECTS, async () => {
-    if (!cachedProjects) {
-      cachedProjects = await discoverProjects();
+    if (projectCache && (Date.now() - projectCache.timestamp) < CACHE_TTL_MS) {
+      return projectCache.data;
     }
-    return cachedProjects;
+    const projects = await discoverProjects();
+    projectCache = { data: projects, timestamp: Date.now() };
+    return projects;
   });
 
   ipcMain.handle(IPC_CHANNELS.GET_PROJECT_DETAIL, async (_, projectPath: string) => {
@@ -41,8 +59,10 @@ export function registerProjectHandlers() {
   });
 
   ipcMain.handle(IPC_CHANNELS.REFRESH_PROJECTS, async () => {
-    cachedProjects = await discoverProjects();
-    return cachedProjects;
+    invalidateProjectCache();
+    const projects = await discoverProjects();
+    projectCache = { data: projects, timestamp: Date.now() };
+    return projects;
   });
 }
 
@@ -51,55 +71,55 @@ async function discoverProjects(): Promise<Project[]> {
 
   // 1. Scan ~/.claude/projects/ for registered projects
   try {
-    if (existsSync(CLAUDE_PROJECTS_DIR)) {
-      const entries = readdirSync(CLAUDE_PROJECTS_DIR, { withFileTypes: true });
+    if (await pathExists(CLAUDE_PROJECTS_DIR)) {
+      const entries = await fs.readdir(CLAUDE_PROJECTS_DIR, { withFileTypes: true });
       for (const entry of entries) {
         if (entry.isDirectory()) {
-          const decoded = decodeClaudePath(entry.name);
-          if (existsSync(decoded)) {
+          const decoded = await decodeClaudePath(entry.name);
+          if (await pathExists(decoded)) {
             projectPaths.add(decoded);
           }
         }
       }
     }
-  } catch {
-    // Skip silently if Claude projects dir is inaccessible
+  } catch (error: unknown) {
+    log('warn', 'projects', 'Failed to scan Claude projects directory', error);
   }
 
   // 2. Scan ~/Projects/ and ~/Desktop/ for project directories
   for (const scanDir of SCAN_DIRS) {
     try {
-      if (!existsSync(scanDir)) continue;
-      const entries = readdirSync(scanDir, { withFileTypes: true });
+      if (!(await pathExists(scanDir))) continue;
+      const entries = await fs.readdir(scanDir, { withFileTypes: true });
       for (const entry of entries) {
         if (entry.isDirectory() && !entry.name.startsWith('.')) {
           const fullPath = path.join(scanDir, entry.name);
           // Heuristic: it's a project if it has package.json, .git, or CLAUDE.md
-          const hasPackageJson = existsSync(path.join(fullPath, 'package.json'));
-          const hasGit = existsSync(path.join(fullPath, '.git'));
-          const hasClaudeMd = existsSync(path.join(fullPath, 'CLAUDE.md'));
-          const hasClaudeDir = existsSync(path.join(fullPath, '.claude'));
+          const [hasPackageJson, hasGit, hasClaudeMd, hasClaudeDir] = await Promise.all([
+            pathExists(path.join(fullPath, 'package.json')),
+            pathExists(path.join(fullPath, '.git')),
+            pathExists(path.join(fullPath, 'CLAUDE.md')),
+            pathExists(path.join(fullPath, '.claude')),
+          ]);
           if (hasPackageJson || hasGit || hasClaudeMd || hasClaudeDir) {
             projectPaths.add(fullPath);
           }
         }
       }
-    } catch {
-      // Skip silently if scan dir is inaccessible
+    } catch (error: unknown) {
+      log('warn', 'projects', `Failed to scan directory: ${scanDir}`, error);
     }
   }
 
   // 3. Build project metadata for all discovered paths
   const projects: Project[] = [];
   const allPaths = Array.from(projectPaths);
-  for (const projectPath of allPaths) {
-    try {
-      const project = await buildProjectSummary(projectPath);
-      if (project) {
-        projects.push(project);
-      }
-    } catch {
-      // Skip malformed projects silently
+  const results = await Promise.allSettled(
+    allPaths.map((projectPath) => buildProjectSummary(projectPath))
+  );
+  for (const result of results) {
+    if (result.status === 'fulfilled' && result.value) {
+      projects.push(result.value);
     }
   }
 
@@ -111,19 +131,19 @@ async function discoverProjects(): Promise<Project[]> {
 
 async function buildProjectSummary(projectPath: string): Promise<Project | null> {
   try {
-    if (!existsSync(projectPath)) return null;
+    if (!(await pathExists(projectPath))) return null;
 
     const name = path.basename(projectPath);
-    const hasClaudeDir = existsSync(path.join(projectPath, '.claude'));
+    const hasClaudeDir = await pathExists(path.join(projectPath, '.claude'));
 
     // Find the Claude config path in ~/.claude/projects/
     let claudeConfigPath: string | null = null;
     try {
-      if (existsSync(CLAUDE_PROJECTS_DIR)) {
-        const entries = readdirSync(CLAUDE_PROJECTS_DIR, { withFileTypes: true });
+      if (await pathExists(CLAUDE_PROJECTS_DIR)) {
+        const entries = await fs.readdir(CLAUDE_PROJECTS_DIR, { withFileTypes: true });
         for (const entry of entries) {
           if (entry.isDirectory()) {
-            const decoded = decodeClaudePath(entry.name);
+            const decoded = await decodeClaudePath(entry.name);
             if (decoded === projectPath) {
               claudeConfigPath = path.join(CLAUDE_PROJECTS_DIR, entry.name);
               break;
@@ -131,57 +151,51 @@ async function buildProjectSummary(projectPath: string): Promise<Project | null>
           }
         }
       }
-    } catch {
-      // Skip silently
+    } catch (error: unknown) {
+      log('warn', 'projects', `Failed to find Claude config for ${name}`, error);
     }
 
     // Read PLAN.md
     let plan: string | null = null;
     try {
-      const planPath = path.join(projectPath, 'PLAN.md');
-      if (existsSync(planPath)) {
-        plan = readFileSync(planPath, 'utf-8');
-      }
+      plan = await fs.readFile(path.join(projectPath, 'PLAN.md'), 'utf-8');
     } catch {
-      // Skip silently
+      // File doesn't exist — expected
     }
 
     // Read CLAUDE.md
     let claudeMd: string | null = null;
     try {
-      const claudeMdPath = path.join(projectPath, 'CLAUDE.md');
-      if (existsSync(claudeMdPath)) {
-        claudeMd = readFileSync(claudeMdPath, 'utf-8');
-      }
+      claudeMd = await fs.readFile(path.join(projectPath, 'CLAUDE.md'), 'utf-8');
     } catch {
-      // Skip silently
+      // File doesn't exist — expected
     }
 
-    // Get git info
-    const git = await getGitInfo(projectPath);
-
-    // Get project health indicators (only meaningful for git repos)
-    let health: ProjectHealth | null = null;
+    // Get git info, package.json, tasks, teams in parallel
     const gitDir = path.join(projectPath, '.git');
-    if (existsSync(gitDir)) {
-      const gitInstance = simpleGit(projectPath);
+    const hasGitDir = await pathExists(gitDir);
+
+    const [git, packageJson, tasks, teams] = await Promise.all([
+      getGitInfo(projectPath),
+      readPackageJson(projectPath),
+      getTasksForProject(projectPath),
+      getTeamsForProject(projectPath),
+    ]);
+
+    // Get project health (only meaningful for git repos)
+    let health: ProjectHealth | null = null;
+    if (hasGitDir) {
+      const gitInstance = simpleGit({ baseDir: projectPath, timeout: { block: 5000 } });
       health = await getProjectHealth(projectPath, gitInstance);
     }
-
-    // Get package.json info
-    const packageJson = readPackageJson(projectPath);
-
-    // Get tasks and teams
-    const tasks = getTasksForProject(projectPath);
-    const teams = getTeamsForProject(projectPath);
 
     // Determine last activity time
     let lastActivity = 0;
     try {
-      const stat = statSync(projectPath);
+      const stat = await fs.stat(projectPath);
       lastActivity = stat.mtimeMs;
-    } catch {
-      // Skip silently
+    } catch (error: unknown) {
+      log('warn', 'projects', `Failed to stat project directory: ${name}`, error);
     }
 
     // If git has a last commit date, use that if more recent
@@ -215,7 +229,8 @@ async function buildProjectSummary(projectPath: string): Promise<Project | null>
       hasClaudeDir,
       health,
     };
-  } catch {
+  } catch (error: unknown) {
+    log('warn', 'projects', `Failed to build summary for ${projectPath}`, error);
     return null;
   }
 }
@@ -223,9 +238,9 @@ async function buildProjectSummary(projectPath: string): Promise<Project | null>
 async function getGitInfo(projectPath: string): Promise<GitInfo | null> {
   try {
     const gitDir = path.join(projectPath, '.git');
-    if (!existsSync(gitDir)) return null;
+    if (!(await pathExists(gitDir))) return null;
 
-    const git = simpleGit(projectPath);
+    const git = simpleGit({ baseDir: projectPath, timeout: { block: 5000 } });
 
     const [statusResult, logResult, remotes] = await Promise.all([
       git.status().catch(() => null),
@@ -260,7 +275,8 @@ async function getGitInfo(projectPath: string): Promise<GitInfo | null> {
       ahead: statusResult?.ahead || 0,
       behind: statusResult?.behind || 0,
     };
-  } catch {
+  } catch (error: unknown) {
+    log('warn', 'git', `Failed to get git info for ${projectPath}`, error);
     return null;
   }
 }
@@ -275,8 +291,8 @@ async function getProjectHealth(
     try {
       const statusResult = await git.status();
       uncommittedCount = statusResult.files.length;
-    } catch {
-      // If git status fails, leave at 0
+    } catch (error: unknown) {
+      log('warn', 'health', `Git status failed for ${projectPath}`, error);
     }
 
     // Calculate days since last commit
@@ -288,8 +304,8 @@ async function getProjectHealth(
         const msPerDay = 24 * 60 * 60 * 1000;
         daysSinceLastCommit = Math.floor((Date.now() - lastCommitTime) / msPerDay);
       }
-    } catch {
-      // Leave as null if log fails
+    } catch (error: unknown) {
+      log('warn', 'health', `Git log failed for ${projectPath}`, error);
     }
 
     // Check if package.json is newer than package-lock.json (deps may be outdated)
@@ -297,44 +313,43 @@ async function getProjectHealth(
     try {
       const pkgPath = path.join(projectPath, 'package.json');
       const lockPath = path.join(projectPath, 'package-lock.json');
-      if (existsSync(pkgPath) && existsSync(lockPath)) {
+      if ((await pathExists(pkgPath)) && (await pathExists(lockPath))) {
         const [pkgStat, lockStat] = await Promise.all([
-          fsPromises.stat(pkgPath),
-          fsPromises.stat(lockPath),
+          fs.stat(pkgPath),
+          fs.stat(lockPath),
         ]);
         hasOutdatedDeps = pkgStat.mtimeMs > lockStat.mtimeMs;
       }
-    } catch {
-      // Leave as false if stat fails
+    } catch (error: unknown) {
+      log('warn', 'health', `Outdated deps check failed for ${projectPath}`, error);
     }
 
     return { uncommittedCount, daysSinceLastCommit, hasOutdatedDeps };
-  } catch {
+  } catch (error: unknown) {
+    log('warn', 'health', `Health check failed for ${projectPath}`, error);
     return null;
   }
 }
 
-function getTasksForProject(projectPath: string): TaskItem[] {
+async function getTasksForProject(_projectPath: string): Promise<TaskItem[]> {
   const tasks: TaskItem[] = [];
 
   try {
-    if (!existsSync(CLAUDE_TASKS_DIR)) return tasks;
+    if (!(await pathExists(CLAUDE_TASKS_DIR))) return tasks;
 
-    const taskDirs = readdirSync(CLAUDE_TASKS_DIR, { withFileTypes: true });
+    const taskDirs = await fs.readdir(CLAUDE_TASKS_DIR, { withFileTypes: true });
     for (const dir of taskDirs) {
       if (!dir.isDirectory()) continue;
 
       const taskDirPath = path.join(CLAUDE_TASKS_DIR, dir.name);
       try {
-        const files = readdirSync(taskDirPath);
+        const files = await fs.readdir(taskDirPath);
         for (const file of files) {
           if (!file.endsWith('.json')) continue;
           try {
-            const content = readFileSync(path.join(taskDirPath, file), 'utf-8');
+            const content = await fs.readFile(path.join(taskDirPath, file), 'utf-8');
             const parsed = JSON.parse(content);
 
-            // Check if this task is related to the project
-            // Tasks may reference the project in their metadata or description
             if (parsed && typeof parsed === 'object') {
               // Skip deleted tasks entirely
               if (parsed.status === 'deleted') continue;
@@ -352,36 +367,36 @@ function getTasksForProject(projectPath: string): TaskItem[] {
               };
               tasks.push(task);
             }
-          } catch {
-            // Skip malformed JSON files
+          } catch (error: unknown) {
+            log('warn', 'tasks', `Failed to parse task file: ${file}`, error);
           }
         }
-      } catch {
-        // Skip inaccessible task directories
+      } catch (error: unknown) {
+        log('warn', 'tasks', `Failed to read task directory: ${dir.name}`, error);
       }
     }
-  } catch {
-    // Skip silently
+  } catch (error: unknown) {
+    log('warn', 'tasks', 'Failed to scan tasks directory', error);
   }
 
   return tasks;
 }
 
-function getTeamsForProject(projectPath: string): Team[] {
+async function getTeamsForProject(projectPath: string): Promise<Team[]> {
   const teams: Team[] = [];
 
   try {
-    if (!existsSync(CLAUDE_TEAMS_DIR)) return teams;
+    if (!(await pathExists(CLAUDE_TEAMS_DIR))) return teams;
 
-    const teamDirs = readdirSync(CLAUDE_TEAMS_DIR, { withFileTypes: true });
+    const teamDirs = await fs.readdir(CLAUDE_TEAMS_DIR, { withFileTypes: true });
     for (const dir of teamDirs) {
       if (!dir.isDirectory()) continue;
 
       const configPath = path.join(CLAUDE_TEAMS_DIR, dir.name, 'config.json');
       try {
-        if (!existsSync(configPath)) continue;
+        if (!(await pathExists(configPath))) continue;
 
-        const content = readFileSync(configPath, 'utf-8');
+        const content = await fs.readFile(configPath, 'utf-8');
         const parsed = JSON.parse(content);
 
         if (parsed && typeof parsed === 'object') {
@@ -389,7 +404,7 @@ function getTeamsForProject(projectPath: string): Team[] {
 
           // Check if any team member's cwd starts with the project path
           const isRelated = members.some(
-            (m: any) => m.cwd && typeof m.cwd === 'string' && m.cwd.startsWith(projectPath)
+            (m: Record<string, unknown>) => m.cwd && typeof m.cwd === 'string' && (m.cwd as string).startsWith(projectPath)
           );
 
           if (isRelated) {
@@ -398,36 +413,34 @@ function getTeamsForProject(projectPath: string): Team[] {
               description: parsed.description || '',
               createdAt: parsed.createdAt || 0,
               leadAgentId: parsed.leadAgentId || '',
-              members: members.map((m: any) => ({
-                agentId: m.agentId || '',
-                name: m.name || '',
-                agentType: m.agentType || '',
-                model: m.model || '',
-                color: m.color || '',
-                joinedAt: m.joinedAt || 0,
-                cwd: m.cwd || '',
+              members: members.map((m: Record<string, unknown>) => ({
+                agentId: (m.agentId as string) || '',
+                name: (m.name as string) || '',
+                agentType: (m.agentType as string) || '',
+                model: (m.model as string) || '',
+                color: (m.color as string) || '',
+                joinedAt: (m.joinedAt as number) || 0,
+                cwd: (m.cwd as string) || '',
               })),
             };
             teams.push(team);
           }
         }
-      } catch {
-        // Skip malformed team configs
+      } catch (error: unknown) {
+        log('warn', 'teams', `Failed to parse team config: ${dir.name}`, error);
       }
     }
-  } catch {
-    // Skip silently
+  } catch (error: unknown) {
+    log('warn', 'teams', 'Failed to scan teams directory', error);
   }
 
   return teams;
 }
 
-function readPackageJson(projectPath: string): PackageJsonInfo | null {
+async function readPackageJson(projectPath: string): Promise<PackageJsonInfo | null> {
   try {
     const pkgPath = path.join(projectPath, 'package.json');
-    if (!existsSync(pkgPath)) return null;
-
-    const content = readFileSync(pkgPath, 'utf-8');
+    const content = await fs.readFile(pkgPath, 'utf-8');
     const parsed = JSON.parse(content);
 
     return {

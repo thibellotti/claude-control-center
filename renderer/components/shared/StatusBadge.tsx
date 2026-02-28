@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 interface StatusBadgeProps {
   status: 'active' | 'idle';
 }
 
-export default function StatusBadge({ status }: StatusBadgeProps) {
+export default memo(function StatusBadge({ status }: StatusBadgeProps) {
   const isActive = status === 'active';
 
   return (
@@ -23,4 +23,4 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
       {isActive ? 'Active' : 'Idle'}
     </span>
   );
-}
+})

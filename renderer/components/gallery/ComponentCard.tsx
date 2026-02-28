@@ -1,32 +1,12 @@
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import type { ComponentInfo } from '../../../shared/types';
+import { ChevronDownIcon } from '../icons';
 
 interface ComponentCardProps {
   component: ComponentInfo;
 }
 
-function ChevronDownIcon({ open }: { open: boolean }) {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={`transition-transform ${open ? 'rotate-180' : ''}`}
-    >
-      <path
-        d="M3 4.5l3 3 3-3"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-export default function ComponentCard({ component }: ComponentCardProps) {
+export default memo(function ComponentCard({ component }: ComponentCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -37,7 +17,7 @@ export default function ComponentCard({ component }: ComponentCardProps) {
           <div className="flex items-center gap-2">
             {component.hasTests && (
               <span
-                className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0"
+                className="w-1.5 h-1.5 rounded-full bg-feedback-success shrink-0"
                 title="Has tests"
               />
             )}
@@ -53,15 +33,15 @@ export default function ComponentCard({ component }: ComponentCardProps) {
 
       {/* Badges row */}
       <div className="flex items-center gap-1.5 mt-2">
-        <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-surface-3 text-text-secondary">
+        <span className="px-1.5 py-0.5 rounded text-micro font-medium bg-surface-3 text-text-secondary">
           {component.exportType}
         </span>
         {component.props.length > 0 && (
-          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-accent-muted text-accent">
+          <span className="px-1.5 py-0.5 rounded text-micro font-medium bg-accent-muted text-accent">
             {component.props.length} prop{component.props.length !== 1 ? 's' : ''}
           </span>
         )}
-        <span className="text-[10px] text-text-tertiary ml-auto">
+        <span className="text-micro text-text-tertiary ml-auto">
           {component.lineCount} lines
         </span>
       </div>
@@ -73,7 +53,7 @@ export default function ComponentCard({ component }: ComponentCardProps) {
             onClick={() => setExpanded(!expanded)}
             className="flex items-center gap-1 text-[11px] text-text-tertiary hover:text-text-secondary transition-colors w-full"
           >
-            <ChevronDownIcon open={expanded} />
+            <ChevronDownIcon className={`transition-transform ${expanded ? 'rotate-180' : ''}`} size={12} />
             <span>Props</span>
           </button>
 
@@ -87,7 +67,7 @@ export default function ComponentCard({ component }: ComponentCardProps) {
                   <div className="flex items-center gap-1 min-w-0">
                     {prop.required && (
                       <span
-                        className="w-1 h-1 rounded-full bg-red-400 shrink-0"
+                        className="w-1 h-1 rounded-full bg-feedback-error shrink-0"
                         title="Required"
                       />
                     )}
@@ -106,4 +86,4 @@ export default function ComponentCard({ component }: ComponentCardProps) {
       )}
     </div>
   );
-}
+})

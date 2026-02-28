@@ -309,6 +309,41 @@ export interface GitHubRepoInfo {
   pullRequests: GitHubPRInfo[];
 }
 
+// -- Forma Request System --
+
+export type RequestStatus = 'draft' | 'queued' | 'in_progress' | 'review' | 'approved' | 'rejected';
+
+export interface RequestAttachment {
+  id: string;
+  type: 'figma' | 'screenshot' | 'reference_url';
+  url: string;
+  label: string;
+  thumbnail?: string;
+}
+
+export interface DesignRequest {
+  id: string;
+  projectId: string;
+  projectPath: string;
+  prompt: string;
+  attachments: RequestAttachment[];
+  status: RequestStatus;
+  createdAt: number;
+  startedAt?: number;
+  completedAt?: number;
+  screenshotBefore?: string;
+  screenshotAfter?: string;
+  error?: string;
+}
+
+export interface TranslatedFeedEntry {
+  timestamp: number;
+  type: 'info' | 'action' | 'progress' | 'complete' | 'error';
+  message: string;
+  detail?: string;
+  requestId: string;
+}
+
 export const IPC_CHANNELS = {
   GET_PROJECTS: 'get-projects',
   GET_PROJECT_DETAIL: 'get-project-detail',
@@ -366,4 +401,20 @@ export const IPC_CHANNELS = {
   GET_VERCEL_DEPLOYMENTS: 'get-vercel-deployments',
   GET_VERCEL_PROJECT_INFO: 'get-vercel-project-info',
   GET_GITHUB_INFO: 'get-github-info',
+  // Request System
+  CREATE_REQUEST: 'create-request',
+  GET_REQUESTS: 'get-requests',
+  CANCEL_REQUEST: 'cancel-request',
+  APPROVE_REQUEST: 'approve-request',
+  REJECT_REQUEST: 'reject-request',
+  REQUEST_STATUS_UPDATE: 'request-status-update',
+  REQUEST_FEED_UPDATE: 'request-feed-update',
+  GET_PROJECT_PAGES: 'get-project-pages',
+  GET_TEMPLATES: 'get-templates',
+  CREATE_FROM_TEMPLATE: 'create-from-template',
+  PICK_DIRECTORY: 'pick-directory',
+  GET_ACCOUNT: 'get-account',
+  SAVE_ACCOUNT: 'save-account',
+  GET_PLAN_LIMITS: 'get-plan-limits',
+  OPEN_BILLING_PORTAL: 'open-billing-portal',
 } as const;

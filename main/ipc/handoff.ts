@@ -1,9 +1,10 @@
 import { ipcMain } from 'electron';
-import { readFileSync, readdirSync, existsSync, statSync, writeFileSync } from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
 import { simpleGit } from 'simple-git';
 import { IPC_CHANNELS, HandoffPackage } from '../../shared/types';
+import { log } from '../helpers/logger';
 
 const HOME = os.homedir();
 const CLAUDE_TASKS_DIR = path.join(HOME, '.claude', 'tasks');
@@ -71,6 +72,15 @@ const TECH_IDENTIFIERS: Record<string, string> = {
   stripe: 'Stripe',
 };
 
+async function pathExists(p: string): Promise<boolean> {
+  try {
+    await fs.access(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function registerHandoffHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GENERATE_HANDOFF,
@@ -96,10 +106,10 @@ async function generateHandoff(projectPath: string): Promise<HandoffPackage> {
   const projectName = path.basename(projectPath);
 
   // Read CLAUDE.md
-  const overview = readOptionalFile(path.join(projectPath, 'CLAUDE.md'));
+  const overview = await readOptionalFile(path.join(projectPath, 'CLAUDE.md'));
 
   // Read PLAN.md
-  const plan = readOptionalFile(path.join(projectPath, 'PLAN.md'));
+  const plan = await readOptionalFile(path.join(projectPath, 'PLAN.md'));
 
   // Git info
   let gitBranch: string | null = null;
@@ -107,10 +117,10 @@ async function generateHandoff(projectPath: string): Promise<HandoffPackage> {
   let recentCommits: HandoffPackage['recentCommits'] = [];
 
   const gitDir = path.join(projectPath, '.git');
-  if (existsSync(gitDir)) {
+  if (await pathExists(gitDir)) {
     try {
-      const git = simpleGit(projectPath);
-      const [status, log] = await Promise.all([
+      const git = simpleGit({ baseDir: projectPath, timeout: { block: 5000 } });
+      const [status, gitLog] = await Promise.all([
         git.status().catch(() => null),
         git.log({ maxCount: 10 }).catch(() => null),
       ]);
@@ -121,33 +131,34 @@ async function generateHandoff(projectPath: string): Promise<HandoffPackage> {
         gitStatus = fileCount === 0 ? 'clean' : `dirty (${fileCount} modified files)`;
       }
 
-      if (log && log.all) {
-        recentCommits = log.all.map((entry) => ({
+      if (gitLog && gitLog.all) {
+        recentCommits = gitLog.all.map((entry: { hash: string; message: string; date: string; author_name: string }) => ({
           hash: entry.hash.slice(0, 7),
           message: entry.message,
           date: entry.date,
           author: entry.author_name,
         }));
       }
-    } catch {
-      // Git operations failed, leave defaults
+    } catch (error: unknown) {
+      log('warn', 'handoff', `Git operations failed for project: ${projectPath}`, error);
     }
   }
 
   // Tasks from ~/.claude/tasks/
-  const tasks = getTasksForHandoff(projectPath);
+  const tasks = await getTasksForHandoff(projectPath);
 
   // File tree
-  const fileTree = generateFileTree(projectPath, 3);
+  const fileTree = await generateFileTree(projectPath, 3);
 
   // Tech stack and dependencies from package.json
   let techStack: string[] = [];
   let dependencies: Record<string, string> = {};
 
   const pkgPath = path.join(projectPath, 'package.json');
-  if (existsSync(pkgPath)) {
+  if (await pathExists(pkgPath)) {
     try {
-      const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+      const raw = await fs.readFile(pkgPath, 'utf-8');
+      const pkg = JSON.parse(raw);
       const allDeps: Record<string, string> = {
         ...(pkg.dependencies || {}),
         ...(pkg.devDependencies || {}),
@@ -164,8 +175,8 @@ async function generateHandoff(projectPath: string): Promise<HandoffPackage> {
 
       // Merge dependencies for the output
       dependencies = allDeps;
-    } catch {
-      // package.json parse failed
+    } catch (error: unknown) {
+      log('warn', 'handoff', `Failed to parse package.json at: ${pkgPath}`, error);
     }
   }
 
@@ -185,21 +196,21 @@ async function generateHandoff(projectPath: string): Promise<HandoffPackage> {
   };
 }
 
-function exportHandoff(
+async function exportHandoff(
   projectPath: string,
   handoff: HandoffPackage,
   format: 'markdown' | 'json'
-): { filePath: string } {
+): Promise<{ filePath: string }> {
   if (format === 'json') {
     const filePath = path.join(projectPath, 'HANDOFF.json');
-    writeFileSync(filePath, JSON.stringify(handoff, null, 2), 'utf-8');
+    await fs.writeFile(filePath, JSON.stringify(handoff, null, 2), 'utf-8');
     return { filePath };
   }
 
   // Markdown format
   const md = buildMarkdown(handoff);
   const filePath = path.join(projectPath, 'HANDOFF.md');
-  writeFileSync(filePath, md, 'utf-8');
+  await fs.writeFile(filePath, md, 'utf-8');
   return { filePath };
 }
 
@@ -294,36 +305,35 @@ function buildMarkdown(h: HandoffPackage): string {
   return lines.join('\n');
 }
 
-function readOptionalFile(filePath: string): string | null {
+async function readOptionalFile(filePath: string): Promise<string | null> {
   try {
-    if (existsSync(filePath)) {
-      return readFileSync(filePath, 'utf-8');
-    }
-  } catch {
-    // File unreadable
+    const content = await fs.readFile(filePath, 'utf-8');
+    return content;
+  } catch (error: unknown) {
+    log('warn', 'handoff', `Could not read optional file: ${filePath}`, error);
   }
   return null;
 }
 
-function getTasksForHandoff(
+async function getTasksForHandoff(
   _projectPath: string
-): { subject: string; status: string; owner: string }[] {
+): Promise<{ subject: string; status: string; owner: string }[]> {
   const tasks: { subject: string; status: string; owner: string }[] = [];
 
   try {
-    if (!existsSync(CLAUDE_TASKS_DIR)) return tasks;
+    if (!(await pathExists(CLAUDE_TASKS_DIR))) return tasks;
 
-    const taskDirs = readdirSync(CLAUDE_TASKS_DIR, { withFileTypes: true });
+    const taskDirs = await fs.readdir(CLAUDE_TASKS_DIR, { withFileTypes: true });
     for (const dir of taskDirs) {
       if (!dir.isDirectory()) continue;
 
       const taskDirPath = path.join(CLAUDE_TASKS_DIR, dir.name);
       try {
-        const files = readdirSync(taskDirPath);
+        const files = await fs.readdir(taskDirPath);
         for (const file of files) {
           if (!file.endsWith('.json')) continue;
           try {
-            const content = readFileSync(path.join(taskDirPath, file), 'utf-8');
+            const content = await fs.readFile(path.join(taskDirPath, file), 'utf-8');
             const parsed = JSON.parse(content);
             if (parsed && typeof parsed === 'object' && parsed.status !== 'deleted') {
               tasks.push({
@@ -332,16 +342,16 @@ function getTasksForHandoff(
                 owner: parsed.owner || '',
               });
             }
-          } catch {
-            // Skip malformed task files
+          } catch (error: unknown) {
+            log('warn', 'handoff', `Failed to read task file: ${file}`, error);
           }
         }
-      } catch {
-        // Skip inaccessible directories
+      } catch (error: unknown) {
+        log('warn', 'handoff', `Failed to read task directory: ${taskDirPath}`, error);
       }
     }
-  } catch {
-    // Skip silently
+  } catch (error: unknown) {
+    log('warn', 'handoff', 'Failed to read tasks root directory', error);
   }
 
   return tasks;
@@ -351,15 +361,15 @@ function getTasksForHandoff(
  * Generate an indented file tree with box-drawing characters.
  * Skips common build/dependency directories for efficiency.
  */
-function generateFileTree(dirPath: string, maxDepth: number): string {
+async function generateFileTree(dirPath: string, maxDepth: number): Promise<string> {
   const lines: string[] = [];
 
-  function walk(currentPath: string, prefix: string, depth: number) {
+  async function walk(currentPath: string, prefix: string, depth: number) {
     if (depth > maxDepth) return;
 
     let entries: { name: string; isDir: boolean }[] = [];
     try {
-      const dirEntries = readdirSync(currentPath, { withFileTypes: true });
+      const dirEntries = await fs.readdir(currentPath, { withFileTypes: true });
       entries = dirEntries
         .filter((e) => !e.name.startsWith('.') || e.name === '.claude')
         .filter((e) => !SKIP_DIRS.has(e.name))
@@ -369,27 +379,28 @@ function generateFileTree(dirPath: string, maxDepth: number): string {
           if (a.isDir !== b.isDir) return a.isDir ? -1 : 1;
           return a.name.localeCompare(b.name);
         });
-    } catch {
+    } catch (error: unknown) {
+      log('warn', 'handoff', `Failed to read directory for file tree: ${currentPath}`, error);
       return;
     }
 
     for (let i = 0; i < entries.length; i++) {
       const entry = entries[i];
       const isLast = i === entries.length - 1;
-      const connector = isLast ? '\u2514\u2500\u2500 ' : '\u251C\u2500\u2500 ';
-      const childPrefix = isLast ? '    ' : '\u2502   ';
+      const connector = isLast ? '└── ' : '├── ';
+      const childPrefix = isLast ? '    ' : '│   ';
       const displayName = entry.isDir ? `${entry.name}/` : entry.name;
 
       lines.push(`${prefix}${connector}${displayName}`);
 
       if (entry.isDir) {
-        walk(path.join(currentPath, entry.name), `${prefix}${childPrefix}`, depth + 1);
+        await walk(path.join(currentPath, entry.name), `${prefix}${childPrefix}`, depth + 1);
       }
     }
   }
 
   lines.push(path.basename(dirPath) + '/');
-  walk(dirPath, '', 1);
+  await walk(dirPath, '', 1);
 
   return lines.join('\n');
 }

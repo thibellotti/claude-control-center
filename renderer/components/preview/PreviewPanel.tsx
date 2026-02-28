@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { usePreview } from '../../hooks/usePreview';
 import PreviewToolbar from './PreviewToolbar';
+import { PlayCircleIcon, SpinnerIcon, TrashIcon, ErrorCircleIcon } from '../icons';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -11,26 +12,8 @@ interface PreviewPanelProps {
 }
 
 // ---------------------------------------------------------------------------
-// Inline SVG icons
+// Helpers
 // ---------------------------------------------------------------------------
-
-function PlayCircleIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M13 11v10l8-5-8-5z" fill="currentColor" />
-    </svg>
-  );
-}
-
-function SpinnerIcon() {
-  return (
-    <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" opacity="0.2" />
-      <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 function LoadingDots() {
   return (
@@ -42,22 +25,14 @@ function LoadingDots() {
   );
 }
 
-function TrashIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M2 3h8M4.5 3V2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v1M9 3v7a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 // ---------------------------------------------------------------------------
 // Console line color helper
 // ---------------------------------------------------------------------------
 
 function lineColorClass(line: string): string {
   const lower = line.toLowerCase();
-  if (lower.includes('error')) return 'text-red-400';
-  if (lower.includes('warn')) return 'text-yellow-400';
+  if (lower.includes('error')) return 'text-feedback-error';
+  if (lower.includes('warn')) return 'text-feedback-warning';
   return 'text-text-tertiary';
 }
 
@@ -153,7 +128,7 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
         {isLoading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
             <div className="text-text-tertiary">
-              <SpinnerIcon />
+              <SpinnerIcon size={24} />
             </div>
             <div className="text-center">
               <p className="text-sm text-text-secondary flex items-center gap-2">
@@ -166,13 +141,13 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
               )}
             </div>
             {state.error && (
-              <p className="text-xs text-yellow-400 mt-1 max-w-md text-center">{state.error}</p>
+              <p className="text-xs text-feedback-warning mt-1 max-w-md text-center">{state.error}</p>
             )}
             {/* Recent output while loading */}
             {state.output.length > 0 && (
               <div className="w-full max-w-lg mt-4 px-4">
                 <div className="bg-surface-2 rounded-lg p-3 max-h-40 overflow-y-auto">
-                  <pre className="text-[10px] font-mono text-text-tertiary leading-relaxed whitespace-pre-wrap break-all">
+                  <pre className="text-micro font-mono text-text-tertiary leading-relaxed whitespace-pre-wrap break-all">
                     {state.output.slice(-10).join('\n')}
                   </pre>
                 </div>
@@ -203,17 +178,13 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
         {/* ── Error state ─────────────────────────────────────────────── */}
         {state.status === 'error' && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="10" cy="10" r="8" stroke="#FF6B6B" strokeWidth="1.5" />
-                <path d="M10 6v5" stroke="#FF6B6B" strokeWidth="1.5" strokeLinecap="round" />
-                <circle cx="10" cy="14" r="0.75" fill="#FF6B6B" />
-              </svg>
+            <div className="w-10 h-10 rounded-full bg-feedback-error-muted flex items-center justify-center text-feedback-error">
+              <ErrorCircleIcon size={20} />
             </div>
             <div className="text-center max-w-md">
               <p className="text-sm text-text-secondary mb-1">Server failed to start</p>
               {state.error && (
-                <p className="text-xs text-red-400 mt-1">{state.error}</p>
+                <p className="text-xs text-feedback-error mt-1">{state.error}</p>
               )}
             </div>
             <button
@@ -226,7 +197,7 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
             {state.output.length > 0 && (
               <div className="w-full max-w-lg mt-2 px-4">
                 <div className="bg-surface-2 rounded-lg p-3 max-h-40 overflow-y-auto">
-                  <pre className="text-[10px] font-mono text-red-400/80 leading-relaxed whitespace-pre-wrap break-all">
+                  <pre className="text-micro font-mono text-feedback-error/80 leading-relaxed whitespace-pre-wrap break-all">
                     {state.output.slice(-15).join('\n')}
                   </pre>
                 </div>
@@ -241,10 +212,10 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
         <div className="border-t border-border-subtle bg-surface-1 shrink-0" style={{ maxHeight: '200px' }}>
           {/* Console header */}
           <div className="flex items-center justify-between px-3 py-1.5 border-b border-border-subtle">
-            <span className="text-[10px] font-medium text-text-tertiary uppercase tracking-wider">Console</span>
+            <span className="text-micro font-medium text-text-tertiary uppercase tracking-wider">Console</span>
             <button
               onClick={clearConsole}
-              className="flex items-center gap-1 text-[10px] text-text-tertiary hover:text-text-secondary transition-colors"
+              className="flex items-center gap-1 text-micro text-text-tertiary hover:text-text-secondary transition-colors"
               title="Clear console"
             >
               <TrashIcon />
@@ -254,13 +225,13 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
           {/* Console output */}
           <div className="overflow-y-auto px-3 py-2" style={{ maxHeight: '168px' }}>
             {state.output.length === 0 ? (
-              <p className="text-[10px] font-mono text-text-tertiary">No output yet.</p>
+              <p className="text-micro font-mono text-text-tertiary">No output yet.</p>
             ) : (
               <div className="space-y-px">
                 {state.output.map((line, i) => (
                   <pre
                     key={i}
-                    className={`text-[10px] font-mono leading-relaxed whitespace-pre-wrap break-all ${lineColorClass(line)}`}
+                    className={`text-micro font-mono leading-relaxed whitespace-pre-wrap break-all ${lineColorClass(line)}`}
                   >
                     {line}
                   </pre>

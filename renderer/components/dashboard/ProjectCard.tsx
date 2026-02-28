@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { memo } from 'react';
 import type { Project } from '../../../shared/types';
 import StatusBadge from '../shared/StatusBadge';
 import GitBadge from '../shared/GitBadge';
 import HealthBadge from '../shared/HealthBadge';
+import { PencilIcon, ClaudeIcon } from '../icons';
 
 interface ProjectCardProps {
   project: Project;
@@ -49,31 +50,7 @@ function shortenPath(path: string): string {
 }
 
 
-function EditorIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M8.5 2.5l3 3M2 9.5l6.5-6.5 3 3L5 12.5H2v-3z"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ClaudeIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M4 5l2.5 2L4 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M7.5 9H10" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-export default function ProjectCard({
+export default memo(function ProjectCard({
   project,
   onClick,
   onOpenEditor,
@@ -133,7 +110,7 @@ export default function ProjectCard({
           {stack.map((tag) => (
             <span
               key={tag}
-              className="px-1.5 py-0.5 rounded bg-surface-3 text-[10px] font-mono text-text-tertiary"
+              className="px-1.5 py-0.5 rounded bg-surface-3 text-micro font-mono text-text-tertiary"
             >
               {tag}
             </span>
@@ -168,7 +145,7 @@ export default function ProjectCard({
           aria-label="Launch Claude Code"
           title="Launch Claude Code"
         >
-          <ClaudeIcon />
+          <ClaudeIcon size={14} />
         </button>
         <button
           onClick={(e) => {
@@ -178,9 +155,9 @@ export default function ProjectCard({
           className="p-1.5 rounded-button bg-surface-3 text-text-tertiary hover:text-text-primary hover:bg-surface-4 transition-colors"
           title="Open in editor"
         >
-          <EditorIcon />
+          <PencilIcon size={14} />
         </button>
       </div>
     </div>
   );
-}
+})

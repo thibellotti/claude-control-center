@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import type { CommandResult } from '../../hooks/useCommandPalette';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { SearchIcon } from '../icons';
 
 interface CommandPaletteProps {
   open: boolean;
@@ -23,22 +25,6 @@ const TYPE_LABELS: Record<CommandResult['type'], string> = {
   plan: 'Plan',
 };
 
-function SearchIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="shrink-0"
-    >
-      <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M11 11l3.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 export default function CommandPalette({
   open,
   query,
@@ -48,6 +34,7 @@ export default function CommandPalette({
   onSelect,
 }: CommandPaletteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const trapRef = useFocusTrap(open);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   // Auto-focus input on open
@@ -94,7 +81,7 @@ export default function CommandPalette({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-center px-4" style={{ paddingTop: '20vh' }}>
+    <div ref={trapRef} className="fixed inset-0 z-50 flex justify-center px-4" style={{ paddingTop: '20vh' }}>
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60"
@@ -108,8 +95,8 @@ export default function CommandPalette({
       >
         {/* Search input */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle">
-          <span className="text-text-tertiary">
-            <SearchIcon />
+          <span className="text-text-tertiary shrink-0">
+            <SearchIcon size={16} />
           </span>
           <input
             ref={inputRef}
@@ -119,7 +106,7 @@ export default function CommandPalette({
             placeholder="Search projects, tasks, plans..."
             className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-tertiary outline-none"
           />
-          <kbd className="px-1.5 py-0.5 rounded bg-surface-3 border border-border-subtle text-[10px] font-mono text-text-tertiary">
+          <kbd className="px-1.5 py-0.5 rounded bg-surface-3 border border-border-subtle text-micro font-mono text-text-tertiary">
             ESC
           </kbd>
         </div>
@@ -166,7 +153,7 @@ export default function CommandPalette({
                     </div>
 
                     {/* Type label */}
-                    <span className="shrink-0 text-[10px] font-medium uppercase tracking-wider text-text-tertiary">
+                    <span className="shrink-0 text-micro font-medium uppercase tracking-wider text-text-tertiary">
                       {TYPE_LABELS[result.type]}
                     </span>
                   </button>

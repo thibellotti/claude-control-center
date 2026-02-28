@@ -1,103 +1,26 @@
 import React, { useState } from 'react';
-import type { Project } from '../../../shared/types';
+import { useProjectContext } from '../../hooks/useProjectContext';
+import { DashboardIcon, SettingsIcon, PromptsIcon, WorkspacesIcon, TerminalIcon, UsageIcon, ChevronLeftIcon, ChevronRightIcon } from '../icons';
 
 interface SidebarProps {
-  projects: Project[];
-  selectedPath: string | null;
-  onSelectProject: (project: Project) => void;
   onNavigate: (page: string) => void;
   currentPage: string;
 }
 
-// SVG Icons
-function DashboardIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}
-
-function SettingsIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.5" />
-      <path
-        d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function PromptsIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="2" y="1.5" width="10" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M5 5h4M5 8h4M5 11h2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-      <path d="M12 4.5h1.5a1 1 0 011 1v9a1 1 0 01-1 1H6a1 1 0 01-1-1V14" stroke="currentColor" strokeWidth="1.2" />
-    </svg>
-  );
-}
-
-function WorkspacesIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="1" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="9" y="1" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="1" y="7" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="9" y="7" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="1" y="13" width="14" height="2" rx="0.5" stroke="currentColor" strokeWidth="1" />
-    </svg>
-  );
-}
-
-function UsageIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1.5" y="9" width="3" height="5.5" rx="0.5" stroke="currentColor" strokeWidth="1.3" />
-      <rect x="6.5" y="5" width="3" height="9.5" rx="0.5" stroke="currentColor" strokeWidth="1.3" />
-      <rect x="11.5" y="1.5" width="3" height="13" rx="0.5" stroke="currentColor" strokeWidth="1.3" />
-    </svg>
-  );
-}
-
-function ChevronLeftIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M9 3L5 7l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function ChevronRightIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 export default function Sidebar({
-  projects,
-  selectedPath,
-  onSelectProject,
   onNavigate,
   currentPage,
 }: SidebarProps) {
+  const { projects, selectedProjectPath, onSelectProject } = useProjectContext();
   const [collapsed, setCollapsed] = useState(false);
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
-    { id: 'workspaces', label: 'Workspaces', icon: <WorkspacesIcon /> },
-    { id: 'prompts', label: 'Prompts', icon: <PromptsIcon /> },
-    { id: 'usage', label: 'Usage', icon: <UsageIcon /> },
-    { id: 'settings', label: 'Settings', icon: <SettingsIcon /> },
+    { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon size={16} /> },
+    { id: 'terminal', label: 'Terminal', icon: <TerminalIcon size={16} /> },
+    { id: 'workspaces', label: 'Workspaces', icon: <WorkspacesIcon size={16} /> },
+    { id: 'prompts', label: 'Prompts', icon: <PromptsIcon size={16} /> },
+    { id: 'usage', label: 'Usage', icon: <UsageIcon size={16} /> },
+    { id: 'settings', label: 'Settings', icon: <SettingsIcon size={16} /> },
   ];
 
   return (
@@ -113,7 +36,7 @@ export default function Sidebar({
       <div className="flex items-center justify-between px-4 pb-3 shrink-0">
         {!collapsed && (
           <span className="text-xs font-semibold tracking-wider uppercase text-text-secondary">
-            Control Center
+            Forma
           </span>
         )}
         <button
@@ -159,12 +82,12 @@ export default function Sidebar({
       {/* Project list */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 space-y-0.5">
         {!collapsed && (
-          <span className="block px-3 pb-2 text-[10px] font-semibold tracking-wider uppercase text-text-tertiary">
+          <span className="block px-3 pb-2 text-micro font-semibold tracking-wider uppercase text-text-tertiary">
             Projects
           </span>
         )}
         {projects.map((project) => {
-          const isSelected = selectedPath === project.path;
+          const isSelected = selectedProjectPath === project.path;
           return (
             <button
               key={project.path}

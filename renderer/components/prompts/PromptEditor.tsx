@@ -172,7 +172,7 @@ export default function PromptEditor({
               placeholder="Comma-separated tags..."
               className="w-full px-3 py-2 rounded-md bg-surface-2 border border-border-subtle text-sm text-text-primary placeholder-text-tertiary focus:outline-none focus:border-accent transition-colors"
             />
-            <p className="text-[10px] text-text-tertiary mt-1">
+            <p className="text-micro text-text-tertiary mt-1">
               Separate multiple tags with commas
             </p>
           </div>
@@ -188,7 +188,7 @@ export default function PromptEditor({
                     <span className="text-xs text-text-tertiary">Delete this prompt?</span>
                     <button
                       onClick={handleDelete}
-                      className="px-2.5 py-1 rounded-button text-xs font-medium bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+                      className="px-2.5 py-1 rounded-button text-xs font-medium bg-feedback-error-muted text-feedback-error hover:bg-feedback-error-muted transition-colors"
                     >
                       Confirm
                     </button>
@@ -202,7 +202,7 @@ export default function PromptEditor({
                 ) : (
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="px-2.5 py-1 rounded-button text-xs text-red-400 hover:bg-red-500/10 transition-colors"
+                    className="px-2.5 py-1 rounded-button text-xs text-feedback-error hover:bg-feedback-error-muted transition-colors"
                   >
                     Delete
                   </button>

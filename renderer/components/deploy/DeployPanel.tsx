@@ -1,72 +1,17 @@
 import React, { useRef, useEffect } from 'react';
 import { useDeploy } from '../../hooks/useDeploy';
 import type { DeployResult } from '../../../shared/types';
+import { VercelIcon, NetlifyIcon, RocketIcon, ExternalLinkIcon, SpinnerIcon } from '../icons';
 
 interface DeployPanelProps {
   projectPath: string;
-}
-
-// -- Icons --
-
-function VercelIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M8 3L14 13H2L8 3Z" fill="currentColor" />
-    </svg>
-  );
-}
-
-function NetlifyIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="2" y="2" width="5" height="5" rx="0.5" fill="currentColor" />
-      <rect x="9" y="2" width="5" height="5" rx="0.5" fill="currentColor" opacity="0.7" />
-      <rect x="2" y="9" width="5" height="5" rx="0.5" fill="currentColor" opacity="0.7" />
-      <rect x="9" y="9" width="5" height="5" rx="0.5" fill="currentColor" opacity="0.4" />
-    </svg>
-  );
-}
-
-function RocketIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M16 4c-4 4-6 10-6 14l3 3c4-2 10-4 14-6C27 15 27 4 16 4z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-      <circle cx="19" cy="12" r="2" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M10 18l-3 3 2 2 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M14 22l-3 3 2 2 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function ExternalLinkIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M5 2H3a1 1 0 00-1 1v6a1 1 0 001 1h6a1 1 0 001-1V7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M7 2h3v3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M10 2L5.5 6.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg className="animate-spin" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" opacity="0.2" />
-      <path d="M8 1.5a6.5 6.5 0 0 1 6.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
 }
 
 function StatusDot({ success }: { success: boolean }) {
   return (
     <span
       className={`inline-block w-2 h-2 rounded-full shrink-0 ${
-        success ? 'bg-emerald-400' : 'bg-red-400'
+        success ? 'bg-feedback-success' : 'bg-feedback-error'
       }`}
     />
   );
@@ -161,7 +106,7 @@ export default function DeployPanel({ projectPath }: DeployPanelProps) {
             </div>
           </div>
           {error && (
-            <p className="text-xs text-red-400 mt-4">{error}</p>
+            <p className="text-xs text-feedback-error mt-4">{error}</p>
           )}
         </div>
       </div>
@@ -190,7 +135,7 @@ export default function DeployPanel({ projectPath }: DeployPanelProps) {
                   className="text-xs text-accent hover:underline flex items-center gap-1 mt-0.5"
                 >
                   {config.lastDeployUrl}
-                  <ExternalLinkIcon />
+                  <ExternalLinkIcon size={12} />
                 </button>
               )}
               {config.lastDeployTime && !config.lastDeployUrl && (
@@ -207,7 +152,7 @@ export default function DeployPanel({ projectPath }: DeployPanelProps) {
           >
             {isDeploying ? (
               <>
-                <Spinner />
+                <SpinnerIcon />
                 Deploying...
               </>
             ) : (
@@ -219,8 +164,8 @@ export default function DeployPanel({ projectPath }: DeployPanelProps) {
 
       {/* Error state */}
       {error && (
-        <div className="px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-lg">
-          <span className="text-xs text-red-400">{error}</span>
+        <div className="px-3 py-2 bg-feedback-error-muted border border-feedback-error-border rounded-lg">
+          <span className="text-xs text-feedback-error">{error}</span>
         </div>
       )}
 
@@ -252,18 +197,18 @@ export default function DeployPanel({ projectPath }: DeployPanelProps) {
         <div
           className={`flex items-center gap-3 px-4 py-3 rounded-lg border ${
             result.success
-              ? 'bg-emerald-500/10 border-emerald-500/20'
-              : 'bg-red-500/10 border-red-500/20'
+              ? 'bg-feedback-success-muted border-feedback-success-border'
+              : 'bg-feedback-error-muted border-feedback-error-border'
           }`}
         >
           <StatusDot success={result.success} />
           <div className="flex-1 min-w-0">
             {result.success ? (
-              <p className="text-xs text-emerald-400">
+              <p className="text-xs text-feedback-success">
                 Deploy successful
               </p>
             ) : (
-              <p className="text-xs text-red-400">
+              <p className="text-xs text-feedback-error">
                 Deploy failed{result.error ? `: ${result.error}` : ''}
               </p>
             )}
@@ -273,10 +218,10 @@ export default function DeployPanel({ projectPath }: DeployPanelProps) {
                 className="text-xs text-accent hover:underline flex items-center gap-1 mt-1"
               >
                 {result.url}
-                <ExternalLinkIcon />
+                <ExternalLinkIcon size={12} />
               </button>
             )}
-            <p className="text-[10px] text-text-tertiary mt-1">
+            <p className="text-micro text-text-tertiary mt-1">
               {formatTimestamp(result.timestamp)}
             </p>
           </div>
@@ -311,7 +256,7 @@ function DeployHistoryEntry({ entry }: { entry: DeployResult }) {
             className="text-xs text-accent hover:underline flex items-center gap-1 truncate"
           >
             <span className="truncate">{entry.url}</span>
-            <span className="shrink-0"><ExternalLinkIcon /></span>
+            <span className="shrink-0"><ExternalLinkIcon size={12} /></span>
           </button>
         ) : (
           <p className="text-xs text-text-tertiary truncate">
@@ -319,7 +264,7 @@ function DeployHistoryEntry({ entry }: { entry: DeployResult }) {
           </p>
         )}
       </div>
-      <span className="text-[10px] text-text-tertiary whitespace-nowrap shrink-0">
+      <span className="text-micro text-text-tertiary whitespace-nowrap shrink-0">
         {formatTimestamp(entry.timestamp)}
       </span>
     </div>

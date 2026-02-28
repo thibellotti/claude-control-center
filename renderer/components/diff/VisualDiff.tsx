@@ -2,55 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useVisualDiff, VIEWPORT_PRESETS } from '../../hooks/useVisualDiff';
 import ScreenshotSlider from './ScreenshotSlider';
 import type { ScreenshotEntry } from '../../../shared/types';
+import { CameraIcon, TrashIcon, LayersIcon, CheckIcon, CloseIcon } from '../icons';
 
 interface VisualDiffProps {
   projectId: string;
   projectPath: string;
-}
-
-// -- Icons --
-
-function CameraIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M5 2l-1 2H2a1 1 0 00-1 1v6a1 1 0 001 1h10a1 1 0 001-1V5a1 1 0 00-1-1h-2l-1-2H5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
-      <circle cx="7" cy="7.5" r="2" stroke="currentColor" strokeWidth="1.2" />
-    </svg>
-  );
-}
-
-function TrashIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M2.5 3.5h7M4.5 3.5V2.5a1 1 0 011-1h1a1 1 0 011 1v1M5 5.5v3M7 5.5v3M3.5 3.5l.5 6a1 1 0 001 1h2a1 1 0 001-1l.5-6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function LayersIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M4 12l12 6 12-6-12-6-12 6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-      <path d="M4 18l12 6 12-6" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-      <path d="M4 24l12 6 12-6" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M2 5l2.5 2.5L8 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
 }
 
 // -- Thumbnail card --
@@ -106,7 +62,7 @@ function ThumbnailCard({
             : 'border-border-default bg-surface-0/80 text-transparent group-hover:border-border-strong'
         }`}
       >
-        <CheckIcon />
+        <CheckIcon size={10} />
       </div>
 
       {/* Delete button */}
@@ -115,7 +71,7 @@ function ThumbnailCard({
           e.stopPropagation();
           onDelete();
         }}
-        className="absolute top-2 right-2 z-10 p-1 rounded bg-surface-0/80 text-text-tertiary hover:text-red-400 hover:bg-surface-0 opacity-0 group-hover:opacity-100 transition-all"
+        className="absolute top-2 right-2 z-10 p-1 rounded bg-surface-0/80 text-text-tertiary hover:text-feedback-error hover:bg-surface-0 opacity-0 group-hover:opacity-100 transition-all"
         title="Delete screenshot"
       >
         <TrashIcon />
@@ -141,13 +97,13 @@ function ThumbnailCard({
           {screenshot.label}
         </p>
         <div className="flex items-center gap-2 mt-1">
-          <span className="text-[10px] text-text-tertiary">{dateStr}</span>
-          <span className="text-[10px] text-text-tertiary">
+          <span className="text-micro text-text-tertiary">{dateStr}</span>
+          <span className="text-micro text-text-tertiary">
             {screenshot.viewport.width}x{screenshot.viewport.height}
           </span>
         </div>
         {screenshot.commitHash && (
-          <p className="text-[10px] text-text-tertiary mt-1 truncate font-mono">
+          <p className="text-micro text-text-tertiary mt-1 truncate font-mono">
             {screenshot.commitHash.slice(0, 7)}
             {screenshot.commitMessage ? ` — ${screenshot.commitMessage}` : ''}
           </p>
@@ -159,7 +115,7 @@ function ThumbnailCard({
 
 // -- Main component --
 
-export default function VisualDiff({ projectId, projectPath }: VisualDiffProps) {
+export default function VisualDiff({ projectId }: VisualDiffProps) {
   const {
     screenshots,
     isLoading,
@@ -306,7 +262,7 @@ export default function VisualDiff({ projectId, projectPath }: VisualDiffProps) 
             </button>
 
             {error && (
-              <p className="text-xs text-red-400 flex-1 truncate">{error}</p>
+              <p className="text-xs text-feedback-error flex-1 truncate">{error}</p>
             )}
           </div>
         </div>
@@ -321,7 +277,7 @@ export default function VisualDiff({ projectId, projectPath }: VisualDiffProps) 
               onClick={clearComparison}
               className="flex items-center gap-1 px-2 py-1 rounded-button text-[11px] text-text-tertiary hover:text-text-secondary transition-colors"
             >
-              <CloseIcon />
+              <CloseIcon size={12} />
               Clear
             </button>
           </div>
@@ -357,7 +313,7 @@ export default function VisualDiff({ projectId, projectPath }: VisualDiffProps) 
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-medium text-text-primary">Gallery</h3>
             {screenshots.length > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-surface-3 text-text-tertiary">
+              <span className="px-1.5 py-0.5 rounded-full text-micro font-medium bg-surface-3 text-text-tertiary">
                 {screenshots.length}
               </span>
             )}

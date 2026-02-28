@@ -1,6 +1,7 @@
 import React from 'react';
 import type { EnhancedPreviewState } from '../../../shared/types';
 import type { ViewportState } from '../../hooks/usePreview';
+import { PlayIcon, StopIcon, RefreshIcon, DesktopIcon, TabletIcon, MobileIcon, ExternalLinkIcon, ConsoleIcon } from '../icons';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -20,109 +21,6 @@ interface PreviewToolbarProps {
 }
 
 // ---------------------------------------------------------------------------
-// Inline SVG icons
-// ---------------------------------------------------------------------------
-
-function PlayIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 1.5v9l7.5-4.5L3 1.5z" fill="currentColor" />
-    </svg>
-  );
-}
-
-function StopIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="2" y="2" width="8" height="8" rx="1" fill="currentColor" />
-    </svg>
-  );
-}
-
-function RefreshIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M11.5 7A4.5 4.5 0 1 1 9.25 3M11.5 2v3h-3"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function DesktopIcon({ active }: { active: boolean }) {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect
-        x="1.5" y="2" width="13" height="9" rx="1"
-        stroke="currentColor"
-        strokeWidth={active ? '1.5' : '1.2'}
-      />
-      <path d="M5.5 14h5M8 11v3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function TabletIcon({ active }: { active: boolean }) {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect
-        x="3" y="1.5" width="10" height="13" rx="1.5"
-        stroke="currentColor"
-        strokeWidth={active ? '1.5' : '1.2'}
-      />
-      <circle cx="8" cy="12.5" r="0.75" fill="currentColor" />
-    </svg>
-  );
-}
-
-function MobileIcon({ active }: { active: boolean }) {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect
-        x="4" y="1.5" width="8" height="13" rx="1.5"
-        stroke="currentColor"
-        strokeWidth={active ? '1.5' : '1.2'}
-      />
-      <circle cx="8" cy="12.5" r="0.75" fill="currentColor" />
-    </svg>
-  );
-}
-
-function ExternalLinkIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M10.5 7.5v3a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h3"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M8 2.5h3.5V6M6 8l5.5-5.5"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ConsoleIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 5l2.5 2L3 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M7 9h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Status dot color helper
 // ---------------------------------------------------------------------------
 
@@ -137,7 +35,7 @@ function statusDotClass(status: EnhancedPreviewState['status']): string {
     case 'ready':
       return 'bg-status-active';
     case 'error':
-      return 'bg-[#FF6B6B]';
+      return 'bg-feedback-error';
     default:
       return 'bg-text-tertiary';
   }
@@ -188,8 +86,8 @@ export default function PreviewToolbar({
           onClick={isRunning ? onStop : onStart}
           className={`flex items-center justify-center w-7 h-7 rounded-button transition-colors ${
             isRunning
-              ? 'bg-red-500/15 text-red-400 hover:bg-red-500/25'
-              : 'bg-green-500/15 text-green-400 hover:bg-green-500/25'
+              ? 'bg-feedback-error-muted text-feedback-error hover:bg-feedback-error-muted'
+              : 'bg-feedback-success-muted text-feedback-success hover:bg-feedback-success-muted'
           }`}
           title={isRunning ? 'Stop dev server' : 'Start dev server'}
         >
@@ -233,9 +131,9 @@ export default function PreviewToolbar({
             }`}
             title={`${v.charAt(0).toUpperCase() + v.slice(1)} viewport`}
           >
-            {v === 'desktop' && <DesktopIcon active={viewport.mode === v} />}
-            {v === 'tablet' && <TabletIcon active={viewport.mode === v} />}
-            {v === 'mobile' && <MobileIcon active={viewport.mode === v} />}
+            {v === 'desktop' && <DesktopIcon active={viewport.mode === v} size={16} />}
+            {v === 'tablet' && <TabletIcon active={viewport.mode === v} size={16} />}
+            {v === 'mobile' && <MobileIcon active={viewport.mode === v} size={16} />}
           </button>
         ))}
 

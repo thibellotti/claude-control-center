@@ -23,7 +23,7 @@ function SectionHeader({ title, count }: { title: string; count?: number }) {
         {title}
       </h2>
       {count !== undefined && (
-        <span className="px-1.5 py-0.5 rounded-full bg-surface-3 text-[10px] font-mono text-text-tertiary">
+        <span className="px-1.5 py-0.5 rounded-full bg-surface-3 text-micro font-mono text-text-tertiary">
           {count}
         </span>
       )}
@@ -154,7 +154,7 @@ export default function SettingsPage() {
                 <div key={name} className="flex items-center justify-between gap-2 min-w-0">
                   <span className="text-xs font-mono text-text-secondary truncate min-w-0">{name}</span>
                   <span
-                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-micro font-medium ${
                       enabled
                         ? 'bg-status-active/10 text-status-active'
                         : 'bg-status-idle/10 text-status-idle'

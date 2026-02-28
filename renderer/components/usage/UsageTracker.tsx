@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useUsageTracker } from '../../hooks/useUsageTracker';
 import UsageChart from './UsageChart';
+import { RefreshIcon, BarChartIcon } from '../icons';
 
 function formatCost(value: number): string {
   return `$${value.toFixed(2)}`;
@@ -10,21 +11,6 @@ function formatTokens(value: number): string {
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
   return value.toLocaleString();
-}
-
-function RefreshIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M1.5 7a5.5 5.5 0 019.37-3.9M12.5 7a5.5 5.5 0 01-9.37 3.9"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-      />
-      <path d="M10.5 1v2.5H13" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M3.5 13v-2.5H1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
 }
 
 const DATE_RANGES = [
@@ -102,12 +88,8 @@ export default function UsageTracker() {
 
       {isEmpty ? (
         <div className="flex flex-col items-center justify-center py-24 bg-surface-1 rounded-lg border border-border-subtle">
-          <div className="w-10 h-10 rounded-full bg-surface-3 flex items-center justify-center mb-3">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="12" width="3" height="6" rx="0.5" stroke="currentColor" strokeWidth="1.3" className="text-text-tertiary" />
-              <rect x="7" y="8" width="3" height="10" rx="0.5" stroke="currentColor" strokeWidth="1.3" className="text-text-tertiary" />
-              <rect x="12" y="5" width="3" height="13" rx="0.5" stroke="currentColor" strokeWidth="1.3" className="text-text-tertiary" />
-            </svg>
+          <div className="w-10 h-10 rounded-full bg-surface-3 flex items-center justify-center mb-3 text-text-tertiary">
+            <BarChartIcon size={20} />
           </div>
           <span className="text-text-secondary text-sm font-medium">No usage data found</span>
           <span className="text-text-tertiary text-xs mt-1">

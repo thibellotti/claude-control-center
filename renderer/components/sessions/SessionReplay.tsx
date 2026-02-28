@@ -2,31 +2,13 @@ import React, { useState, useMemo } from 'react';
 import { useSessionReplay } from '../../hooks/useSessionReplay';
 import TimelineEvent from './TimelineEvent';
 import type { SessionAction, SessionTimeline } from '../../../shared/types';
+import { ChevronLeftIcon, ClockIcon } from '../icons';
 
 interface SessionReplayProps {
   projectPath: string;
 }
 
 type FilterType = 'all' | 'files' | 'commands' | 'text';
-
-// --- Icons ---
-
-function BackIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M9 3L5 7l4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function ClockIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M7 4v3l2 1.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 // --- Helpers ---
 
@@ -220,7 +202,7 @@ export default function SessionReplay({ projectPath }: SessionReplayProps) {
                 className="shrink-0 p-1.5 rounded-button text-text-tertiary hover:text-text-primary hover:bg-surface-2 transition-colors"
                 title="Back to session list"
               >
-                <BackIcon />
+                <ChevronLeftIcon />
               </button>
               <div className="min-w-0">
                 <p className="text-sm font-medium text-text-primary truncate">

@@ -86,6 +86,36 @@ const api = {
   previewStartWatching: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.PREVIEW_START_WATCHING, projectPath),
   previewStopWatching: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.PREVIEW_STOP_WATCHING, projectPath),
 
+  // Request System (Forma)
+  createRequest: (data: { projectId: string; projectPath: string; prompt: string; attachments?: unknown[] }) =>
+    ipcRenderer.invoke(IPC_CHANNELS.CREATE_REQUEST, data),
+  getRequests: (projectId?: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_REQUESTS, projectId),
+  cancelRequest: (requestId: string) => ipcRenderer.invoke(IPC_CHANNELS.CANCEL_REQUEST, requestId),
+  approveRequest: (requestId: string) => ipcRenderer.invoke(IPC_CHANNELS.APPROVE_REQUEST, requestId),
+  rejectRequest: (requestId: string) => ipcRenderer.invoke(IPC_CHANNELS.REJECT_REQUEST, requestId),
+  onRequestStatusUpdate: (callback: (request: unknown) => void) => {
+    const handler = (_: unknown, data: unknown) => callback(data);
+    ipcRenderer.on(IPC_CHANNELS.REQUEST_STATUS_UPDATE, handler);
+    return () => { ipcRenderer.removeListener(IPC_CHANNELS.REQUEST_STATUS_UPDATE, handler); };
+  },
+  onRequestFeedUpdate: (callback: (entry: unknown) => void) => {
+    const handler = (_: unknown, data: unknown) => callback(data);
+    ipcRenderer.on(IPC_CHANNELS.REQUEST_FEED_UPDATE, handler);
+    return () => { ipcRenderer.removeListener(IPC_CHANNELS.REQUEST_FEED_UPDATE, handler); };
+  },
+
+  getProjectPages: (projectPath: string) => ipcRenderer.invoke('get-project-pages', projectPath),
+
+  getTemplates: () => ipcRenderer.invoke('get-templates'),
+  createFromTemplate: (opts: { templateId: string; projectName: string; parentDir?: string }) =>
+    ipcRenderer.invoke('create-from-template', opts),
+  pickDirectory: () => ipcRenderer.invoke('pick-directory'),
+
+  getAccount: () => ipcRenderer.invoke('get-account'),
+  saveAccount: (updates: Record<string, unknown>) => ipcRenderer.invoke('save-account', updates),
+  getPlanLimits: () => ipcRenderer.invoke('get-plan-limits'),
+  openBillingPortal: () => ipcRenderer.invoke('open-billing-portal'),
+
   onProjectUpdated: (callback: (data: { refresh?: boolean } | Record<string, unknown>) => void) => {
     ipcRenderer.on('project-updated', (_, project) => callback(project));
     return () => { ipcRenderer.removeAllListeners('project-updated'); };

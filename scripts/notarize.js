@@ -13,7 +13,7 @@ exports.default = async function notarizing(context) {
   console.log('Notarizing ' + appName + '...');
 
   await notarize({
-    appBundleId: 'com.thxtype.claude-control-center',
+    appBundleId: 'com.forma.app',
     appPath: appOutDir + '/' + appName + '.app',
     appleId: process.env.APPLE_ID,
     appleIdPassword: process.env.APPLE_APP_SPECIFIC_PASSWORD,

@@ -1,44 +1,10 @@
 import React, { useState } from 'react';
 import type { FigmaLink } from '../../../shared/types';
+import { ExternalLinkIcon, EyeIcon, EyeOffIcon, TrashIcon } from '../icons';
 
 interface FigmaLinkCardProps {
   link: FigmaLink;
   onDelete: (id: string) => void;
-}
-
-function ExternalLinkIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M5 2H3a1 1 0 00-1 1v6a1 1 0 001 1h6a1 1 0 001-1V7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M7 2h3v3M6 6l4-4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function EyeIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="7" cy="7" r="1.5" stroke="currentColor" strokeWidth="1.2" />
-    </svg>
-  );
-}
-
-function EyeOffIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M2 2l10 10M5.6 5.6a2 2 0 002.8 2.8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M4 4.3C2.6 5.3 1 7 1 7s2.5 4 6 4c1 0 1.9-.3 2.7-.7M9.8 9.8c1.3-1 2.8-2.8 3.2-2.8-1-2.5-3-4-6-4-.5 0-1 .1-1.5.2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function TrashIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M2.5 4h9M5 4V3a1 1 0 011-1h2a1 1 0 011 1v1M10.5 4v7a1 1 0 01-1 1h-5a1 1 0 01-1-1V4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
 }
 
 function truncateUrl(url: string, maxLength: number = 60): string {
@@ -82,7 +48,7 @@ export default function FigmaLinkCard({ link, onDelete }: FigmaLinkCardProps) {
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs text-text-secondary hover:text-text-primary hover:bg-surface-2 transition-colors"
             title="Open in Figma"
           >
-            <ExternalLinkIcon />
+            <ExternalLinkIcon size={12} />
             <span>Open</span>
           </button>
 
@@ -99,12 +65,12 @@ export default function FigmaLinkCard({ link, onDelete }: FigmaLinkCardProps) {
             onClick={() => onDelete(link.id)}
             className={`flex items-center p-1.5 rounded-md text-xs transition-colors ${
               isHovered
-                ? 'text-red-400 hover:text-red-300 hover:bg-red-500/10'
+                ? 'text-feedback-error hover:text-feedback-error hover:bg-feedback-error-muted'
                 : 'text-transparent pointer-events-none'
             }`}
             title="Remove link"
           >
-            <TrashIcon />
+            <TrashIcon size={14} />
           </button>
         </div>
       </div>

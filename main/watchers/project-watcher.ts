@@ -2,6 +2,7 @@ import { BrowserWindow } from 'electron';
 import chokidar from 'chokidar';
 import { join, relative } from 'path';
 import { homedir } from 'os';
+import { invalidateProjectCache } from '../ipc/projects';
 
 const CLAUDE_DIR = join(homedir(), '.claude');
 
@@ -66,13 +67,16 @@ export function startProjectWatcher(mainWindow: BrowserWindow) {
 
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => {
+      // Invalidate the project cache so next GET_PROJECTS fetches fresh data
+      invalidateProjectCache();
+
       try {
         if (!mainWindow.isDestroyed()) {
           // Build the hints array, replacing null (global) with '__all__'
           const hints: string[] = [];
           let hasGlobal = false;
 
-          for (const h of pendingHints) {
+          for (const h of Array.from(pendingHints)) {
             if (h === null) {
               hasGlobal = true;
             } else {

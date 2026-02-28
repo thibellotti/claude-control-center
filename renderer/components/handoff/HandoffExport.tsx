@@ -1,51 +1,10 @@
 import React, { useState } from 'react';
 import { useHandoff, HandoffSections } from '../../hooks/useHandoff';
 import MarkdownView from '../shared/MarkdownView';
+import { PackageIcon, DownloadIcon, CopyIcon, CheckIcon } from '../icons';
 
 interface HandoffExportProps {
   projectPath: string;
-}
-
-function PackageIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M16 4L28 10v12L16 28 4 22V10l12-6z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-      <path d="M16 16v12" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M28 10L16 16 4 10" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M10 7l12 6" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}
-
-function DownloadIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M7 2v7M4 7l3 3 3-3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M2 11h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function CopyIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="4.5" y="4.5" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M9.5 4.5V3a1 1 0 00-1-1H3a1 1 0 00-1 1v5.5a1 1 0 001 1h1.5" stroke="currentColor" strokeWidth="1.2" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 7.5l3 3 5-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
 }
 
 function Spinner() {
@@ -113,7 +72,7 @@ export default function HandoffExport({ projectPath }: HandoffExportProps) {
             Generate Handoff
           </button>
           {error && (
-            <p className="text-xs text-red-400 mt-3">{error}</p>
+            <p className="text-xs text-feedback-error mt-3">{error}</p>
           )}
         </div>
       </div>
@@ -183,9 +142,9 @@ export default function HandoffExport({ projectPath }: HandoffExportProps) {
 
       {/* Success toast */}
       {exportedPath && (
-        <div className="flex items-center gap-2 px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-md">
+        <div className="flex items-center gap-2 px-3 py-2 bg-feedback-success-muted border border-feedback-success-border rounded-md">
           <CheckIcon />
-          <span className="text-xs text-emerald-400">
+          <span className="text-xs text-feedback-success">
             Saved to {exportedPath}
           </span>
         </div>
@@ -193,8 +152,8 @@ export default function HandoffExport({ projectPath }: HandoffExportProps) {
 
       {/* Error */}
       {error && (
-        <div className="px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-md">
-          <span className="text-xs text-red-400">{error}</span>
+        <div className="px-3 py-2 bg-feedback-error-muted border border-feedback-error-border rounded-md">
+          <span className="text-xs text-feedback-error">{error}</span>
         </div>
       )}
 

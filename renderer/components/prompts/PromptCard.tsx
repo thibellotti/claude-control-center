@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import type { Prompt } from '../../../shared/types';
+import { StarIcon, CopyIcon, PencilIcon } from '../icons';
 
 interface PromptCardProps {
   prompt: Prompt;
@@ -7,49 +8,7 @@ interface PromptCardProps {
   onToggleFavorite: (id: string) => void;
 }
 
-function StarIcon({ filled }: { filled: boolean }) {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M7 1.5l1.64 3.32 3.66.54-2.65 2.58.63 3.64L7 9.77l-3.28 1.81.63-3.64L1.7 5.36l3.66-.54L7 1.5z"
-        fill={filled ? 'currentColor' : 'none'}
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function CopyIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="4.5" y="4.5" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
-      <path
-        d="M9.5 4.5V3a1.5 1.5 0 00-1.5-1.5H3A1.5 1.5 0 001.5 3v5A1.5 1.5 0 003 9.5h1.5"
-        stroke="currentColor"
-        strokeWidth="1.2"
-      />
-    </svg>
-  );
-}
-
-function EditIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M8.5 2.5l3 3M2 9.5l6.5-6.5 3 3L5 12.5H2v-3z"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-export default function PromptCard({ prompt, onEdit, onToggleFavorite }: PromptCardProps) {
+export default memo(function PromptCard({ prompt, onEdit, onToggleFavorite }: PromptCardProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(
@@ -88,7 +47,7 @@ export default function PromptCard({ prompt, onEdit, onToggleFavorite }: PromptC
           }}
           className={`shrink-0 p-1 rounded-button transition-colors ${
             prompt.isFavorite
-              ? 'text-yellow-400 hover:text-yellow-300'
+              ? 'text-feedback-warning hover:text-feedback-warning'
               : 'text-text-tertiary hover:text-text-secondary'
           }`}
           aria-label={prompt.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
@@ -105,11 +64,11 @@ export default function PromptCard({ prompt, onEdit, onToggleFavorite }: PromptC
 
       {/* Category pill */}
       <div className="flex items-center gap-2 mb-3">
-        <span className="px-2 py-0.5 rounded-full bg-surface-3 text-[10px] font-medium text-text-secondary">
+        <span className="px-2 py-0.5 rounded-full bg-surface-3 text-micro font-medium text-text-secondary">
           {prompt.category}
         </span>
         {prompt.tags.length > 0 && (
-          <span className="text-[10px] text-text-tertiary truncate">
+          <span className="text-micro text-text-tertiary truncate">
             {prompt.tags.join(', ')}
           </span>
         )}
@@ -133,10 +92,10 @@ export default function PromptCard({ prompt, onEdit, onToggleFavorite }: PromptC
           className="flex items-center gap-1.5 px-2 py-1 rounded-button text-[11px] text-text-tertiary hover:text-text-primary hover:bg-surface-3 transition-colors"
           title="Edit prompt"
         >
-          <EditIcon />
+          <PencilIcon />
           <span>Edit</span>
         </button>
       </div>
     </div>
   );
-}
+})

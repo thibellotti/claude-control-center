@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 interface Tab {
   id: string;
@@ -12,7 +12,7 @@ interface TabsProps {
   onChange: (tabId: string) => void;
 }
 
-export default function Tabs({ tabs, activeTab, onChange }: TabsProps) {
+export default memo(function Tabs({ tabs, activeTab, onChange }: TabsProps) {
   return (
     <div className="flex items-center gap-0 border-b border-border-subtle">
       {tabs.map((tab) => {
@@ -31,7 +31,7 @@ export default function Tabs({ tabs, activeTab, onChange }: TabsProps) {
               {tab.label}
               {tab.count !== undefined && (
                 <span
-                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
+                  className={`px-1.5 py-0.5 rounded-full text-micro font-medium ${
                     isActive
                       ? 'bg-accent-muted text-accent'
                       : 'bg-surface-3 text-text-tertiary'
@@ -46,4 +46,4 @@ export default function Tabs({ tabs, activeTab, onChange }: TabsProps) {
       })}
     </div>
   );
-}
+})

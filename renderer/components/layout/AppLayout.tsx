@@ -1,41 +1,68 @@
 import React from 'react';
+import { Group, Panel, Separator } from 'react-resizable-panels';
+import dynamic from 'next/dynamic';
 import type { Project } from '../../../shared/types';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 
+const ProjectWorkspace = dynamic(() => import('../project/ProjectWorkspace'), { ssr: false });
+const PreviewWorkspace = dynamic(() => import('../preview/PreviewWorkspace'), { ssr: false });
+const DirigirCanvas = dynamic(() => import('../dirigir/DirigirCanvas'), { ssr: false });
+
 interface AppLayoutProps {
   children: React.ReactNode;
-  projects: Project[];
-  selectedPath: string | null;
-  onSelectProject: (project: Project) => void;
+  selectedProject?: Project | null;
   onNavigate: (page: string) => void;
+  onBack?: () => void;
   currentPage: string;
   pageTitle: string;
   onOpenSearch?: () => void;
+  mode?: 'forma' | 'developer';
 }
 
 export default function AppLayout({
   children,
-  projects,
-  selectedPath,
-  onSelectProject,
+  selectedProject,
   onNavigate,
+  onBack,
   currentPage,
   pageTitle,
   onOpenSearch,
+  mode = 'forma',
 }: AppLayoutProps) {
+  const showProjectView = !!selectedProject;
+
   return (
     <div className="flex h-screen bg-surface-0 overflow-hidden">
       <Sidebar
-        projects={projects}
-        selectedPath={selectedPath}
-        onSelectProject={onSelectProject}
         onNavigate={onNavigate}
         currentPage={currentPage}
       />
       <div className="flex flex-col flex-1 min-w-0">
-        <TopBar pageTitle={pageTitle} onOpenSearch={onOpenSearch} />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        {!showProjectView && <TopBar pageTitle={pageTitle} onOpenSearch={onOpenSearch} />}
+        {showProjectView ? (
+          mode === 'forma' ? (
+            <DirigirCanvas
+              project={selectedProject}
+              onBack={onBack || (() => onNavigate('dashboard'))}
+            />
+          ) : (
+            <Group orientation="horizontal" className="flex-1">
+              <Panel defaultSize={50} minSize={30}>
+                <ProjectWorkspace
+                  project={selectedProject}
+                  onBack={onBack || (() => onNavigate('dashboard'))}
+                />
+              </Panel>
+              <Separator className="w-1 bg-border-subtle hover:bg-accent/40 transition-colors cursor-col-resize" />
+              <Panel defaultSize={50} minSize={25}>
+                <PreviewWorkspace project={selectedProject} />
+              </Panel>
+            </Group>
+          )
+        ) : (
+          <main className="flex-1 overflow-y-auto">{children}</main>
+        )}
       </div>
     </div>
   );

@@ -13,11 +13,13 @@ export const createWindow = (
   const key = 'window-state'
   const name = `window-state-${windowName}`
   const store = new Store<Rectangle>({ name })
-  const defaultSize = {
-    width: options.width,
-    height: options.height,
+  const defaultSize: Rectangle = {
+    x: 0,
+    y: 0,
+    width: options.width || 1400,
+    height: options.height || 900,
   }
-  let state = {}
+  let state: Partial<Rectangle> = {}
 
   const restore = () => store.get(key, defaultSize)
 
@@ -32,7 +34,7 @@ export const createWindow = (
     }
   }
 
-  const windowWithinBounds = (windowState, bounds) => {
+  const windowWithinBounds = (windowState: Rectangle, bounds: Rectangle) => {
     return (
       windowState.x >= bounds.x &&
       windowState.y >= bounds.y &&
@@ -44,12 +46,12 @@ export const createWindow = (
   const resetToDefaults = () => {
     const bounds = screen.getPrimaryDisplay().bounds
     return Object.assign({}, defaultSize, {
-      x: (bounds.width - defaultSize.width) / 2,
-      y: (bounds.height - defaultSize.height) / 2,
+      x: (bounds.width - (defaultSize.width || 1400)) / 2,
+      y: (bounds.height - (defaultSize.height || 900)) / 2,
     })
   }
 
-  const ensureVisibleOnSomeDisplay = (windowState) => {
+  const ensureVisibleOnSomeDisplay = (windowState: Rectangle) => {
     const visible = screen.getAllDisplays().some((display) => {
       return windowWithinBounds(windowState, display.bounds)
     })

@@ -55,13 +55,13 @@ export default function SpacingScale({ spacing }: SpacingScaleProps) {
     <div className="py-4 space-y-1">
       {/* Header */}
       <div className="grid grid-cols-[60px_80px_1fr] gap-3 pb-2 border-b border-border-subtle">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">
+        <span className="text-micro font-semibold uppercase tracking-wider text-text-tertiary">
           Key
         </span>
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">
+        <span className="text-micro font-semibold uppercase tracking-wider text-text-tertiary">
           Value
         </span>
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">
+        <span className="text-micro font-semibold uppercase tracking-wider text-text-tertiary">
           Preview
         </span>
       </div>
@@ -90,7 +90,7 @@ export default function SpacingScale({ spacing }: SpacingScaleProps) {
                   style={{ width: `${Math.max(widthPercent, 1)}%` }}
                 />
               </div>
-              <span className="text-[10px] text-text-tertiary font-mono w-10 text-right shrink-0">
+              <span className="text-micro text-text-tertiary font-mono w-10 text-right shrink-0">
                 {px > 0 ? `${px}px` : '0'}
               </span>
             </div>

@@ -2,10 +2,11 @@ import { ipcMain } from 'electron';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { basename, join } from 'path';
-import { readdirSync, readFileSync, statSync, existsSync } from 'fs';
+import { promises as fs } from 'fs';
 import { homedir } from 'os';
 import { IPC_CHANNELS } from '../../shared/types';
 import type { ActiveSession } from '../../shared/types';
+import { log } from '../helpers/logger';
 
 const execAsync = promisify(exec);
 const CLAUDE_PROJECTS_DIR = join(homedir(), '.claude', 'projects');
@@ -18,18 +19,28 @@ function encodePath(fsPath: string): string {
   return fsPath.replace(/\//g, '-');
 }
 
+async function pathExists(p: string): Promise<boolean> {
+  try {
+    await fs.access(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Extract the first user prompt from a JSONL session file.
- * Reads line-by-line until it finds a `type: "user"` entry
+ * Reads only the first chunk asynchronously to find a `type: "user"` entry
  * whose `message.content` is a plain string (not a tool_result array).
  */
-function extractSessionLabel(jsonlPath: string, maxBytes: number = 50000): string | null {
+async function extractSessionLabel(jsonlPath: string, maxBytes: number = 50000): Promise<string | null> {
+  let handle: fs.FileHandle | null = null;
   try {
-    // Read only the first chunk — the first user message is always near the top
-    const fd = require('fs').openSync(jsonlPath, 'r');
+    handle = await fs.open(jsonlPath, 'r');
     const buf = Buffer.alloc(maxBytes);
-    const bytesRead = require('fs').readSync(fd, buf, 0, maxBytes, 0);
-    require('fs').closeSync(fd);
+    const { bytesRead } = await handle.read(buf, 0, maxBytes, 0);
+    await handle.close();
+    handle = null;
 
     const text = buf.toString('utf-8', 0, bytesRead);
     const lines = text.split('\n');
@@ -56,8 +67,11 @@ function extractSessionLabel(jsonlPath: string, maxBytes: number = 50000): strin
         // Skip malformed lines
       }
     }
-  } catch {
-    // File read error
+  } catch (error: unknown) {
+    log('warn', 'sessions', `Failed to extract session label from ${jsonlPath}`, error);
+    if (handle) {
+      try { await handle.close(); } catch { /* ignore */ }
+    }
   }
   return null;
 }
@@ -66,37 +80,42 @@ function extractSessionLabel(jsonlPath: string, maxBytes: number = 50000): strin
  * For a given project path, find the most recently modified JSONL files
  * and extract their session labels. Returns a map of sessionId → label.
  */
-function getActiveSessionLabels(projectPath: string, maxSessions: number): Map<string, string> {
+async function getActiveSessionLabels(projectPath: string, maxSessions: number): Promise<Map<string, string>> {
   const labels = new Map<string, string>();
   const encoded = encodePath(projectPath);
 
   const projectDir = join(CLAUDE_PROJECTS_DIR, encoded);
-  if (!existsSync(projectDir)) return labels;
+  if (!(await pathExists(projectDir))) return labels;
 
   try {
-    const files = readdirSync(projectDir)
-      .filter(f => f.endsWith('.jsonl'))
-      .map(f => ({
-        name: f,
-        path: join(projectDir, f),
-        mtime: statSync(join(projectDir, f)).mtimeMs,
-      }))
-      .sort((a, b) => b.mtime - a.mtime)
-      .slice(0, maxSessions);
+    const allFiles = await fs.readdir(projectDir);
+    const jsonlFiles = allFiles.filter(f => f.endsWith('.jsonl'));
+
+    // Stat all JSONL files in parallel
+    const fileStats = await Promise.all(
+      jsonlFiles.map(async (f) => {
+        const filePath = join(projectDir, f);
+        const stat = await fs.stat(filePath);
+        return { name: f, path: filePath, mtime: stat.mtimeMs };
+      })
+    );
+
+    fileStats.sort((a, b) => b.mtime - a.mtime);
+    const recent = fileStats.slice(0, maxSessions);
 
     // Only consider files modified in the last 10 minutes (likely active)
     const cutoff = Date.now() - 10 * 60 * 1000;
 
-    for (const file of files) {
+    for (const file of recent) {
       if (file.mtime < cutoff) continue;
       const sessionId = file.name.replace('.jsonl', '');
-      const label = extractSessionLabel(file.path);
+      const label = await extractSessionLabel(file.path);
       if (label) {
         labels.set(sessionId, label);
       }
     }
-  } catch {
-    // Skip errors
+  } catch (error: unknown) {
+    log('warn', 'sessions', `Failed to get session labels for ${projectPath}`, error);
   }
 
   return labels;
@@ -129,7 +148,9 @@ async function detectActiveSessions(): Promise<ActiveSession[]> {
         if (cwdMatch) {
           projectPath = cwdMatch[1];
         }
-      } catch {}
+      } catch {
+        // Process may have exited
+      }
 
       if (projectPath) {
         if (!pidsByProject.has(projectPath)) {
@@ -141,7 +162,7 @@ async function detectActiveSessions(): Promise<ActiveSession[]> {
 
     // For each project, get labels from JSONL files
     for (const [projectPath, pids] of Array.from(pidsByProject.entries())) {
-      const labels = getActiveSessionLabels(projectPath, pids.length + 2);
+      const labels = await getActiveSessionLabels(projectPath, pids.length + 2);
       const labelValues = Array.from(labels.values());
 
       for (let i = 0; i < pids.length; i++) {
@@ -161,7 +182,8 @@ async function detectActiveSessions(): Promise<ActiveSession[]> {
     }
 
     return sessions;
-  } catch {
+  } catch (error: unknown) {
+    log('warn', 'sessions', 'Failed to detect active sessions', error);
     return [];
   }
 }

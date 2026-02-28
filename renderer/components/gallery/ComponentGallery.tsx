@@ -1,43 +1,10 @@
 import React from 'react';
 import { useComponentGallery } from '../../hooks/useComponentGallery';
 import ComponentCard from './ComponentCard';
+import { SearchIcon, RefreshIcon, ComponentsEmptyIcon } from '../icons';
 
 interface ComponentGalleryProps {
   projectPath: string;
-}
-
-function SearchIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M9.5 9.5L12.5 12.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function RefreshIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M11.5 7A4.5 4.5 0 11 10 3.5"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-      <path d="M12 2v2.5H9.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function ComponentsEmptyIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="4" y="4" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="18" y="4" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="4" y="18" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="18" y="18" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
 }
 
 export default function ComponentGallery({ projectPath }: ComponentGalleryProps) {
@@ -69,7 +36,7 @@ export default function ComponentGallery({ projectPath }: ComponentGalleryProps)
   if (error) {
     return (
       <div className="py-16 text-center">
-        <p className="text-sm text-red-400">{error}</p>
+        <p className="text-sm text-feedback-error">{error}</p>
         <button
           onClick={rescan}
           className="mt-3 text-xs text-accent hover:text-accent-hover transition-colors"
@@ -121,7 +88,7 @@ export default function ComponentGallery({ projectPath }: ComponentGalleryProps)
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-medium text-text-primary">Components</h3>
-          <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-surface-3 text-text-tertiary">
+          <span className="px-1.5 py-0.5 rounded-full text-micro font-medium bg-surface-3 text-text-tertiary">
             {stats.total}
           </span>
         </div>
@@ -138,7 +105,7 @@ export default function ComponentGallery({ projectPath }: ComponentGalleryProps)
       <div className="flex items-center gap-4 mb-4 text-[11px] text-text-tertiary">
         <span>{stats.total} total</span>
         <span className="flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+          <span className="w-1.5 h-1.5 rounded-full bg-feedback-success" />
           {stats.withTests} with tests
         </span>
         <span>{stats.withoutTests} without tests</span>

@@ -45,7 +45,7 @@ export default function TeamView({ teams }: TeamViewProps) {
           {/* Members list */}
           {team.members.length > 0 && (
             <div className="space-y-2">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">
+              <span className="text-micro font-semibold uppercase tracking-wider text-text-tertiary">
                 Members
               </span>
               <div className="space-y-1.5">
@@ -65,7 +65,7 @@ export default function TeamView({ teams }: TeamViewProps) {
                       {member.agentType}
                     </span>
                     {member.model && (
-                      <span className="text-[10px] text-text-tertiary ml-auto">
+                      <span className="text-micro text-text-tertiary ml-auto">
                         {member.model}
                       </span>
                     )}
