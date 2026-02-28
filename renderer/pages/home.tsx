@@ -12,6 +12,7 @@ import OnboardingWizard from '../components/dirigir/OnboardingWizard';
 import dynamic from 'next/dynamic';
 
 const TerminalPage = dynamic(() => import('../components/terminal/TerminalPage'), { ssr: false });
+const SessionsCanvas = dynamic(() => import('../components/sessions/SessionsCanvas'), { ssr: false });
 import { useProjects, useProjectDetail } from '../hooks/useProjects';
 import { useCommandPalette } from '../hooks/useCommandPalette';
 import { useToast } from '../hooks/useToast';
@@ -41,7 +42,7 @@ export default function Home() {
 
   const { projects, loading } = useProjects(handleRefresh);
   const { sessions: activeSessions, getSessionForProject } = useActiveSessions();
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts' | 'workspaces' | 'usage' | 'terminal'>('dashboard');
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts' | 'workspaces' | 'usage' | 'terminal' | 'sessions'>('dashboard');
   const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(null);
   const { project: selectedProject } = useProjectDetail(
     currentPage === 'project' ? selectedProjectPath : null
@@ -56,7 +57,7 @@ export default function Home() {
   }, []);
 
   const handleNavigate = useCallback((page: string) => {
-    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'workspaces' || page === 'usage' || page === 'terminal') {
+    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'workspaces' || page === 'usage' || page === 'terminal' || page === 'sessions') {
       setCurrentPage(page);
       setSelectedProjectPath(null);
     }
@@ -89,6 +90,8 @@ export default function Home() {
       ? 'Usage & Costs'
       : currentPage === 'terminal'
       ? 'Terminal'
+      : currentPage === 'sessions'
+      ? 'Sessions'
       : selectedProject?.name || 'Project';
 
   const contextValue = useMemo(
@@ -137,6 +140,7 @@ export default function Home() {
         {currentPage === 'prompts' && <PromptLibrary />}
         {currentPage === 'usage' && <UsageTracker />}
         {currentPage === 'terminal' && <TerminalPage />}
+        {currentPage === 'sessions' && <SessionsCanvas />}
         {currentPage === 'settings' && <SettingsPage />}
       </AppLayout>
 
