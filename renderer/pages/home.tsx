@@ -12,7 +12,7 @@ import OnboardingWizard from '../components/dirigir/OnboardingWizard';
 import dynamic from 'next/dynamic';
 
 const TerminalPage = dynamic(() => import('../components/terminal/TerminalPage'), { ssr: false });
-const SessionsCanvas = dynamic(() => import('../components/sessions/SessionsCanvas'), { ssr: false });
+const OrchestratorPage = dynamic(() => import('../components/orchestrator/OrchestratorPage'), { ssr: false });
 import { useProjects, useProjectDetail } from '../hooks/useProjects';
 import { useCommandPalette } from '../hooks/useCommandPalette';
 import { useToast } from '../hooks/useToast';
@@ -91,7 +91,7 @@ export default function Home() {
       : currentPage === 'terminal'
       ? 'Terminal'
       : currentPage === 'sessions'
-      ? 'Sessions'
+      ? 'Orchestrator'
       : selectedProject?.name || 'Project';
 
   const contextValue = useMemo(
@@ -140,7 +140,7 @@ export default function Home() {
         {currentPage === 'prompts' && <PromptLibrary />}
         {currentPage === 'usage' && <UsageTracker />}
         {currentPage === 'terminal' && <TerminalPage />}
-        {currentPage === 'sessions' && <SessionsCanvas />}
+        {currentPage === 'sessions' && <OrchestratorPage />}
         {currentPage === 'settings' && <SettingsPage />}
       </AppLayout>
 
