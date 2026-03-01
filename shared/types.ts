@@ -70,6 +70,7 @@ export interface Project {
   lastActivity: number;
   status: 'active' | 'idle';
   hasClaudeDir: boolean;
+  client: string | null;
   health: ProjectHealth | null;
 }
 
