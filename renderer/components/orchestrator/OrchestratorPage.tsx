@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useOrchestrator } from '../../hooks/useOrchestrator';
 import { useTerminalSessions } from '../../hooks/useTerminal';
 import { useProjects } from '../../hooks/useProjects';
@@ -6,7 +6,14 @@ import OrchestratorToolbar from './OrchestratorToolbar';
 import OrchestratorGrid from './OrchestratorGrid';
 import { TerminalIcon, ClaudeIcon } from '../icons';
 
-export default function OrchestratorPage() {
+interface OrchestratorPageProps {
+  initialProject?: {
+    path: string;
+    mode: 'claude' | 'claude --dangerously-skip-permissions';
+  };
+}
+
+export default function OrchestratorPage({ initialProject }: OrchestratorPageProps) {
   const orchestrator = useOrchestrator();
   const { createSession, killSession } = useTerminalSessions();
   const { projects } = useProjects();
@@ -20,6 +27,34 @@ export default function OrchestratorPage() {
   useEffect(() => {
     orchestrator.persistWorkspace();
   }, [orchestrator.cells, orchestrator.layout]);
+
+  // Auto-create Claude + Preview cells when opening from a project
+  const initializedRef = useRef(false);
+  useEffect(() => {
+    if (!initialProject || initializedRef.current) return;
+    initializedRef.current = true;
+
+    orchestrator.setLayout('split');
+
+    setTimeout(async () => {
+      const sessionId = await createSession(initialProject.path, initialProject.mode);
+      const isAutopilot = initialProject.mode.includes('--dangerously-skip-permissions');
+      orchestrator.addCell({
+        type: 'terminal',
+        sessionId,
+        label: isAutopilot ? 'Claude Autopilot' : 'Claude',
+        cwd: initialProject.path,
+        command: initialProject.mode,
+      });
+
+      orchestrator.addCell({
+        type: 'preview',
+        url: 'http://localhost:3000',
+        label: 'Preview',
+        projectPath: initialProject.path,
+      });
+    }, 100);
+  }, [initialProject]);
 
   // Derive default project path from known projects or terminal cells
   const getDefaultProjectPath = useCallback((): string => {
