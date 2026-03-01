@@ -46,6 +46,7 @@ interface ClientAccordionProps {
   group: ClientGroup;
   onSelectProject: (project: Project) => void;
   onOpenEditor: (path: string) => void;
+  onOpenProject?: (path: string, mode: 'claude' | 'claude --dangerously-skip-permissions') => void;
   getSessionForProject: (projectPath: string) => ReturnType<ReturnType<typeof useProjectContext>['getSessionForProject']>;
   defaultOpen: boolean;
 }
@@ -54,6 +55,7 @@ function ClientAccordion({
   group,
   onSelectProject,
   onOpenEditor,
+  onOpenProject,
   getSessionForProject,
   defaultOpen,
 }: ClientAccordionProps) {
@@ -100,6 +102,7 @@ function ClientAccordion({
                 project={project}
                 onClick={onSelectProject}
                 onOpenEditor={onOpenEditor}
+                onOpenProject={onOpenProject}
                 isLive={!!getSessionForProject(project.path)}
               />
             ))}
@@ -117,7 +120,7 @@ function ClientAccordion({
 const UNCATEGORIZED = 'Uncategorized';
 
 export default function Dashboard() {
-  const { projects, onSelectProject, activeSessions, getSessionForProject } = useProjectContext();
+  const { projects, onSelectProject, onOpenProject, activeSessions, getSessionForProject } = useProjectContext();
 
   // Compute stats
   const { totalTasks, activeTasks, uncommitted, clientCount } = useMemo(() => {
@@ -205,6 +208,7 @@ export default function Dashboard() {
               group={group}
               onSelectProject={onSelectProject}
               onOpenEditor={handleOpenEditor}
+              onOpenProject={onOpenProject}
               getSessionForProject={getSessionForProject}
               defaultOpen={group.hasActive}
             />

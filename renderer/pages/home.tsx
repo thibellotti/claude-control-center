@@ -20,6 +20,31 @@ import { useActiveSessions } from '../hooks/useSessions';
 import { ProjectProvider } from '../hooks/useProjectContext';
 import { useOnboarding } from '../hooks/useOnboarding';
 
+// ---------------------------------------------------------------------------
+// Mode persistence helpers
+// ---------------------------------------------------------------------------
+
+const MODE_STORAGE_KEY = 'project-claude-mode';
+
+function getSavedMode(projectPath: string): 'claude' | 'claude --dangerously-skip-permissions' {
+  try {
+    const saved = JSON.parse(localStorage.getItem(MODE_STORAGE_KEY) || '{}');
+    return saved[projectPath] || 'claude';
+  } catch {
+    return 'claude';
+  }
+}
+
+function saveMode(projectPath: string, mode: string): void {
+  try {
+    const saved = JSON.parse(localStorage.getItem(MODE_STORAGE_KEY) || '{}');
+    saved[projectPath] = mode;
+    localStorage.setItem(MODE_STORAGE_KEY, JSON.stringify(saved));
+  } catch {
+    // ignore
+  }
+}
+
 export default function Home() {
   const { addToast } = useToast();
   const lastToastTime = useRef(0);
@@ -49,17 +74,20 @@ export default function Home() {
   );
 
   const [launchProject, setLaunchProject] = useState<{ path: string; mode: string } | null>(null);
-  const [showModeDialog, setShowModeDialog] = useState<string | null>(null);
 
   const { open, setOpen, query, setQuery, results } = useCommandPalette(projects);
 
-  // Sidebar and Dashboard pass a Project object; show mode dialog
+  // Clicking a project card opens Orchestrator with the saved (or default) mode
   const handleSelectProject = useCallback((project: Project) => {
-    setShowModeDialog(project.path);
+    const mode = getSavedMode(project.path);
+    saveMode(project.path, mode);
+    setLaunchProject({ path: project.path, mode });
+    setCurrentPage('sessions');
   }, []);
 
+  // Explicit open with a chosen mode (from inline buttons or project switcher)
   const handleLaunchProject = useCallback((projectPath: string, mode: 'claude' | 'claude --dangerously-skip-permissions') => {
-    setShowModeDialog(null);
+    saveMode(projectPath, mode);
     setLaunchProject({ path: projectPath, mode });
     setCurrentPage('sessions');
   }, []);
@@ -110,10 +138,12 @@ export default function Home() {
       projects,
       selectedProjectPath,
       onSelectProject: handleSelectProject,
+      onOpenProject: handleLaunchProject,
+      activeProjectPath: launchProject?.path || null,
       activeSessions: activeSessions || [],
       getSessionForProject: getSessionForProject || (() => null),
     }),
-    [projects, selectedProjectPath, handleSelectProject, activeSessions, getSessionForProject]
+    [projects, selectedProjectPath, handleSelectProject, handleLaunchProject, launchProject, activeSessions, getSessionForProject]
   );
 
   if (loading || onboardingLoading) {
@@ -145,6 +175,17 @@ export default function Home() {
         currentPage={currentPage === 'project' ? 'dashboard' : currentPage as string}
         pageTitle={pageTitle}
         onOpenSearch={() => setOpen(true)}
+        activeProject={launchProject ? {
+          name: launchProject.path.split('/').pop() || '',
+          client: projects.find(p => p.path === launchProject.path)?.client || null,
+          path: launchProject.path,
+          mode: launchProject.mode,
+        } : null}
+        recentProjects={projects.slice(0, 10).map(p => ({ name: p.name, path: p.path, client: p.client }))}
+        onSwitchProject={(path) => {
+          const mode = getSavedMode(path);
+          handleLaunchProject(path, mode);
+        }}
       >
         {currentPage === 'dashboard' && <Dashboard />}
         {currentPage === 'workspaces' && <WorkspaceBoard />}
@@ -168,31 +209,6 @@ export default function Home() {
         onSelect={handleSearchSelect}
       />
 
-      {showModeDialog && (
-        <>
-          <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowModeDialog(null)} />
-          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-surface-1 border border-border-subtle rounded-card p-6 shadow-xl min-w-[320px]">
-            <p className="text-sm font-medium text-text-primary mb-1">
-              Open: {showModeDialog.split('/').pop()}
-            </p>
-            <p className="text-xs text-text-tertiary mb-4">Choose how to start Claude Code</p>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => handleLaunchProject(showModeDialog, 'claude')}
-                className="flex-1 px-4 py-2.5 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
-              >
-                Claude
-              </button>
-              <button
-                onClick={() => handleLaunchProject(showModeDialog, 'claude --dangerously-skip-permissions')}
-                className="flex-1 px-4 py-2.5 rounded-button text-sm font-medium bg-surface-2 border border-border-subtle text-feedback-warning hover:bg-surface-3 transition-colors"
-              >
-                Autopilot
-              </button>
-            </div>
-          </div>
-        </>
-      )}
     </ProjectProvider>
   );
 }

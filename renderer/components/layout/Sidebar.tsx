@@ -11,7 +11,7 @@ export default function Sidebar({
   onNavigate,
   currentPage,
 }: SidebarProps) {
-  const { projects, selectedProjectPath, onSelectProject } = useProjectContext();
+  const { projects, selectedProjectPath, onSelectProject, onOpenProject, activeProjectPath } = useProjectContext();
   const [collapsed, setCollapsed] = useState(false);
 
   const navItems = [
@@ -89,21 +89,30 @@ export default function Sidebar({
         )}
         {projects.map((project) => {
           const isSelected = selectedProjectPath === project.path;
+          const isActive = activeProjectPath === project.path;
           return (
             <button
               key={project.path}
-              onClick={() => onSelectProject(project)}
+              onClick={(e) => {
+                if (e.metaKey || e.ctrlKey) {
+                  onOpenProject(project.path, 'claude --dangerously-skip-permissions');
+                } else {
+                  onSelectProject(project);
+                }
+              }}
               className={`flex items-center gap-2.5 w-full px-3 py-1.5 rounded-button text-sm transition-colors ${
-                isSelected
+                isActive
+                  ? 'bg-accent/10 text-accent border-l-2 border-accent'
+                  : isSelected
                   ? 'bg-accent-muted text-accent'
                   : 'text-text-secondary hover:text-text-primary hover:bg-surface-2'
               } ${collapsed ? 'justify-center' : ''}`}
               aria-label={project.name}
-              title={collapsed ? project.name : undefined}
+              title={collapsed ? project.name : isActive ? `${project.name} (active in Orchestrator)` : undefined}
             >
               <span
                 className={`shrink-0 w-1.5 h-1.5 rounded-full ${
-                  project.status === 'active' ? 'bg-status-active' : 'bg-status-idle'
+                  isActive ? 'bg-accent' : project.status === 'active' ? 'bg-status-active' : 'bg-status-idle'
                 }`}
               />
               {!collapsed && (

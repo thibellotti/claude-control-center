@@ -3,7 +3,7 @@ import { Group, Panel, Separator } from 'react-resizable-panels';
 import dynamic from 'next/dynamic';
 import type { Project } from '../../../shared/types';
 import Sidebar from './Sidebar';
-import TopBar from './TopBar';
+import TopBar, { type TopBarProps } from './TopBar';
 
 const ProjectWorkspace = dynamic(() => import('../project/ProjectWorkspace'), { ssr: false });
 const PreviewWorkspace = dynamic(() => import('../preview/PreviewWorkspace'), { ssr: false });
@@ -18,6 +18,9 @@ interface AppLayoutProps {
   pageTitle: string;
   onOpenSearch?: () => void;
   mode?: 'forma' | 'developer';
+  activeProject?: TopBarProps['activeProject'];
+  recentProjects?: TopBarProps['recentProjects'];
+  onSwitchProject?: TopBarProps['onSwitchProject'];
 }
 
 export default function AppLayout({
@@ -29,6 +32,9 @@ export default function AppLayout({
   pageTitle,
   onOpenSearch,
   mode = 'forma',
+  activeProject,
+  recentProjects,
+  onSwitchProject,
 }: AppLayoutProps) {
   const showProjectView = !!selectedProject;
 
@@ -39,7 +45,16 @@ export default function AppLayout({
         currentPage={currentPage}
       />
       <div className="flex flex-col flex-1 min-w-0">
-        {!showProjectView && <TopBar pageTitle={pageTitle} onOpenSearch={onOpenSearch} />}
+        {!showProjectView && (
+          <TopBar
+            pageTitle={pageTitle}
+            onOpenSearch={onOpenSearch}
+            activeProject={activeProject}
+            onBack={onBack}
+            recentProjects={recentProjects}
+            onSwitchProject={onSwitchProject}
+          />
+        )}
         {showProjectView ? (
           mode === 'forma' ? (
             <DirigirCanvas
