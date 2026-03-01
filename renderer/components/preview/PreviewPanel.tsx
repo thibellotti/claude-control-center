@@ -1,7 +1,8 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { usePreview } from '../../hooks/usePreview';
 import PreviewToolbar from './PreviewToolbar';
-import { PlayCircleIcon, SpinnerIcon, TrashIcon, ErrorCircleIcon } from '../icons';
+import { PlayCircleIcon, SpinnerIcon, TrashIcon, ErrorCircleIcon, ExternalLinkIcon } from '../icons';
+import type { VercelProjectInfo, DeployConfig } from '../../../shared/types';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -68,6 +69,43 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
     clearConsole,
   } = usePreview(projectPath);
 
+  // Fetch deploy/production URL for fallback when no dev server
+  const [productionUrl, setProductionUrl] = useState<string | null>(null);
+  const [showingProduction, setShowingProduction] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchDeployInfo() {
+      try {
+        const [vercelInfo, deployConfig] = await Promise.all([
+          window.api.getVercelProjectInfo(projectPath) as Promise<VercelProjectInfo>,
+          window.api.detectDeployProvider(projectPath) as Promise<DeployConfig>,
+        ]);
+        if (cancelled) return;
+
+        // Prefer Vercel productionUrl, fallback to lastDeployUrl
+        const url = vercelInfo?.productionUrl
+          ? (vercelInfo.productionUrl.startsWith('http') ? vercelInfo.productionUrl : `https://${vercelInfo.productionUrl}`)
+          : deployConfig?.lastDeployUrl || null;
+        setProductionUrl(url);
+      } catch {
+        // No deploy info available
+      }
+    }
+    fetchDeployInfo();
+    return () => { cancelled = true; };
+  }, [projectPath]);
+
+  // Auto-show production when idle and available
+  useEffect(() => {
+    if (state.status === 'idle' && productionUrl) {
+      setShowingProduction(true);
+    }
+    if (state.status === 'ready') {
+      setShowingProduction(false);
+    }
+  }, [state.status, productionUrl]);
+
   // Auto-scroll console to bottom
   const consoleEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -105,8 +143,46 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
 
       {/* Main content area */}
       <div className="flex-1 bg-surface-0 overflow-hidden relative">
-        {/* ── Idle state ──────────────────────────────────────────────── */}
-        {state.status === 'idle' && (
+        {/* ── Idle state: show production deploy or empty ────────────── */}
+        {state.status === 'idle' && showingProduction && productionUrl && (
+          <div className="absolute inset-0 flex flex-col">
+            {/* Production banner */}
+            <div className="flex items-center justify-between px-3 py-1.5 bg-surface-1 border-b border-border-subtle shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-status-active shrink-0" />
+                <span className="text-micro text-text-tertiary">Production</span>
+                <span className="text-micro text-text-secondary font-mono truncate max-w-[200px]">{productionUrl.replace(/^https?:\/\//, '')}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => window.open(productionUrl, '_blank')}
+                  className="p-1 rounded text-text-tertiary hover:text-text-primary transition-colors"
+                  title="Open in browser"
+                >
+                  <ExternalLinkIcon size={12} />
+                </button>
+                <button
+                  onClick={() => { setShowingProduction(false); start(); }}
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-button text-micro font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+                >
+                  Start Dev Server
+                </button>
+              </div>
+            </div>
+            {/* Production iframe */}
+            <div className="flex-1 min-h-0">
+              <iframe
+                src={productionUrl}
+                className="w-full h-full border-0"
+                style={{ backgroundColor: 'white' }}
+                title="Production Preview"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+              />
+            </div>
+          </div>
+        )}
+
+        {state.status === 'idle' && !showingProduction && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
             <div className="text-text-tertiary">
               <PlayCircleIcon />
@@ -115,12 +191,22 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
               <p className="text-sm text-text-secondary mb-1">No dev server running</p>
               <p className="text-xs text-text-tertiary">Start the dev server to preview your project</p>
             </div>
-            <button
-              onClick={start}
-              className="flex items-center gap-2 px-4 py-2 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
-            >
-              Start Preview
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={start}
+                className="flex items-center gap-2 px-4 py-2 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+              >
+                Start Preview
+              </button>
+              {productionUrl && (
+                <button
+                  onClick={() => setShowingProduction(true)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-button text-sm font-medium bg-surface-2 border border-border-subtle text-text-secondary hover:text-text-primary transition-colors"
+                >
+                  View Production
+                </button>
+              )}
+            </div>
           </div>
         )}
 
