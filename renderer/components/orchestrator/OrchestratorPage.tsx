@@ -41,11 +41,12 @@ export default function OrchestratorPage() {
     async (command?: string) => {
       const cwd = getDefaultProjectPath();
       const sessionId = await createSession(cwd !== '~' ? cwd : undefined, command);
-      const isClaude = command === 'claude';
+      const isAutopilot = command?.includes('--dangerously-skip-permissions');
+      const isClaude = command?.startsWith('claude');
       orchestrator.addCell({
         type: 'terminal',
         sessionId,
-        label: isClaude ? 'Claude' : 'Shell',
+        label: isAutopilot ? 'Claude Autopilot' : isClaude ? 'Claude' : 'Shell',
         cwd,
         command,
       });

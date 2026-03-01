@@ -83,6 +83,13 @@ export default function OrchestratorToolbar({
                 <ClaudeIcon size={14} />
                 Claude Session
               </button>
+              <button
+                onClick={() => { onAddTerminal('claude --dangerously-skip-permissions'); setShowAddMenu(false); }}
+                className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-3 transition-colors"
+              >
+                <ClaudeIcon size={14} />
+                <span>Claude <span className="text-feedback-warning">Autopilot</span></span>
+              </button>
               <div className="border-t border-border-subtle my-1" />
               <button
                 onClick={() => { onAddFeed(); setShowAddMenu(false); }}
