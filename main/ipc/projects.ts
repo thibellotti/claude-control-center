@@ -21,10 +21,11 @@ const CLAUDE_PROJECTS_DIR = path.join(CLAUDE_DIR, 'projects');
 const CLAUDE_TASKS_DIR = path.join(CLAUDE_DIR, 'tasks');
 const CLAUDE_TEAMS_DIR = path.join(CLAUDE_DIR, 'teams');
 
-// Directories to scan for projects
-const SCAN_DIRS = [
-  path.join(HOME, 'Projects'),
-  path.join(HOME, 'Desktop'),
+// Directories to scan for projects (depth 1 = direct children, depth 2 = grandchildren)
+const SCAN_DIRS: { dir: string; depth: number }[] = [
+  { dir: path.join(HOME, 'Desktop', 'Projects'), depth: 2 },
+  { dir: path.join(HOME, 'Projects'), depth: 1 },
+  { dir: path.join(HOME, 'Desktop'), depth: 1 },
 ];
 
 // Cache with TTL
@@ -86,24 +87,41 @@ async function discoverProjects(): Promise<Project[]> {
     log('warn', 'projects', 'Failed to scan Claude projects directory', error);
   }
 
-  // 2. Scan ~/Projects/ and ~/Desktop/ for project directories
-  for (const scanDir of SCAN_DIRS) {
+  // 2. Scan configured directories for project directories
+  async function checkAndAddProject(dirPath: string) {
+    const [hasPackageJson, hasGit, hasClaudeMd, hasClaudeDir] = await Promise.all([
+      pathExists(path.join(dirPath, 'package.json')),
+      pathExists(path.join(dirPath, '.git')),
+      pathExists(path.join(dirPath, 'CLAUDE.md')),
+      pathExists(path.join(dirPath, '.claude')),
+    ]);
+    if (hasPackageJson || hasGit || hasClaudeMd || hasClaudeDir) {
+      projectPaths.add(dirPath);
+    }
+  }
+
+  for (const { dir: scanDir, depth } of SCAN_DIRS) {
     try {
       if (!(await pathExists(scanDir))) continue;
       const entries = await fs.readdir(scanDir, { withFileTypes: true });
       for (const entry of entries) {
-        if (entry.isDirectory() && !entry.name.startsWith('.')) {
-          const fullPath = path.join(scanDir, entry.name);
-          // Heuristic: it's a project if it has package.json, .git, or CLAUDE.md
-          const [hasPackageJson, hasGit, hasClaudeMd, hasClaudeDir] = await Promise.all([
-            pathExists(path.join(fullPath, 'package.json')),
-            pathExists(path.join(fullPath, '.git')),
-            pathExists(path.join(fullPath, 'CLAUDE.md')),
-            pathExists(path.join(fullPath, '.claude')),
-          ]);
-          if (hasPackageJson || hasGit || hasClaudeMd || hasClaudeDir) {
-            projectPaths.add(fullPath);
+        if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
+        const fullPath = path.join(scanDir, entry.name);
+
+        if (depth >= 2) {
+          // Scan subdirectories (client folders containing projects)
+          try {
+            const subEntries = await fs.readdir(fullPath, { withFileTypes: true });
+            for (const sub of subEntries) {
+              if (sub.isDirectory() && !sub.name.startsWith('.')) {
+                await checkAndAddProject(path.join(fullPath, sub.name));
+              }
+            }
+          } catch {
+            // Client folder may not be readable
           }
+        } else {
+          await checkAndAddProject(fullPath);
         }
       }
     } catch (error: unknown) {

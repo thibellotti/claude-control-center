@@ -56,7 +56,7 @@ export function registerTemplateHandlers() {
     const template = TEMPLATES.find((t) => t.id === opts.templateId);
     if (!template) throw new Error(`Template not found: ${opts.templateId}`);
 
-    const parentDir = opts.parentDir || path.join(os.homedir(), 'Projects');
+    const parentDir = opts.parentDir || path.join(os.homedir(), 'Desktop', 'Projects');
     await fs.mkdir(parentDir, { recursive: true });
 
     const projectDir = path.join(parentDir, opts.projectName);
