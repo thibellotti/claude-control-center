@@ -48,18 +48,29 @@ export default function Home() {
     currentPage === 'project' ? selectedProjectPath : null
   );
 
+  const [launchProject, setLaunchProject] = useState<{ path: string; mode: string } | null>(null);
+  const [showModeDialog, setShowModeDialog] = useState<string | null>(null);
+
   const { open, setOpen, query, setQuery, results } = useCommandPalette(projects);
 
-  // Sidebar and Dashboard pass a Project object; we extract the path
+  // Sidebar and Dashboard pass a Project object; show mode dialog
   const handleSelectProject = useCallback((project: Project) => {
-    setSelectedProjectPath(project.path);
-    setCurrentPage('project');
+    setShowModeDialog(project.path);
+  }, []);
+
+  const handleLaunchProject = useCallback((projectPath: string, mode: 'claude' | 'claude --dangerously-skip-permissions') => {
+    setShowModeDialog(null);
+    setLaunchProject({ path: projectPath, mode });
+    setCurrentPage('sessions');
   }, []);
 
   const handleNavigate = useCallback((page: string) => {
     if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'workspaces' || page === 'usage' || page === 'terminal' || page === 'sessions') {
       setCurrentPage(page);
       setSelectedProjectPath(null);
+      if (page !== 'sessions') {
+        setLaunchProject(null);
+      }
     }
   }, []);
 
@@ -140,7 +151,11 @@ export default function Home() {
         {currentPage === 'prompts' && <PromptLibrary />}
         {currentPage === 'usage' && <UsageTracker />}
         {currentPage === 'terminal' && <TerminalPage />}
-        {currentPage === 'sessions' && <OrchestratorPage />}
+        {currentPage === 'sessions' && (
+          <OrchestratorPage
+            initialProject={launchProject ? { path: launchProject.path, mode: launchProject.mode as 'claude' | 'claude --dangerously-skip-permissions' } : undefined}
+          />
+        )}
         {currentPage === 'settings' && <SettingsPage />}
       </AppLayout>
 
@@ -152,6 +167,32 @@ export default function Home() {
         onClose={() => setOpen(false)}
         onSelect={handleSearchSelect}
       />
+
+      {showModeDialog && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowModeDialog(null)} />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-surface-1 border border-border-subtle rounded-card p-6 shadow-xl min-w-[320px]">
+            <p className="text-sm font-medium text-text-primary mb-1">
+              Open: {showModeDialog.split('/').pop()}
+            </p>
+            <p className="text-xs text-text-tertiary mb-4">Choose how to start Claude Code</p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => handleLaunchProject(showModeDialog, 'claude')}
+                className="flex-1 px-4 py-2.5 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+              >
+                Claude
+              </button>
+              <button
+                onClick={() => handleLaunchProject(showModeDialog, 'claude --dangerously-skip-permissions')}
+                className="flex-1 px-4 py-2.5 rounded-button text-sm font-medium bg-surface-2 border border-border-subtle text-feedback-warning hover:bg-surface-3 transition-colors"
+              >
+                Autopilot
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </ProjectProvider>
   );
 }
