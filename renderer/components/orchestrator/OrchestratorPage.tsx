@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { useOrchestrator } from '../../hooks/useOrchestrator';
 import { useTerminalSessions } from '../../hooks/useTerminal';
+import { useProjects } from '../../hooks/useProjects';
 import OrchestratorToolbar from './OrchestratorToolbar';
 import OrchestratorGrid from './OrchestratorGrid';
 import { TerminalIcon, ClaudeIcon } from '../icons';
@@ -8,6 +9,7 @@ import { TerminalIcon, ClaudeIcon } from '../icons';
 export default function OrchestratorPage() {
   const orchestrator = useOrchestrator();
   const { createSession, killSession } = useTerminalSessions();
+  const { projects } = useProjects();
 
   // Restore workspace on mount
   useEffect(() => {
@@ -19,28 +21,46 @@ export default function OrchestratorPage() {
     orchestrator.persistWorkspace();
   }, [orchestrator.cells, orchestrator.layout]);
 
+  // Derive default project path from known projects or terminal cells
+  const getDefaultProjectPath = useCallback((): string => {
+    // First: check existing terminal cells for a real cwd
+    const terminalCell = orchestrator.cells.find(
+      (c) => c.config.type === 'terminal' && c.config.cwd && c.config.cwd !== '~'
+    );
+    if (terminalCell && terminalCell.config.type === 'terminal') {
+      return terminalCell.config.cwd;
+    }
+    // Second: use the first known project
+    if (projects.length > 0) {
+      return projects[0].path;
+    }
+    return '~';
+  }, [orchestrator.cells, projects]);
+
   const handleAddTerminal = useCallback(
     async (command?: string) => {
-      const sessionId = await createSession(undefined, command);
+      const cwd = getDefaultProjectPath();
+      const sessionId = await createSession(cwd !== '~' ? cwd : undefined, command);
       const isClaude = command === 'claude';
       orchestrator.addCell({
         type: 'terminal',
         sessionId,
         label: isClaude ? 'Claude' : 'Shell',
-        cwd: '~',
+        cwd,
         command,
       });
     },
-    [createSession, orchestrator.addCell]
+    [createSession, orchestrator.addCell, getDefaultProjectPath]
   );
 
   const handleAddFeed = useCallback(() => {
+    const projectPath = getDefaultProjectPath();
     orchestrator.addCell({
       type: 'feed',
-      projectPath: '~',
+      projectPath,
       label: 'Activity Feed',
     });
-  }, [orchestrator.addCell]);
+  }, [orchestrator.addCell, getDefaultProjectPath]);
 
   const handleAddTaskBoard = useCallback(() => {
     orchestrator.addCell({
@@ -51,12 +71,14 @@ export default function OrchestratorPage() {
   }, [orchestrator.addCell]);
 
   const handleAddPreview = useCallback(() => {
+    const projectPath = getDefaultProjectPath();
     orchestrator.addCell({
       type: 'preview',
       url: 'http://localhost:3000',
       label: 'Preview',
+      projectPath: projectPath !== '~' ? projectPath : undefined,
     });
-  }, [orchestrator.addCell]);
+  }, [orchestrator.addCell, getDefaultProjectPath]);
 
   const handleCloseCell = useCallback(
     async (id: string) => {
