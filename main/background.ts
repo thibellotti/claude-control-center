@@ -73,6 +73,10 @@ if (isProd) {
     backgroundColor: '#0A0A0A',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: false, // needed for preload script
+      webSecurity: true,
     },
   })
 

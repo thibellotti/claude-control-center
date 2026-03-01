@@ -4,9 +4,9 @@ copyright: Copyright © 2026 THXType Studio
 
 mac:
   category: public.app-category.developer-tools
-  identity: null
+  identity: "-"
   hardenedRuntime: true
-  gatekeeperAssess: false
+  gatekeeperAssess: true
   entitlements: resources/entitlements.mac.plist
   entitlementsInherit: resources/entitlements.mac.plist
   target:
@@ -25,6 +25,11 @@ files:
     filter:
       - package.json
       - app
+      - main
+      - node_modules
       - '!**/*.map'
+      - '!**/*.ts'
+      - '!**/*.tsx'
+      - '!**/node_modules/.cache'
 
 publish: null

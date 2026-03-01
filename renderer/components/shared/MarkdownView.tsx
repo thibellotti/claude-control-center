@@ -1,24 +1,8 @@
 import React from 'react';
+import DOMPurify from 'dompurify';
 
 interface MarkdownViewProps {
   content: string;
-}
-
-/**
- * Sanitize HTML output to prevent XSS attacks.
- * Strips script/iframe/object/embed tags, event handler attributes,
- * and javascript: URLs.
- */
-function sanitizeHtml(html: string): string {
-  // Remove dangerous tags and their content
-  let clean = html.replace(/<\s*(script|iframe|object|embed|form|base|meta|link)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, '');
-  // Remove self-closing / unclosed dangerous tags
-  clean = clean.replace(/<\s*(script|iframe|object|embed|form|base|meta|link)[^>]*\/?>/gi, '');
-  // Remove event handler attributes (on*)
-  clean = clean.replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
-  // Remove javascript: and data: URLs in href/src/action attributes
-  clean = clean.replace(/(href|src|action)\s*=\s*(?:"[^"]*(?:javascript|data)\s*:[^"]*"|'[^']*(?:javascript|data)\s*:[^']*')/gi, '$1=""');
-  return clean;
 }
 
 function escapeHtml(str: string): string {
@@ -124,7 +108,7 @@ export default function MarkdownView({ content }: MarkdownViewProps) {
   return (
     <div
       className="markdown-view text-sm leading-relaxed min-w-0 overflow-x-hidden"
-      dangerouslySetInnerHTML={{ __html: sanitizeHtml(html) }}
+      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }}
     />
   );
 }

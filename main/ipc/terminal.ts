@@ -15,11 +15,25 @@ interface PtySession {
 const sessions = new Map<string, PtySession>();
 let nextId = 1;
 
-/** Return a copy of process.env without Claude Code session vars */
-function cleanEnv(): NodeJS.ProcessEnv {
+/** Return a copy of process.env without sensitive or session vars */
+export function cleanEnv(): NodeJS.ProcessEnv {
   const env = { ...process.env };
+  const deleteIfPrefix = (prefix: string) => {
+    for (const key of Object.keys(env)) {
+      if (key.startsWith(prefix)) delete env[key];
+    }
+  };
   delete env.CLAUDECODE;
   delete env.CLAUDE_CODE_SESSION;
+  deleteIfPrefix('ANTHROPIC_');
+  deleteIfPrefix('OPENAI_');
+  delete env.GITHUB_TOKEN;
+  deleteIfPrefix('AWS_ACCESS_KEY');
+  deleteIfPrefix('AWS_SECRET_ACCESS');
+  deleteIfPrefix('STRIPE_');
+  delete env.SUPABASE_SERVICE_ROLE;
+  delete env.NETLIFY_AUTH_TOKEN;
+  delete env.VERCEL_TOKEN;
   return env;
 }
 

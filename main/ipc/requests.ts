@@ -1,13 +1,25 @@
 import { ipcMain, BrowserWindow } from 'electron';
-import { promises as fs } from 'fs';
+import { promises as fs, realpathSync } from 'fs';
 import path from 'path';
 import os from 'os';
 import { v4 as uuidv4 } from 'uuid';
 import { IPC_CHANNELS, DesignRequest } from '../../shared/types';
 import { log } from '../helpers/logger';
+import { logSecurityEvent } from '../helpers/security-logger';
 
 const HOME = os.homedir();
+const REAL_HOME = realpathSync(HOME);
 const REQUESTS_DIR = path.join(HOME, '.claude', 'studio', 'requests');
+
+function isProjectPathSafe(projectPath: string): boolean {
+  const resolved = path.resolve(projectPath);
+  try {
+    const real = realpathSync(resolved);
+    return real.startsWith(REAL_HOME);
+  } catch {
+    return resolved.startsWith(REAL_HOME);
+  }
+}
 
 // In-memory request store (persisted to disk)
 let requests: DesignRequest[] = [];
@@ -90,6 +102,15 @@ async function captureMainWindowScreenshot(filePath: string): Promise<boolean> {
 }
 
 async function executeRequest(request: DesignRequest) {
+  if (!isProjectPathSafe(request.projectPath)) {
+    logSecurityEvent('path-traversal', 'high', 'Request execution blocked for unsafe project path', { projectPath: request.projectPath, requestId: request.id });
+    request.status = 'rejected';
+    request.error = 'Access denied: project path is outside the home directory';
+    pushUpdate(IPC_CHANNELS.REQUEST_STATUS_UPDATE, request);
+    await saveRequests();
+    return;
+  }
+
   request.status = 'in_progress';
   request.startedAt = Date.now();
   pushUpdate(IPC_CHANNELS.REQUEST_STATUS_UPDATE, request);

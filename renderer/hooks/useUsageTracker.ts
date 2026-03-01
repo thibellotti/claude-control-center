@@ -23,15 +23,18 @@ export interface ProjectBreakdown {
 export function useUsageTracker() {
   const [summary, setSummary] = useState<UsageSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState(30);
 
   const load = useCallback(async (days: number) => {
     setIsLoading(true);
+    setError(null);
     try {
       const result = await window.api.getUsageStats(days);
       setSummary(result || null);
-    } catch {
-      setSummary(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load usage stats');
+      // Keep previous summary data if available
     } finally {
       setIsLoading(false);
     }
@@ -110,6 +113,7 @@ export function useUsageTracker() {
   return {
     summary,
     isLoading,
+    error,
     dateRange,
     setDateRange,
     dailyData,

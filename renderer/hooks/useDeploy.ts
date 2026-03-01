@@ -41,8 +41,8 @@ export function useDeploy(projectPath: string) {
       try {
         const h = await window.api.getDeployHistory(projectPath);
         if (!cancelled) setHistory(h);
-      } catch {
-        // Ignore history fetch errors
+      } catch (err) {
+        console.error('Failed to fetch deploy history:', err);
       }
     }
 

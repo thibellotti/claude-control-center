@@ -51,14 +51,22 @@ export function usePromptLibrary() {
   }, []);
 
   const toggleFavorite = useCallback(async (id: string) => {
-    setPrompts((prev) => {
-      const target = prev.find((p) => p.id === id);
-      if (!target) return prev;
-      const updated = { ...target, isFavorite: !target.isFavorite };
-      window.api.savePrompt(updated).catch((err: unknown) => console.error('Failed to toggle favorite:', err));
-      return prev.map((p) => (p.id === id ? updated : p));
-    });
-  }, []);
+    const target = prompts.find((p) => p.id === id);
+    if (!target) return;
+
+    const updated = { ...target, isFavorite: !target.isFavorite };
+
+    // Optimistic update
+    setPrompts((prev) => prev.map((p) => (p.id === id ? updated : p)));
+
+    try {
+      await window.api.savePrompt(updated);
+    } catch (err) {
+      // Rollback on failure
+      console.error('Failed to toggle favorite:', err);
+      setPrompts((prev) => prev.map((p) => (p.id === id ? target : p)));
+    }
+  }, [prompts]);
 
   const categories = useMemo(() => {
     const cats = new Set<string>();

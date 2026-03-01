@@ -2,6 +2,7 @@ import React from 'react';
 import dynamic from 'next/dynamic';
 import type { OrchestratorCell } from '../../../shared/types';
 import CellHeader from './CellHeader';
+import ErrorBoundary from '../shared/ErrorBoundary';
 
 const TerminalCell = dynamic(() => import('./cells/TerminalCell'), { ssr: false });
 const FeedCell = dynamic(() => import('./cells/FeedCell'), { ssr: false });
@@ -36,7 +37,9 @@ export default function CellRenderer({ cell, isActive, onClose, onFocus }: CellR
       }`}
     >
       <CellHeader cell={cell} isActive={isActive} onClose={onClose} onFocus={onFocus} />
-      <div className="flex-1 min-h-0">{renderContent()}</div>
+      <div className="flex-1 min-h-0">
+        <ErrorBoundary>{renderContent()}</ErrorBoundary>
+      </div>
     </div>
   );
 }

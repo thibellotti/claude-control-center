@@ -1,11 +1,16 @@
 import { ipcMain, BrowserWindow } from 'electron';
-import { watch, promises as fs } from 'fs';
+import { watch, promises as fs, realpathSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 import { IPC_CHANNELS } from '../../shared/types';
 import { log } from '../helpers/logger';
+import { logSecurityEvent } from '../helpers/security-logger';
 
-const CLAUDE_PROJECTS_DIR = join(homedir(), '.claude', 'projects');
+const HOME = homedir();
+let REAL_HOME: string;
+try { REAL_HOME = realpathSync(HOME); } catch { REAL_HOME = HOME; }
+
+const CLAUDE_PROJECTS_DIR = join(HOME, '.claude', 'projects');
 
 interface FeedEntry {
   timestamp: number;
@@ -26,9 +31,24 @@ function getMainWindow(): BrowserWindow | null {
   return windows.length > 0 ? windows[0] : null;
 }
 
-function decodePath(encoded: string): string {
+function decodePath(encoded: string): string | null {
   // Reverse of encodePath: "-Users-thiago-..." → "/Users/thiago/..."
-  return encoded.replace(/^-/, '/').replace(/-/g, '/');
+  const decoded = encoded.replace(/^-/, '/').replace(/-/g, '/');
+  try {
+    const real = realpathSync(decoded);
+    if (!real.startsWith(REAL_HOME)) {
+      logSecurityEvent('path-traversal', 'high', 'Live feed decodePath resolved to path outside home', { encoded, decoded, real });
+      return null;
+    }
+    return real;
+  } catch {
+    // Path doesn't exist on disk — validate with string check
+    if (!decoded.startsWith(HOME)) {
+      logSecurityEvent('path-traversal', 'high', 'Live feed decodePath decoded to path outside home', { encoded, decoded });
+      return null;
+    }
+    return decoded;
+  }
 }
 
 function summarizeLine(obj: Record<string, unknown>): FeedEntry | null {
@@ -177,6 +197,7 @@ async function startWatching() {
       }
 
       const projectPath = decodePath(dir);
+      if (!projectPath) continue;
 
       try {
         const dirEntries = await fs.readdir(projectDir);
@@ -232,7 +253,11 @@ async function startWatching() {
     // Close watchers for files that are no longer active
     for (const [filePath, watcher] of watchers) {
       if (!activeFilePaths.has(filePath)) {
-        watcher.close();
+        try {
+          watcher.close();
+        } catch (error: unknown) {
+          log('warn', 'live-feed', `Failed to close stale watcher for ${filePath}`, error);
+        }
         watchers.delete(filePath);
         filePositions.delete(filePath);
       }
@@ -247,10 +272,14 @@ function stopWatching() {
     clearInterval(rescanInterval);
     rescanInterval = null;
   }
-  Array.from(watchers.entries()).forEach(([path, watcher]) => {
-    watcher.close();
-    watchers.delete(path);
-  });
+  for (const [filePath, watcher] of watchers) {
+    try {
+      watcher.close();
+    } catch (error: unknown) {
+      log('warn', 'live-feed', `Failed to close watcher for ${filePath}`, error);
+    }
+    watchers.delete(filePath);
+  }
   filePositions.clear();
   feedActive = false;
 }

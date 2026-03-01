@@ -19,7 +19,11 @@ export function useSupabase(projectPath: string) {
     setLoading(true);
     try {
       const result = await window.api.getSupabaseInfo(projectPath);
-      setInfo(result as SupabaseInfo);
+      if (result && typeof result === 'object') {
+        setInfo(result as SupabaseInfo);
+      } else {
+        setInfo(null);
+      }
     } catch {
       setInfo(null);
     } finally {

@@ -21,7 +21,10 @@ export function useFocusTrap(active: boolean) {
 
       const focusable = Array.from(
         container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
-      ).filter((el) => el.offsetParent !== null);
+      ).filter((el) => {
+        const style = getComputedStyle(el);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+      });
 
       if (focusable.length === 0) {
         e.preventDefault();

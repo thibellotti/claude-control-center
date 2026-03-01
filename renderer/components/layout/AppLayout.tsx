@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import type { Project } from '../../../shared/types';
 import Sidebar from './Sidebar';
 import TopBar, { type TopBarProps } from './TopBar';
+import ErrorBoundary from '../shared/ErrorBoundary';
 
 const ProjectWorkspace = dynamic(() => import('../project/ProjectWorkspace'), { ssr: false });
 const PreviewWorkspace = dynamic(() => import('../preview/PreviewWorkspace'), { ssr: false });
@@ -57,21 +58,27 @@ export default function AppLayout({
         )}
         {showProjectView ? (
           mode === 'forma' ? (
-            <DirigirCanvas
-              project={selectedProject}
-              onBack={onBack || (() => onNavigate('dashboard'))}
-            />
+            <ErrorBoundary>
+              <DirigirCanvas
+                project={selectedProject}
+                onBack={onBack || (() => onNavigate('dashboard'))}
+              />
+            </ErrorBoundary>
           ) : (
             <Group orientation="horizontal" className="flex-1">
               <Panel defaultSize={50} minSize={30}>
-                <ProjectWorkspace
-                  project={selectedProject}
-                  onBack={onBack || (() => onNavigate('dashboard'))}
-                />
+                <ErrorBoundary>
+                  <ProjectWorkspace
+                    project={selectedProject}
+                    onBack={onBack || (() => onNavigate('dashboard'))}
+                  />
+                </ErrorBoundary>
               </Panel>
               <Separator className="w-1 bg-border-subtle hover:bg-accent/40 transition-colors cursor-col-resize" />
               <Panel defaultSize={50} minSize={25}>
-                <PreviewWorkspace project={selectedProject} />
+                <ErrorBoundary>
+                  <PreviewWorkspace project={selectedProject} />
+                </ErrorBoundary>
               </Panel>
             </Group>
           )

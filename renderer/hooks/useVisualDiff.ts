@@ -125,15 +125,27 @@ export function useVisualDiff(projectId: string) {
     setSelectedIds([]);
   }, []);
 
-  // Load image as base64 via IPC (with caching)
+  // Load image as base64 via IPC (with LRU caching, max 100 entries)
   const loadImage = useCallback(
     async (imagePath: string): Promise<string | null> => {
       const cached = imageCache.current.get(imagePath);
-      if (cached) return cached;
+      if (cached) {
+        // Move to end (most recently used) by re-inserting
+        imageCache.current.delete(imagePath);
+        imageCache.current.set(imagePath, cached);
+        return cached;
+      }
 
       try {
         const dataUrl = await window.api.getScreenshotImage(imagePath);
         if (dataUrl) {
+          // Evict oldest entry if cache is full
+          if (imageCache.current.size >= 100) {
+            const oldest = imageCache.current.keys().next().value;
+            if (oldest !== undefined) {
+              imageCache.current.delete(oldest);
+            }
+          }
           imageCache.current.set(imagePath, dataUrl);
         }
         return dataUrl;

@@ -241,7 +241,7 @@ export function useClaudeMdEditor(filePath: string | null) {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save file';
       setError(message);
-      throw err;
+      // isDirty remains true since setIsDirty(false) was not reached
     }
   }, [filePath, blocks]);
 

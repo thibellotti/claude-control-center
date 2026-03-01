@@ -37,16 +37,15 @@ export function useTerminalSessions() {
 
   const killSession = useCallback(async (id: string) => {
     await window.api.ptyKill(id);
-    setSessions((prev) => {
-      const remaining = prev.filter((s) => s.id !== id);
-      // Update activeId using the filtered list from this same updater
-      setActiveId((currentActive) => {
-        if (currentActive === id) {
-          return remaining.length > 0 ? remaining[remaining.length - 1].id : null;
-        }
-        return currentActive;
-      });
-      return remaining;
+    setSessions((prev) => prev.filter((s) => s.id !== id));
+    setActiveId((currentActive) => {
+      if (currentActive === id) {
+        // We can't access the filtered list here, but the sessions state
+        // will be updated by the setSessions call above. Use null and let
+        // the component pick a new active session on re-render.
+        return null;
+      }
+      return currentActive;
     });
   }, []);
 

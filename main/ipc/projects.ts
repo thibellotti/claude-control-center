@@ -402,16 +402,28 @@ async function getTasksForProject(_projectPath: string): Promise<TaskItem[]> {
               // Skip deleted tasks entirely
               if (parsed.status === 'deleted') continue;
 
+              // Validate expected field types before using them
+              const id = typeof parsed.id === 'string' ? parsed.id : file.replace('.json', '');
+              const subject = typeof parsed.subject === 'string' ? parsed.subject : '';
+              const description = typeof parsed.description === 'string' ? parsed.description : '';
+              const activeForm = typeof parsed.activeForm === 'string' ? parsed.activeForm : '';
+              const owner = typeof parsed.owner === 'string' ? parsed.owner : '';
+              const status = typeof parsed.status === 'string' ? parsed.status : 'pending';
+              const blocks = Array.isArray(parsed.blocks) ? parsed.blocks : [];
+              const blockedBy = Array.isArray(parsed.blockedBy) ? parsed.blockedBy : [];
+              const metadata = parsed.metadata && typeof parsed.metadata === 'object' && !Array.isArray(parsed.metadata)
+                ? parsed.metadata : {};
+
               const task: TaskItem = {
-                id: parsed.id || file.replace('.json', ''),
-                subject: parsed.subject || '',
-                description: parsed.description || '',
-                activeForm: parsed.activeForm || '',
-                owner: parsed.owner || '',
-                status: parsed.status || 'pending',
-                blocks: parsed.blocks || [],
-                blockedBy: parsed.blockedBy || [],
-                metadata: parsed.metadata || {},
+                id,
+                subject,
+                description,
+                activeForm,
+                owner,
+                status,
+                blocks,
+                blockedBy,
+                metadata,
               };
               tasks.push(task);
             }

@@ -1,6 +1,5 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import {
-  existsSync,
   mkdirSync,
   writeFileSync,
   readFileSync,
@@ -12,22 +11,23 @@ import os from 'os';
 import { randomUUID } from 'crypto';
 import { IPC_CHANNELS } from '../../shared/types';
 import type { ScreenshotEntry } from '../../shared/types';
+import { logSecurityEvent } from '../helpers/security-logger';
 
-const SCREENSHOTS_DIR = path.join(
-  os.homedir(),
-  '.claude',
-  'studio',
-  'screenshots'
-);
+const HOME = os.homedir();
+const SCREENSHOTS_DIR = path.join(HOME, '.claude', 'studio', 'screenshots');
+const REQUESTS_DIR = path.join(HOME, '.claude', 'studio', 'requests');
+
+function isAllowedImagePath(imagePath: string): boolean {
+  const resolved = path.resolve(imagePath);
+  return resolved.startsWith(SCREENSHOTS_DIR) || resolved.startsWith(REQUESTS_DIR);
+}
 
 /**
  * Ensure the screenshots directory exists for a given project.
  */
 function ensureDir(projectId: string): string {
   const dir = path.join(SCREENSHOTS_DIR, projectId);
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
+  mkdirSync(dir, { recursive: true });
   return dir;
 }
 
@@ -117,7 +117,6 @@ export function registerScreenshotHandlers() {
     IPC_CHANNELS.GET_SCREENSHOTS,
     async (_, projectId: string): Promise<ScreenshotEntry[]> => {
       const dir = path.join(SCREENSHOTS_DIR, projectId);
-      if (!existsSync(dir)) return [];
 
       try {
         const files = readdirSync(dir).filter((f) => f.endsWith('.json'));
@@ -127,9 +126,12 @@ export function registerScreenshotHandlers() {
           try {
             const raw = readFileSync(path.join(dir, file), 'utf-8');
             const entry = JSON.parse(raw) as ScreenshotEntry;
-            // Only include entries whose PNG still exists
-            if (existsSync(entry.imagePath)) {
+            // Try reading the PNG — skip if it doesn't exist
+            try {
+              readFileSync(entry.imagePath, { flag: 'r' });
               entries.push(entry);
+            } catch {
+              // PNG missing, skip entry
             }
           } catch {
             // Skip corrupt metadata files
@@ -158,8 +160,8 @@ export function registerScreenshotHandlers() {
       const jsonPath = path.join(dir, `${opts.screenshotId}.json`);
 
       try {
-        if (existsSync(pngPath)) unlinkSync(pngPath);
-        if (existsSync(jsonPath)) unlinkSync(jsonPath);
+        try { unlinkSync(pngPath); } catch { /* already gone */ }
+        try { unlinkSync(jsonPath); } catch { /* already gone */ }
         return true;
       } catch {
         return false;
@@ -171,8 +173,11 @@ export function registerScreenshotHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GET_SCREENSHOT_IMAGE,
     async (_, imagePath: string): Promise<string | null> => {
+      if (!isAllowedImagePath(imagePath)) {
+        logSecurityEvent('path-traversal', 'critical', 'Screenshot image access blocked for path outside allowed dirs', { imagePath });
+        return null;
+      }
       try {
-        if (!existsSync(imagePath)) return null;
         const buffer = readFileSync(imagePath);
         return `data:image/png;base64,${buffer.toString('base64')}`;
       } catch {

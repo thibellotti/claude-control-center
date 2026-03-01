@@ -97,8 +97,13 @@ export function useFigmaBridge(projectId: string) {
 
   const removeLink = useCallback(
     async (linkId: string) => {
-      await window.api.deleteFigmaLink(projectId, linkId);
-      setLinks((prev) => prev.filter((l) => l.id !== linkId));
+      try {
+        await window.api.deleteFigmaLink(projectId, linkId);
+        setLinks((prev) => prev.filter((l) => l.id !== linkId));
+      } catch (err) {
+        console.error('Failed to delete Figma link:', err);
+        throw err;
+      }
     },
     [projectId]
   );

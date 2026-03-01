@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Project } from '../../shared/types';
 
 export function useProjectDetail(projectPath: string | null) {
@@ -24,6 +24,10 @@ export function useProjects(onRefresh?: (hints: string[]) => void) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Use a ref for onRefresh to prevent infinite loops in useEffect
+  const onRefreshRef = useRef(onRefresh);
+  onRefreshRef.current = onRefresh;
 
   const fetchProjects = useCallback(async () => {
     try {
@@ -62,8 +66,12 @@ export function useProjects(onRefresh?: (hints: string[]) => void) {
         if (data && 'refresh' in data && data.refresh) {
           // Refresh signal from file watcher — re-fetch all projects, then notify caller
           fetchProjects().then(() => {
-            if (onRefresh && 'hints' in data && Array.isArray(data.hints)) {
-              onRefresh(data.hints);
+            try {
+              if (onRefreshRef.current && 'hints' in data && Array.isArray(data.hints)) {
+                onRefreshRef.current(data.hints);
+              }
+            } catch (err) {
+              console.error('onRefresh callback failed:', err);
             }
           });
         } else {
@@ -77,7 +85,7 @@ export function useProjects(onRefresh?: (hints: string[]) => void) {
     );
 
     return cleanup;
-  }, [fetchProjects, onRefresh]);
+  }, [fetchProjects]);
 
   return { projects, loading, error, refresh };
 }

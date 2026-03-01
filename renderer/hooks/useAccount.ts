@@ -26,8 +26,8 @@ export function useAccount() {
         window.api.getAccount(),
         window.api.getPlanLimits(),
       ]);
-      setAccount(acc as AccountConfig);
-      setLimits(lim as PlanLimits);
+      setAccount(acc && typeof acc === 'object' ? acc as AccountConfig : null);
+      setLimits(lim && typeof lim === 'object' ? lim as PlanLimits : null);
       setIsLoading(false);
     }
     load();
@@ -35,10 +35,10 @@ export function useAccount() {
 
   const updateAccount = useCallback(async (updates: Partial<AccountConfig>) => {
     const updated = await window.api.saveAccount(updates);
-    setAccount(updated as AccountConfig);
+    setAccount(updated && typeof updated === 'object' ? updated as AccountConfig : null);
     // Refresh limits after plan change
     const lim = await window.api.getPlanLimits();
-    setLimits(lim as PlanLimits);
+    setLimits(lim && typeof lim === 'object' ? lim as PlanLimits : null);
   }, []);
 
   const openBilling = useCallback(async () => {

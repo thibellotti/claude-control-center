@@ -1,13 +1,15 @@
 import { ipcMain } from 'electron';
 import { spawn, ChildProcess } from 'child_process';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, realpathSync } from 'fs';
 import path from 'path';
+import os from 'os';
 import {
   IPC_CHANNELS,
   PreviewStatus,
   EnhancedPreviewState,
 } from '../../shared/types';
 import { log } from '../helpers/logger';
+import { logSecurityEvent } from '../helpers/security-logger';
 
 // Chokidar loaded via require (CJS compat in Electron main process)
 const chokidar = require('chokidar');
@@ -78,12 +80,20 @@ function idleState(): EnhancedPreviewState {
   };
 }
 
-/** Return a copy of process.env without Claude Code session vars */
-function cleanEnv(): NodeJS.ProcessEnv {
-  const env = { ...process.env };
-  delete env.CLAUDECODE;
-  delete env.CLAUDE_CODE_SESSION;
-  return env;
+import { cleanEnv } from './terminal';
+
+const HOME = os.homedir();
+let REAL_HOME: string;
+try { REAL_HOME = realpathSync(HOME); } catch { REAL_HOME = HOME; }
+
+function isProjectPathSafe(projectPath: string): boolean {
+  const resolved = path.resolve(projectPath);
+  try {
+    const real = realpathSync(resolved);
+    return real.startsWith(REAL_HOME);
+  } catch {
+    return resolved.startsWith(REAL_HOME);
+  }
 }
 
 const PORT_REGEX = /(?:localhost|127\.0\.0\.1|0\.0\.0\.0):(\d{4,5})/;
@@ -126,6 +136,11 @@ export function registerPreviewHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.START_DEV_SERVER,
     async (_, projectPath: string): Promise<EnhancedPreviewState> => {
+      if (!isProjectPathSafe(projectPath)) {
+        logSecurityEvent('path-traversal', 'high', 'Dev server start blocked for unsafe path', { projectPath });
+        return { ...idleState(), status: 'error', error: 'Access denied: path is outside the home directory' };
+      }
+
       // If already running, return existing state
       if (runningServers.has(projectPath)) {
         const entry = runningServers.get(projectPath)!;
@@ -204,11 +219,11 @@ export function registerPreviewHandlers() {
       const output: string[] = [];
       let detectedPort: number | null = null;
 
-      // Spawn the process
-      const command = `npm run ${scriptName}`;
-      const child = spawn('sh', ['-c', command], {
+      // Spawn the process using safe array form
+      const child = spawn('npm', ['run', scriptName], {
         cwd: projectPath,
         env: { ...cleanEnv(), BROWSER: 'none', PORT: '0' },
+        shell: false,
       });
 
       // Start file watcher for the project

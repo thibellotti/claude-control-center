@@ -15,16 +15,24 @@ export function useVercel(projectPath: string) {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [projectInfo, deploymentsResult, deployConfig] = await Promise.all([
-        window.api.getVercelProjectInfo(projectPath) as Promise<VercelProjectInfo>,
-        window.api.getVercelDeployments(projectPath) as Promise<{ deployments: VercelDeployment[] }>,
-        window.api.detectDeployProvider(projectPath) as Promise<DeployConfig>,
+      const [projectInfoResult, deploymentsResult, deployConfigResult] = await Promise.all([
+        window.api.getVercelProjectInfo(projectPath),
+        window.api.getVercelDeployments(projectPath),
+        window.api.detectDeployProvider(projectPath),
       ]);
-      setData({
-        projectInfo,
-        deployments: deploymentsResult.deployments,
-        deployConfig,
-      });
+
+      if (
+        projectInfoResult && typeof projectInfoResult === 'object' &&
+        deploymentsResult && typeof deploymentsResult === 'object' &&
+        deployConfigResult && typeof deployConfigResult === 'object'
+      ) {
+        const projectInfo = projectInfoResult as VercelProjectInfo;
+        const deployments = (deploymentsResult as { deployments: VercelDeployment[] }).deployments;
+        const deployConfig = deployConfigResult as DeployConfig;
+        setData({ projectInfo, deployments, deployConfig });
+      } else {
+        setData(null);
+      }
     } catch {
       setData(null);
     } finally {

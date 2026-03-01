@@ -45,10 +45,11 @@ export function useOnboarding() {
     }
   }, []);
 
-  // Use functional setState to avoid stale closure
   const completeStep = useCallback(async (step: keyof Omit<OnboardingState, 'completed'>) => {
+    let newState: OnboardingState | null = null;
+
     setState((prev) => {
-      const newState = { ...prev, [step]: true };
+      newState = { ...prev, [step]: true };
       // Force completed when tourCompleted is set (final step)
       if (step === 'tourCompleted') {
         newState.completed = true;
@@ -57,10 +58,17 @@ export function useOnboarding() {
       if (newState.apiKeyConfigured && newState.firstProjectCreated && newState.tourCompleted) {
         newState.completed = true;
       }
-      // Persist async (fire-and-forget from setState)
-      window.api.writeFile(CONFIG_PATH, JSON.stringify(newState, null, 2)).catch((err) => console.error('Failed to persist onboarding state:', err));
       return newState;
     });
+
+    // Persist outside of setState
+    if (newState) {
+      try {
+        await window.api.writeFile(CONFIG_PATH, JSON.stringify(newState, null, 2));
+      } catch (err) {
+        console.error('Failed to persist onboarding state:', err);
+      }
+    }
   }, []);
 
   const resetOnboarding = useCallback(async () => {

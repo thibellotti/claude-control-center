@@ -12,8 +12,12 @@ export function useGitHub(projectPath: string) {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await window.api.getGitHubInfo(projectPath) as GitHubData;
-      setData(result);
+      const result = await window.api.getGitHubInfo(projectPath);
+      if (result && typeof result === 'object') {
+        setData(result as GitHubData);
+      } else {
+        setData(null);
+      }
     } catch {
       setData(null);
     } finally {

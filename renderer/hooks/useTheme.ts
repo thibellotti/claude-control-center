@@ -64,7 +64,11 @@ export function useThemeProvider(): ThemeContextValue {
   // Set theme and persist to localStorage
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem(STORAGE_KEY, newTheme);
+    try {
+      localStorage.setItem(STORAGE_KEY, newTheme);
+    } catch (err) {
+      console.warn('Failed to persist theme to localStorage:', err);
+    }
     applyTheme(resolveTheme(newTheme));
   }, [applyTheme]);
 

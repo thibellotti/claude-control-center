@@ -8,12 +8,20 @@ export function useRequests(projectId?: string) {
 
   // Load requests
   useEffect(() => {
+    let cancelled = false;
+
     async function load() {
       const data = await window.api.getRequests(projectId);
-      setRequests(data as DesignRequest[]);
-      setIsLoading(false);
+      if (!cancelled) {
+        setRequests(data as DesignRequest[]);
+        setIsLoading(false);
+      }
     }
     load();
+
+    return () => {
+      cancelled = true;
+    };
   }, [projectId]);
 
   // Listen for status updates

@@ -1,23 +1,31 @@
 import { ipcMain } from 'electron';
 import { spawn, exec, execFileSync } from 'child_process';
 import { promisify } from 'util';
-import { promises as fsAsync, existsSync, readFileSync } from 'fs';
+import { promises as fsAsync, existsSync, readFileSync, realpathSync } from 'fs';
 import path from 'path';
 import os from 'os';
 import { IPC_CHANNELS, DeployConfig, DeployResult, VercelDeployment, VercelProjectInfo } from '../../shared/types';
 import { log } from '../helpers/logger';
+import { logSecurityEvent } from '../helpers/security-logger';
+import { cleanEnv } from './terminal';
 
 const execAsync = promisify(exec);
 
-/** Return a copy of process.env without Claude Code session vars */
-function cleanEnv(): NodeJS.ProcessEnv {
-  const env = { ...process.env };
-  delete env.CLAUDECODE;
-  delete env.CLAUDE_CODE_SESSION;
-  return env;
-}
-
 const HOME = os.homedir();
+const REAL_HOME = realpathSync(HOME);
+
+const DEPLOY_TIMEOUT_MS = 120_000;
+const MAX_OUTPUT_BYTES = 50 * 1024 * 1024; // 50 MB
+
+function isProjectPathSafe(projectPath: string): boolean {
+  const resolved = path.resolve(projectPath);
+  try {
+    const real = realpathSync(resolved);
+    return real.startsWith(REAL_HOME);
+  } catch {
+    return resolved.startsWith(REAL_HOME);
+  }
+}
 const DEPLOYS_DIR = path.join(HOME, '.claude', 'studio', 'deploys');
 
 // Ensure the deploys directory exists
@@ -71,6 +79,11 @@ export function registerDeployHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.DETECT_DEPLOY_PROVIDER,
     async (_event, projectPath: string): Promise<DeployConfig> => {
+      if (!isProjectPathSafe(projectPath)) {
+        logSecurityEvent('path-traversal', 'high', 'Deploy provider detection blocked for unsafe path', { projectPath });
+        throw new Error('Access denied: project path is outside the home directory');
+      }
+
       const hasVercelCli = cliExists('vercel');
       const hasNetlifyCli = cliExists('netlify');
 
@@ -117,47 +130,73 @@ export function registerDeployHandlers() {
       projectPath: string,
       provider: 'vercel' | 'netlify'
     ): Promise<DeployResult> => {
-      const command =
-        provider === 'vercel'
-          ? 'vercel --yes --prod'
-          : 'netlify deploy --prod';
+      if (!isProjectPathSafe(projectPath)) {
+        logSecurityEvent('command-injection', 'critical', 'Deploy blocked for unsafe project path', { projectPath, provider });
+        return {
+          success: false,
+          error: 'Access denied: project path is outside the home directory',
+          output: [],
+          timestamp: Date.now(),
+        };
+      }
+
+      // Use safe array spawn instead of sh -c
+      const cmd = provider === 'vercel' ? 'vercel' : 'netlify';
+      const args = provider === 'vercel'
+        ? ['--yes', '--prod']
+        : ['deploy', '--prod'];
 
       return new Promise<DeployResult>((resolve) => {
         const output: string[] = [];
         let deployUrl: string | undefined;
+        let outputBytes = 0;
+        let killed = false;
 
-        const child = spawn('sh', ['-c', command], {
+        const child = spawn(cmd, args, {
           cwd: projectPath,
           env: cleanEnv(),
+          shell: false,
         });
 
-        child.stdout?.on('data', (data: Buffer) => {
-          const text = data.toString();
-          output.push(text);
-        });
+        const timeout = setTimeout(() => {
+          if (!killed) {
+            killed = true;
+            child.kill('SIGTERM');
+            setTimeout(() => { child.kill('SIGKILL'); }, 5000);
+          }
+        }, DEPLOY_TIMEOUT_MS);
 
-        child.stderr?.on('data', (data: Buffer) => {
-          const text = data.toString();
-          output.push(text);
-        });
+        const trackOutput = (data: Buffer) => {
+          outputBytes += data.length;
+          if (outputBytes > MAX_OUTPUT_BYTES) {
+            if (!killed) {
+              killed = true;
+              child.kill('SIGTERM');
+              logSecurityEvent('command-injection', 'medium', 'Deploy process killed: output exceeded 50MB', { projectPath });
+            }
+            return;
+          }
+          output.push(data.toString());
+        };
+
+        child.stdout?.on('data', trackOutput);
+        child.stderr?.on('data', trackOutput);
 
         child.on('close', (code) => {
-          // Attempt to extract the deployed URL from the output
+          clearTimeout(timeout);
+
           const fullOutput = output.join('');
 
           if (provider === 'vercel') {
-            // Vercel prints the production URL — usually the last https:// line
             const urlMatches = fullOutput.match(/https:\/\/[^\s]+/g);
             if (urlMatches && urlMatches.length > 0) {
               deployUrl = urlMatches[urlMatches.length - 1];
             }
           } else {
-            // Netlify prints "Website URL: https://..."
             const websiteMatch = fullOutput.match(/Website\s+URL:\s*(https:\/\/[^\s]+)/i);
             if (websiteMatch) {
               deployUrl = websiteMatch[1];
             } else {
-              // Fallback — grab any https URL
               const urlMatches = fullOutput.match(/https:\/\/[^\s]+/g);
               if (urlMatches && urlMatches.length > 0) {
                 deployUrl = urlMatches[urlMatches.length - 1];
@@ -166,20 +205,23 @@ export function registerDeployHandlers() {
           }
 
           const success = code === 0;
+          const error = killed
+            ? 'Deploy process timed out or exceeded output limit'
+            : success ? undefined : `Process exited with code ${code}`;
           const result: DeployResult = {
-            success,
+            success: success && !killed,
             url: deployUrl,
-            error: success ? undefined : `Process exited with code ${code}`,
+            error,
             output,
             timestamp: Date.now(),
           };
 
-          // Persist to history then resolve
           const projectId = projectIdFromPath(projectPath);
           saveToHistory(projectId, result).then(() => resolve(result), () => resolve(result));
         });
 
         child.on('error', (err) => {
+          clearTimeout(timeout);
           const result: DeployResult = {
             success: false,
             error: err.message,
@@ -200,6 +242,10 @@ export function registerDeployHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GET_DEPLOY_HISTORY,
     async (_event, projectPath: string): Promise<DeployResult[]> => {
+      if (!isProjectPathSafe(projectPath)) {
+        logSecurityEvent('path-traversal', 'high', 'Deploy history access blocked for unsafe path', { projectPath });
+        throw new Error('Access denied: project path is outside the home directory');
+      }
       const projectId = projectIdFromPath(projectPath);
       return await readHistory(projectId);
     }
@@ -211,6 +257,10 @@ export function registerDeployHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GET_VERCEL_DEPLOYMENTS,
     async (_event, projectPath: string): Promise<{ deployments: VercelDeployment[] }> => {
+      if (!isProjectPathSafe(projectPath)) {
+        logSecurityEvent('path-traversal', 'high', 'Vercel deployments access blocked for unsafe path', { projectPath });
+        throw new Error('Access denied: project path is outside the home directory');
+      }
       try {
         const { stdout } = await execAsync('vercel ls --json 2>/dev/null', {
           cwd: projectPath,
@@ -244,6 +294,10 @@ export function registerDeployHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GET_VERCEL_PROJECT_INFO,
     async (_event, projectPath: string): Promise<VercelProjectInfo> => {
+      if (!isProjectPathSafe(projectPath)) {
+        logSecurityEvent('path-traversal', 'high', 'Vercel project info access blocked for unsafe path', { projectPath });
+        throw new Error('Access denied: project path is outside the home directory');
+      }
       const result: VercelProjectInfo = {
         detected: false,
         projectName: null,

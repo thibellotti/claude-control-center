@@ -8,6 +8,8 @@ import OrchestratorDrawer from './OrchestratorDrawer';
 import { TerminalIcon, ClaudeIcon } from '../icons';
 import type { TaskItem } from '../../../shared/types';
 
+const DEFAULT_PREVIEW_URL = 'http://localhost:3000';
+
 interface OrchestratorPageProps {
   initialProject?: {
     path: string;
@@ -31,7 +33,7 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
   // Persist workspace when cells change
   useEffect(() => {
     orchestrator.persistWorkspace();
-  }, [orchestrator.cells]);
+  }, [orchestrator.cells, orchestrator.persistWorkspace]);
 
   // Auto-create Claude + Preview cells when opening from a project
   const initializedRef = useRef(false);
@@ -39,11 +41,15 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
     if (!initialProject || initializedRef.current) return;
     initializedRef.current = true;
 
+    const abortController = new AbortController();
+
     // Clear any stale cells, then create fresh split
     orchestrator.clearCells();
 
-    setTimeout(async () => {
+    const timeout = setTimeout(async () => {
       const sessionId = await createSession(initialProject.path, initialProject.mode);
+      if (abortController.signal.aborted) return;
+
       const isAutopilot = initialProject.mode.includes('--dangerously-skip-permissions');
       orchestrator.addCell({
         type: 'terminal',
@@ -55,12 +61,17 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
 
       orchestrator.addCell({
         type: 'preview',
-        url: 'http://localhost:3000',
+        url: DEFAULT_PREVIEW_URL,
         label: 'Preview',
         projectPath: initialProject.path,
       });
     }, 100);
-  }, [initialProject]);
+
+    return () => {
+      clearTimeout(timeout);
+      abortController.abort();
+    };
+  }, [initialProject, createSession, orchestrator.clearCells, orchestrator.addCell]);
 
   // Derive default project path from known projects or terminal cells
   const getDefaultProjectPath = useCallback((): string => {
@@ -132,7 +143,7 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
     const pp = getDefaultProjectPath();
     orchestrator.addCell({
       type: 'preview',
-      url: 'http://localhost:3000',
+      url: DEFAULT_PREVIEW_URL,
       label: 'Preview',
       projectPath: pp !== '~' ? pp : undefined,
     });
