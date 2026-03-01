@@ -1,10 +1,12 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useOrchestrator } from '../../hooks/useOrchestrator';
 import { useTerminalSessions } from '../../hooks/useTerminal';
 import { useProjects } from '../../hooks/useProjects';
 import OrchestratorToolbar from './OrchestratorToolbar';
 import OrchestratorGrid from './OrchestratorGrid';
+import OrchestratorDrawer from './OrchestratorDrawer';
 import { TerminalIcon, ClaudeIcon } from '../icons';
+import type { TaskItem } from '../../../shared/types';
 
 interface OrchestratorPageProps {
   initialProject?: {
@@ -17,16 +19,19 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
   const orchestrator = useOrchestrator();
   const { createSession, killSession } = useTerminalSessions();
   const { projects } = useProjects();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Restore workspace on mount
+  // Restore workspace on mount — skip if initialProject will create fresh cells
   useEffect(() => {
-    orchestrator.restoreWorkspace();
+    if (!initialProject) {
+      orchestrator.restoreWorkspace();
+    }
   }, []);
 
-  // Persist workspace when cells or layout change
+  // Persist workspace when cells change
   useEffect(() => {
     orchestrator.persistWorkspace();
-  }, [orchestrator.cells, orchestrator.layout]);
+  }, [orchestrator.cells]);
 
   // Auto-create Claude + Preview cells when opening from a project
   const initializedRef = useRef(false);
@@ -34,7 +39,8 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
     if (!initialProject || initializedRef.current) return;
     initializedRef.current = true;
 
-    orchestrator.setLayout('split');
+    // Clear any stale cells, then create fresh split
+    orchestrator.clearCells();
 
     setTimeout(async () => {
       const sessionId = await createSession(initialProject.path, initialProject.mode);
@@ -58,19 +64,52 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
 
   // Derive default project path from known projects or terminal cells
   const getDefaultProjectPath = useCallback((): string => {
-    // First: check existing terminal cells for a real cwd
+    if (initialProject) return initialProject.path;
     const terminalCell = orchestrator.cells.find(
       (c) => c.config.type === 'terminal' && c.config.cwd && c.config.cwd !== '~'
     );
     if (terminalCell && terminalCell.config.type === 'terminal') {
       return terminalCell.config.cwd;
     }
-    // Second: use the first known project
     if (projects.length > 0) {
       return projects[0].path;
     }
     return '~';
-  }, [orchestrator.cells, projects]);
+  }, [initialProject, orchestrator.cells, projects]);
+
+  // Derive project name and mode badge for toolbar
+  const projectName = useMemo(() => {
+    if (initialProject) {
+      return initialProject.path.split('/').pop() || null;
+    }
+    const terminalCell = orchestrator.cells.find(
+      (c) => c.config.type === 'terminal' && c.config.cwd && c.config.cwd !== '~'
+    );
+    if (terminalCell && terminalCell.config.type === 'terminal') {
+      return terminalCell.config.cwd.split('/').pop() || null;
+    }
+    return null;
+  }, [initialProject, orchestrator.cells]);
+
+  const modeBadge = useMemo(() => {
+    const terminalCell = orchestrator.cells.find((c) => c.config.type === 'terminal');
+    if (!terminalCell || terminalCell.config.type !== 'terminal') return null;
+    if (terminalCell.config.command?.includes('--dangerously-skip-permissions')) return 'Autopilot';
+    if (terminalCell.config.command?.startsWith('claude')) return 'Claude';
+    return 'Shell';
+  }, [orchestrator.cells]);
+
+  // Derive project path and tasks for drawer
+  const projectPath = useMemo(() => {
+    const p = getDefaultProjectPath();
+    return p !== '~' ? p : null;
+  }, [getDefaultProjectPath]);
+
+  const projectTasks = useMemo((): TaskItem[] => {
+    if (!projectPath) return [];
+    const project = projects.find((p) => p.path === projectPath);
+    return project?.tasks ?? [];
+  }, [projectPath, projects]);
 
   const handleAddTerminal = useCallback(
     async (command?: string) => {
@@ -89,30 +128,13 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
     [createSession, orchestrator.addCell, getDefaultProjectPath]
   );
 
-  const handleAddFeed = useCallback(() => {
-    const projectPath = getDefaultProjectPath();
-    orchestrator.addCell({
-      type: 'feed',
-      projectPath,
-      label: 'Activity Feed',
-    });
-  }, [orchestrator.addCell, getDefaultProjectPath]);
-
-  const handleAddTaskBoard = useCallback(() => {
-    orchestrator.addCell({
-      type: 'taskboard',
-      teamName: '',
-      label: 'Task Board',
-    });
-  }, [orchestrator.addCell]);
-
   const handleAddPreview = useCallback(() => {
-    const projectPath = getDefaultProjectPath();
+    const pp = getDefaultProjectPath();
     orchestrator.addCell({
       type: 'preview',
       url: 'http://localhost:3000',
       label: 'Preview',
-      projectPath: projectPath !== '~' ? projectPath : undefined,
+      projectPath: pp !== '~' ? pp : undefined,
     });
   }, [orchestrator.addCell, getDefaultProjectPath]);
 
@@ -132,33 +154,28 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
   return (
     <div className="flex flex-col h-full">
       <OrchestratorToolbar
-        layout={orchestrator.layout}
-        cellCount={orchestrator.cells.length}
-        onSetLayout={orchestrator.setLayout}
+        projectName={projectName}
+        modeBadge={modeBadge}
         onAddTerminal={handleAddTerminal}
-        onAddFeed={handleAddFeed}
-        onAddTaskBoard={handleAddTaskBoard}
         onAddPreview={handleAddPreview}
+        drawerOpen={drawerOpen}
+        onToggleDrawer={() => setDrawerOpen((prev) => !prev)}
       />
 
       {isEmpty ? (
         <div className="flex items-center justify-center flex-1">
           <div className="text-center space-y-4 max-w-md">
-            <div className="w-14 h-14 rounded-xl bg-surface-2 flex items-center justify-center mx-auto">
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" className="text-text-tertiary">
-                <rect x="2" y="2" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
-                <rect x="16" y="2" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
-                <rect x="2" y="16" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
-                <rect x="16" y="16" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 2" />
-              </svg>
-            </div>
             <div>
-              <p className="text-sm font-medium text-text-secondary">Orchestrator</p>
-              <p className="text-xs text-text-tertiary mt-1">
-                Create terminals, feeds, and previews in a flexible grid.
-              </p>
+              <p className="text-sm font-medium text-text-secondary">Start a session</p>
             </div>
             <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={() => handleAddTerminal('claude')}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+              >
+                <ClaudeIcon size={14} />
+                Claude
+              </button>
               <button
                 onClick={() => handleAddTerminal()}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-button text-xs font-medium bg-surface-2 border border-border-subtle text-text-secondary hover:text-text-primary transition-colors"
@@ -166,24 +183,26 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
                 <TerminalIcon size={14} />
                 Shell
               </button>
-              <button
-                onClick={() => handleAddTerminal('claude')}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
-              >
-                <ClaudeIcon size={14} />
-                Claude Session
-              </button>
             </div>
+            <p className="text-xs text-text-tertiary">
+              or open a project from the Dashboard
+            </p>
           </div>
         </div>
       ) : (
-        <div className="flex-1 min-h-0">
-          <OrchestratorGrid
-            cells={orchestrator.cells}
-            layout={orchestrator.layout}
-            activeCell={orchestrator.activeCell}
-            onCloseCell={handleCloseCell}
-            onFocusCell={orchestrator.setActiveCell}
+        <div className="flex flex-1 min-h-0">
+          <div className="flex-1 min-w-0 h-full">
+            <OrchestratorGrid
+              cells={orchestrator.cells}
+              activeCell={orchestrator.activeCell}
+              onCloseCell={handleCloseCell}
+              onFocusCell={orchestrator.setActiveCell}
+            />
+          </div>
+          <OrchestratorDrawer
+            open={drawerOpen}
+            projectPath={projectPath}
+            tasks={projectTasks}
           />
         </div>
       )}

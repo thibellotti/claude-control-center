@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type {
   OrchestratorCell,
   LayoutPreset,
@@ -13,6 +13,14 @@ function generateCellId(): string {
 }
 
 const STORAGE_KEY = 'orchestrator-workspace';
+const MAX_CELLS = 4;
+
+function autoLayout(cellCount: number): LayoutPreset {
+  if (cellCount <= 1) return 'focus';
+  if (cellCount === 2) return 'split';
+  if (cellCount === 3) return 'main-side';
+  return 'quad';
+}
 
 function loadWorkspace(): OrchestratorWorkspace | null {
   try {
@@ -24,18 +32,18 @@ function loadWorkspace(): OrchestratorWorkspace | null {
   }
 }
 
-function saveWorkspace(workspace: OrchestratorWorkspace): void {
+function saveWorkspace(cells: OrchestratorCell[]): void {
   try {
-    const cleaned: OrchestratorWorkspace = {
-      ...workspace,
-      cells: workspace.cells.map((cell) => {
+    const workspace: OrchestratorWorkspace = {
+      layout: autoLayout(cells.length),
+      cells: cells.map((cell) => {
         if (cell.config.type === 'terminal') {
           return { ...cell, config: { ...cell.config, sessionId: '' } };
         }
         return cell;
       }),
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(workspace));
   } catch {
     // Ignore
   }
@@ -43,13 +51,18 @@ function saveWorkspace(workspace: OrchestratorWorkspace): void {
 
 export function useOrchestrator() {
   const [cells, setCells] = useState<OrchestratorCell[]>([]);
-  const [layout, setLayout] = useState<LayoutPreset>('quad');
   const [activeCell, setActiveCell] = useState<string | null>(null);
+
+  // Layout is always derived from cell count — never out of sync
+  const layout = useMemo(() => autoLayout(cells.length), [cells.length]);
 
   const addCell = useCallback(
     (config: OrchestratorCellConfig) => {
       const cell: OrchestratorCell = { id: generateCellId(), config };
-      setCells((prev) => [...prev, cell]);
+      setCells((prev) => {
+        if (prev.length >= MAX_CELLS) return prev;
+        return [...prev, cell];
+      });
       setActiveCell(cell.id);
       return cell.id;
     },
@@ -72,15 +85,19 @@ export function useOrchestrator() {
     []
   );
 
+  const clearCells = useCallback(() => {
+    setCells([]);
+    setActiveCell(null);
+  }, []);
+
   const persistWorkspace = useCallback(() => {
-    saveWorkspace({ cells, layout });
-  }, [cells, layout]);
+    saveWorkspace(cells);
+  }, [cells]);
 
   const restoreWorkspace = useCallback(() => {
     const ws = loadWorkspace();
-    if (ws) {
+    if (ws && ws.cells.length > 0) {
       setCells(ws.cells);
-      setLayout(ws.layout);
     }
   }, []);
 
@@ -91,7 +108,7 @@ export function useOrchestrator() {
     addCell,
     removeCell,
     updateCell,
-    setLayout,
+    clearCells,
     setActiveCell,
     persistWorkspace,
     restoreWorkspace,

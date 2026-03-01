@@ -1,11 +1,10 @@
 import React from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
-import type { OrchestratorCell, LayoutPreset } from '../../../shared/types';
+import type { OrchestratorCell } from '../../../shared/types';
 import CellRenderer from './CellRenderer';
 
 interface OrchestratorGridProps {
   cells: OrchestratorCell[];
-  layout: LayoutPreset;
   activeCell: string | null;
   onCloseCell: (id: string) => void;
   onFocusCell: (id: string) => void;
@@ -33,19 +32,11 @@ function CellPanel({
   onCloseCell,
   onFocusCell,
 }: {
-  cell: OrchestratorCell | undefined;
+  cell: OrchestratorCell;
   activeCell: string | null;
   onCloseCell: (id: string) => void;
   onFocusCell: (id: string) => void;
 }) {
-  if (!cell) {
-    return (
-      <div className="flex items-center justify-center h-full bg-surface-0 rounded-card border border-dashed border-border-subtle">
-        <p className="text-xs text-text-tertiary">Empty slot</p>
-      </div>
-    );
-  }
-
   return (
     <CellRenderer
       cell={cell}
@@ -58,22 +49,24 @@ function CellPanel({
 
 export default function OrchestratorGrid({
   cells,
-  layout,
   activeCell,
   onCloseCell,
   onFocusCell,
 }: OrchestratorGridProps) {
-  const at = (i: number) => cells[i];
-
   if (cells.length === 0) {
     return null;
   }
+
+  const layout = cells.length <= 1 ? 'focus'
+    : cells.length === 2 ? 'split'
+    : cells.length === 3 ? 'main-side'
+    : 'quad';
 
   switch (layout) {
     case 'focus':
       return (
         <div className="h-full p-1.5">
-          <CellPanel cell={at(0)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
+          <CellPanel cell={cells[0]} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
         </div>
       );
 
@@ -82,14 +75,41 @@ export default function OrchestratorGrid({
         <Group orientation="horizontal" className="h-full p-1.5">
           <Panel defaultSize={50} minSize={20}>
             <div className="h-full pr-0.5">
-              <CellPanel cell={at(0)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
+              <CellPanel cell={cells[0]} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
             </div>
           </Panel>
           <ResizeHandle orientation="horizontal" />
           <Panel defaultSize={50} minSize={20}>
             <div className="h-full pl-0.5">
-              <CellPanel cell={at(1)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
+              <CellPanel cell={cells[1]} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
             </div>
+          </Panel>
+        </Group>
+      );
+
+    case 'main-side':
+      return (
+        <Group orientation="horizontal" className="h-full p-1.5">
+          <Panel defaultSize={65} minSize={30}>
+            <div className="h-full pr-0.5">
+              <CellPanel cell={cells[0]} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
+            </div>
+          </Panel>
+          <ResizeHandle orientation="horizontal" />
+          <Panel defaultSize={35} minSize={20}>
+            <Group orientation="vertical" className="h-full">
+              <Panel defaultSize={50} minSize={20}>
+                <div className="h-full pb-0.5 pl-0.5">
+                  <CellPanel cell={cells[1]} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
+                </div>
+              </Panel>
+              <ResizeHandle orientation="vertical" />
+              <Panel defaultSize={50} minSize={20}>
+                <div className="h-full pt-0.5 pl-0.5">
+                  <CellPanel cell={cells[2]} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
+                </div>
+              </Panel>
+            </Group>
           </Panel>
         </Group>
       );
@@ -101,13 +121,13 @@ export default function OrchestratorGrid({
             <Group orientation="vertical" className="h-full">
               <Panel defaultSize={50} minSize={20}>
                 <div className="h-full pb-0.5 pr-0.5">
-                  <CellPanel cell={at(0)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
+                  <CellPanel cell={cells[0]} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
                 </div>
               </Panel>
               <ResizeHandle orientation="vertical" />
               <Panel defaultSize={50} minSize={20}>
                 <div className="h-full pt-0.5 pr-0.5">
-                  <CellPanel cell={at(1)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
+                  <CellPanel cell={cells[1]} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
                 </div>
               </Panel>
             </Group>
@@ -117,40 +137,13 @@ export default function OrchestratorGrid({
             <Group orientation="vertical" className="h-full">
               <Panel defaultSize={50} minSize={20}>
                 <div className="h-full pb-0.5 pl-0.5">
-                  <CellPanel cell={at(2)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
+                  <CellPanel cell={cells[2]} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
                 </div>
               </Panel>
               <ResizeHandle orientation="vertical" />
               <Panel defaultSize={50} minSize={20}>
                 <div className="h-full pt-0.5 pl-0.5">
-                  <CellPanel cell={at(3)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
-                </div>
-              </Panel>
-            </Group>
-          </Panel>
-        </Group>
-      );
-
-    case 'main-side':
-      return (
-        <Group orientation="horizontal" className="h-full p-1.5">
-          <Panel defaultSize={65} minSize={30}>
-            <div className="h-full pr-0.5">
-              <CellPanel cell={at(0)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
-            </div>
-          </Panel>
-          <ResizeHandle orientation="horizontal" />
-          <Panel defaultSize={35} minSize={20}>
-            <Group orientation="vertical" className="h-full">
-              <Panel defaultSize={50} minSize={20}>
-                <div className="h-full pb-0.5 pl-0.5">
-                  <CellPanel cell={at(1)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
-                </div>
-              </Panel>
-              <ResizeHandle orientation="vertical" />
-              <Panel defaultSize={50} minSize={20}>
-                <div className="h-full pt-0.5 pl-0.5">
-                  <CellPanel cell={at(2)} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
+                  <CellPanel cell={cells[3]} activeCell={activeCell} onCloseCell={onCloseCell} onFocusCell={onFocusCell} />
                 </div>
               </Panel>
             </Group>
