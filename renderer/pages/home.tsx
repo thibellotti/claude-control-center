@@ -11,7 +11,6 @@ import UsageTracker from '../components/usage/UsageTracker';
 import OnboardingWizard from '../components/dirigir/OnboardingWizard';
 import dynamic from 'next/dynamic';
 
-const TerminalPage = dynamic(() => import('../components/terminal/TerminalPage'), { ssr: false });
 const OrchestratorPage = dynamic(() => import('../components/orchestrator/OrchestratorPage'), { ssr: false });
 import { useProjects, useProjectDetail } from '../hooks/useProjects';
 import { useCommandPalette } from '../hooks/useCommandPalette';
@@ -67,7 +66,7 @@ export default function Home() {
 
   const { projects, loading } = useProjects(handleRefresh);
   const { sessions: activeSessions, getSessionForProject } = useActiveSessions();
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts' | 'workspaces' | 'usage' | 'terminal' | 'sessions'>('dashboard');
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts' | 'workspaces' | 'usage' | 'sessions'>('dashboard');
   const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(null);
   const { project: selectedProject } = useProjectDetail(
     currentPage === 'project' ? selectedProjectPath : null
@@ -93,7 +92,7 @@ export default function Home() {
   }, []);
 
   const handleNavigate = useCallback((page: string) => {
-    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'workspaces' || page === 'usage' || page === 'terminal' || page === 'sessions') {
+    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'workspaces' || page === 'usage' || page === 'sessions') {
       setCurrentPage(page);
       setSelectedProjectPath(null);
       if (page !== 'sessions') {
@@ -127,8 +126,6 @@ export default function Home() {
       ? 'Workspaces'
       : currentPage === 'usage'
       ? 'Usage & Costs'
-      : currentPage === 'terminal'
-      ? 'Terminal'
       : currentPage === 'sessions'
       ? 'Orchestrator'
       : selectedProject?.name || 'Project';
@@ -191,7 +188,6 @@ export default function Home() {
         {currentPage === 'workspaces' && <WorkspaceBoard />}
         {currentPage === 'prompts' && <PromptLibrary />}
         {currentPage === 'usage' && <UsageTracker />}
-        {currentPage === 'terminal' && <TerminalPage />}
         {currentPage === 'sessions' && (
           <OrchestratorPage
             initialProject={launchProject ? { path: launchProject.path, mode: launchProject.mode as 'claude' | 'claude --dangerously-skip-permissions' } : undefined}
