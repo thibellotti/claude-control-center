@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface XTerminalProps {
   sessionId: string;
@@ -52,6 +52,7 @@ export default function XTerminal({ sessionId, isVisible }: XTerminalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const termRef = useRef<unknown>(null);
   const fitRef = useRef<unknown>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     injectXtermCSS();
@@ -70,6 +71,7 @@ export default function XTerminal({ sessionId, isVisible }: XTerminalProps) {
       import('@xterm/addon-fit'),
       import('@xterm/addon-web-links'),
     ]).then(([xtermModule, fitModule, linksModule]) => {
+      setLoadError(null);
       if (disposed || !containerRef.current) return;
 
       const { Terminal } = xtermModule;
@@ -155,6 +157,10 @@ export default function XTerminal({ sessionId, isVisible }: XTerminalProps) {
       });
 
       observer.observe(containerRef.current!);
+    }).catch((err) => {
+      if (!disposed) {
+        setLoadError(err instanceof Error ? err.message : 'Failed to load terminal');
+      }
     });
 
     return () => {
@@ -186,6 +192,14 @@ export default function XTerminal({ sessionId, isVisible }: XTerminalProps) {
       (termRef.current as { focus: () => void }).focus();
     }
   }, [isVisible, sessionId]);
+
+  if (loadError) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-surface-0">
+        <p className="text-sm text-status-error">Terminal failed to load: {loadError}</p>
+      </div>
+    );
+  }
 
   return (
     <div

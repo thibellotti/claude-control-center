@@ -129,11 +129,27 @@ async function discoverProjects(): Promise<Project[]> {
     }
   }
 
-  // 3. Build project metadata for all discovered paths
+  // 3. Build a lookup map of decoded path → claude config dir (avoids O(N²) rescans)
+  const claudeConfigMap = new Map<string, string>();
+  try {
+    if (await pathExists(CLAUDE_PROJECTS_DIR)) {
+      const entries = await fs.readdir(CLAUDE_PROJECTS_DIR, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          const decoded = await decodeClaudePath(entry.name);
+          claudeConfigMap.set(decoded, path.join(CLAUDE_PROJECTS_DIR, entry.name));
+        }
+      }
+    }
+  } catch (error: unknown) {
+    log('warn', 'projects', 'Failed to build Claude config lookup map', error);
+  }
+
+  // 4. Build project metadata for all discovered paths
   const projects: Project[] = [];
   const allPaths = Array.from(projectPaths);
   const results = await Promise.allSettled(
-    allPaths.map((projectPath) => buildProjectSummary(projectPath))
+    allPaths.map((projectPath) => buildProjectSummary(projectPath, claudeConfigMap))
   );
   for (const result of results) {
     if (result.status === 'fulfilled' && result.value) {
@@ -141,7 +157,7 @@ async function discoverProjects(): Promise<Project[]> {
     }
   }
 
-  // 4. Sort by last activity (newest first)
+  // 5. Sort by last activity (newest first)
   projects.sort((a, b) => b.lastActivity - a.lastActivity);
 
   return projects;
@@ -153,30 +169,37 @@ function parseClient(claudeMd: string | null): string | null {
   return match ? match[1].trim() : null;
 }
 
-async function buildProjectSummary(projectPath: string): Promise<Project | null> {
+async function buildProjectSummary(
+  projectPath: string,
+  claudeConfigMap?: Map<string, string>
+): Promise<Project | null> {
   try {
     if (!(await pathExists(projectPath))) return null;
 
     const name = path.basename(projectPath);
     const hasClaudeDir = await pathExists(path.join(projectPath, '.claude'));
 
-    // Find the Claude config path in ~/.claude/projects/
+    // Find the Claude config path — use pre-built map if available, else scan
     let claudeConfigPath: string | null = null;
-    try {
-      if (await pathExists(CLAUDE_PROJECTS_DIR)) {
-        const entries = await fs.readdir(CLAUDE_PROJECTS_DIR, { withFileTypes: true });
-        for (const entry of entries) {
-          if (entry.isDirectory()) {
-            const decoded = await decodeClaudePath(entry.name);
-            if (decoded === projectPath) {
-              claudeConfigPath = path.join(CLAUDE_PROJECTS_DIR, entry.name);
-              break;
+    if (claudeConfigMap) {
+      claudeConfigPath = claudeConfigMap.get(projectPath) || null;
+    } else {
+      try {
+        if (await pathExists(CLAUDE_PROJECTS_DIR)) {
+          const entries = await fs.readdir(CLAUDE_PROJECTS_DIR, { withFileTypes: true });
+          for (const entry of entries) {
+            if (entry.isDirectory()) {
+              const decoded = await decodeClaudePath(entry.name);
+              if (decoded === projectPath) {
+                claudeConfigPath = path.join(CLAUDE_PROJECTS_DIR, entry.name);
+                break;
+              }
             }
           }
         }
+      } catch (error: unknown) {
+        log('warn', 'projects', `Failed to find Claude config for ${name}`, error);
       }
-    } catch (error: unknown) {
-      log('warn', 'projects', `Failed to find Claude config for ${name}`, error);
     }
 
     // Read PLAN.md

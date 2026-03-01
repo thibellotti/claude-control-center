@@ -2,6 +2,7 @@ const config = {
   content: [
     './renderer/pages/**/*.{js,ts,jsx,tsx}',
     './renderer/components/**/*.{js,ts,jsx,tsx}',
+    './renderer/hooks/**/*.{ts,tsx}',
   ],
   darkMode: 'class',
   theme: {
@@ -59,6 +60,17 @@ const config = {
       },
       fontSize: {
         micro: ['10px', { lineHeight: '14px' }],
+      },
+      spacing: {
+        '0': '0px',
+        '1': '4px',
+        '2': '8px',
+        '3': '12px',
+        '4': '16px',
+        '6': '24px',
+        '8': '32px',
+        '12': '48px',
+        '16': '64px',
       },
       borderRadius: {
         card: '8px',

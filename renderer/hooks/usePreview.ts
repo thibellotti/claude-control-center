@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { EnhancedPreviewState, ConsoleEntry } from '../../shared/types';
 
 // ---------------------------------------------------------------------------
@@ -54,17 +54,14 @@ const DEFAULT_STATE: EnhancedPreviewState = {
 export function usePreview(projectPath: string) {
   const [state, setState] = useState<EnhancedPreviewState>(DEFAULT_STATE);
   const [viewport, setViewportState] = useState<ViewportState>({ mode: 'desktop', width: 9999 });
-  const [consoleEntries, setConsoleEntries] = useState<ConsoleEntry[]>([]);
   const [iframeKey, setIframeKey] = useState(0);
   const [showConsole, setShowConsole] = useState(false);
 
   // Debounce timer for cleanup
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Keep consoleEntries in sync whenever state.output changes
-  useEffect(() => {
-    setConsoleEntries(parseConsoleEntries(state.output));
-  }, [state.output]);
+  // Derive consoleEntries from state.output
+  const consoleEntries = useMemo(() => parseConsoleEntries(state.output), [state.output]);
 
   // Track whether we've already auto-started for this path
   const autoStartedRef = useRef(false);
@@ -132,6 +129,7 @@ export function usePreview(projectPath: string) {
     return () => {
       cleanup();
       if (throttleRef.current) clearTimeout(throttleRef.current);
+      pendingStateRef.current = null;
     };
   }, []);
 
@@ -181,7 +179,7 @@ export function usePreview(projectPath: string) {
   }, []);
 
   const clearConsole = useCallback(() => {
-    setConsoleEntries([]);
+    setState((prev) => ({ ...prev, output: [] }));
   }, []);
 
   // -----------------------------------------------------------------------

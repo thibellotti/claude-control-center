@@ -62,8 +62,7 @@ export function useWorkspaces() {
               projectPaths: w.projectPaths.filter((p) => p !== projectPath),
               updatedAt: Date.now(),
             };
-            // Fire and forget
-            window.api.saveWorkspace(updated);
+            window.api.saveWorkspace(updated).catch((err: unknown) => console.error('Failed to save workspace:', err));
             return updated;
           }
           return w;
@@ -74,8 +73,7 @@ export function useWorkspaces() {
           projectPaths: [...workspace.projectPaths, projectPath],
           updatedAt: Date.now(),
         };
-        // Fire and forget
-        window.api.saveWorkspace(updatedWorkspace);
+        window.api.saveWorkspace(updatedWorkspace).catch((err: unknown) => console.error('Failed to save workspace:', err));
 
         return cleaned.map((w) => (w.id === workspaceId ? updatedWorkspace : w));
       });
@@ -94,8 +92,7 @@ export function useWorkspaces() {
           projectPaths: workspace.projectPaths.filter((p) => p !== projectPath),
           updatedAt: Date.now(),
         };
-        // Fire and forget
-        window.api.saveWorkspace(updated);
+        window.api.saveWorkspace(updated).catch((err: unknown) => console.error('Failed to save workspace:', err));
 
         return prev.map((w) => (w.id === workspaceId ? updated : w));
       });

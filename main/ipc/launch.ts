@@ -25,14 +25,18 @@ export function registerLaunchHandlers() {
   });
 
   ipcMain.handle(IPC_CHANNELS.LAUNCH_CLAUDE, async (_, projectPath: string) => {
-    // Use execFile with -e flag to pass AppleScript safely — no shell interpolation
+    // Pass projectPath as an osascript argument to avoid AppleScript injection.
+    // argv in osascript's `on run argv` is a list; item 1 is our path.
     const script = [
-      'tell application "Terminal"',
-      '  activate',
-      `  do script "cd " & quoted form of "${projectPath}" & " && claude"`,
-      'end tell',
+      'on run argv',
+      '  set projectPath to item 1 of argv',
+      '  tell application "Terminal"',
+      '    activate',
+      '    do script "cd " & quoted form of projectPath & " && claude"',
+      '  end tell',
+      'end run',
     ].join('\n');
-    execFile('osascript', ['-e', script], (err) => {
+    execFile('osascript', ['-e', script, projectPath], (err) => {
       if (err) {
         log('warn', 'launch', 'Failed to launch Claude via AppleScript', err);
       }

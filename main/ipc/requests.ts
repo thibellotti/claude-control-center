@@ -107,15 +107,9 @@ async function executeRequest(request: DesignRequest) {
     log('warn', 'requests', 'Failed to capture before screenshot', error);
   }
 
-  const shell = process.env.SHELL || '/bin/zsh';
-
-  // Build the Claude command with the request prompt
-  const escapedPrompt = request.prompt.replace(/'/g, "'\\''");
-  const command = `cd '${request.projectPath}' && claude --print '${escapedPrompt}'`;
-
   log('info', 'requests', `Executing request ${request.id}: ${request.prompt.slice(0, 80)}`);
 
-  const proc = pty.spawn(shell, ['-c', command], {
+  const proc = pty.spawn('claude', ['--print', request.prompt], {
     name: 'xterm-256color',
     cols: 120,
     rows: 30,

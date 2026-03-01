@@ -117,8 +117,9 @@ const api = {
   openBillingPortal: () => ipcRenderer.invoke('open-billing-portal'),
 
   onProjectUpdated: (callback: (data: { refresh?: boolean } | Record<string, unknown>) => void) => {
-    ipcRenderer.on('project-updated', (_, project) => callback(project));
-    return () => { ipcRenderer.removeAllListeners('project-updated'); };
+    const handler = (_: unknown, project: { refresh?: boolean } | Record<string, unknown>) => callback(project);
+    ipcRenderer.on('project-updated', handler);
+    return () => { ipcRenderer.removeListener('project-updated', handler); };
   },
 };
 

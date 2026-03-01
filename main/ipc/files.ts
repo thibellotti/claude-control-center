@@ -1,10 +1,11 @@
 import { ipcMain } from 'electron';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, realpathSync } from 'fs';
 import path from 'path';
 import os from 'os';
 import { IPC_CHANNELS } from '../../shared/types';
 
 const HOME = os.homedir();
+const REAL_HOME = realpathSync(HOME);
 
 // Validate that a file path is within the user's home directory
 // to prevent arbitrary filesystem access.
@@ -17,7 +18,14 @@ function expandTilde(filePath: string): string {
 
 function isPathSafe(filePath: string): boolean {
   const resolved = path.resolve(expandTilde(filePath));
-  return resolved.startsWith(HOME);
+  // Canonicalize through symlinks to prevent symlink-based traversal
+  try {
+    const real = realpathSync(resolved);
+    return real.startsWith(REAL_HOME);
+  } catch {
+    // File doesn't exist yet (e.g. write to new file) — fall back to string check
+    return resolved.startsWith(REAL_HOME);
+  }
 }
 
 export function registerFileHandlers() {

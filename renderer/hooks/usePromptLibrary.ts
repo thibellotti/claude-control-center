@@ -55,8 +55,7 @@ export function usePromptLibrary() {
       const target = prev.find((p) => p.id === id);
       if (!target) return prev;
       const updated = { ...target, isFavorite: !target.isFavorite };
-      // Fire and forget
-      window.api.savePrompt(updated);
+      window.api.savePrompt(updated).catch((err: unknown) => console.error('Failed to toggle favorite:', err));
       return prev.map((p) => (p.id === id ? updated : p));
     });
   }, []);

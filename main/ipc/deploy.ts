@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import { spawn, exec, execFileSync } from 'child_process';
 import { promisify } from 'util';
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { promises as fsAsync, existsSync, readFileSync } from 'fs';
 import path from 'path';
 import os from 'os';
 import { IPC_CHANNELS, DeployConfig, DeployResult, VercelDeployment, VercelProjectInfo } from '../../shared/types';
@@ -21,10 +21,8 @@ const HOME = os.homedir();
 const DEPLOYS_DIR = path.join(HOME, '.claude', 'studio', 'deploys');
 
 // Ensure the deploys directory exists
-function ensureDeploysDir() {
-  if (!existsSync(DEPLOYS_DIR)) {
-    mkdirSync(DEPLOYS_DIR, { recursive: true });
-  }
+async function ensureDeploysDir() {
+  await fsAsync.mkdir(DEPLOYS_DIR, { recursive: true });
 }
 
 // Derive a filesystem-safe project ID from its path
@@ -44,28 +42,26 @@ function cliExists(name: string): boolean {
 }
 
 // Read deploy history from disk
-function readHistory(projectId: string): DeployResult[] {
-  ensureDeploysDir();
+async function readHistory(projectId: string): Promise<DeployResult[]> {
+  await ensureDeploysDir();
   const filePath = path.join(DEPLOYS_DIR, `${projectId}.json`);
-  if (!existsSync(filePath)) return [];
   try {
-    const data = JSON.parse(readFileSync(filePath, 'utf-8'));
+    const data = JSON.parse(await fsAsync.readFile(filePath, 'utf-8'));
     return Array.isArray(data) ? data : [];
-  } catch (error: unknown) {
-    log('warn', 'deploy', 'Failed to read deploy history', error);
+  } catch {
     return [];
   }
 }
 
 // Persist a deploy result to history
-function saveToHistory(projectId: string, result: DeployResult) {
-  ensureDeploysDir();
-  const history = readHistory(projectId);
+async function saveToHistory(projectId: string, result: DeployResult) {
+  await ensureDeploysDir();
+  const history = await readHistory(projectId);
   history.unshift(result);
   // Keep only the last 10 deploys
   const trimmed = history.slice(0, 10);
   const filePath = path.join(DEPLOYS_DIR, `${projectId}.json`);
-  writeFileSync(filePath, JSON.stringify(trimmed, null, 2), 'utf-8');
+  await fsAsync.writeFile(filePath, JSON.stringify(trimmed, null, 2), 'utf-8');
 }
 
 export function registerDeployHandlers() {
@@ -99,7 +95,7 @@ export function registerDeployHandlers() {
 
       // Pull last deploy info from history
       const projectId = projectIdFromPath(projectPath);
-      const history = readHistory(projectId);
+      const history = await readHistory(projectId);
       const last = history[0];
 
       return {
@@ -178,11 +174,9 @@ export function registerDeployHandlers() {
             timestamp: Date.now(),
           };
 
-          // Persist to history
+          // Persist to history then resolve
           const projectId = projectIdFromPath(projectPath);
-          saveToHistory(projectId, result);
-
-          resolve(result);
+          saveToHistory(projectId, result).then(() => resolve(result), () => resolve(result));
         });
 
         child.on('error', (err) => {
@@ -194,9 +188,7 @@ export function registerDeployHandlers() {
           };
 
           const projectId = projectIdFromPath(projectPath);
-          saveToHistory(projectId, result);
-
-          resolve(result);
+          saveToHistory(projectId, result).then(() => resolve(result), () => resolve(result));
         });
       });
     }
@@ -209,7 +201,7 @@ export function registerDeployHandlers() {
     IPC_CHANNELS.GET_DEPLOY_HISTORY,
     async (_event, projectPath: string): Promise<DeployResult[]> => {
       const projectId = projectIdFromPath(projectPath);
-      return readHistory(projectId);
+      return await readHistory(projectId);
     }
   );
 

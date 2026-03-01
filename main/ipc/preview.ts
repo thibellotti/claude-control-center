@@ -182,6 +182,17 @@ export function registerPreviewHandlers() {
         return errState;
       }
 
+      // Validate scriptName to prevent shell injection
+      if (!/^[a-zA-Z0-9_:.-]+$/.test(scriptName)) {
+        const errState: EnhancedPreviewState = {
+          ...idleState(),
+          status: 'error',
+          error: `Invalid script name: ${scriptName}`,
+        };
+        pushStatusUpdate(errState);
+        return errState;
+      }
+
       // --- Status: starting ---
       const startingState: EnhancedPreviewState = {
         ...idleState(),
@@ -284,6 +295,7 @@ export function registerPreviewHandlers() {
       });
 
       child.on('error', (err: Error) => {
+        child.kill();
         const errState: EnhancedPreviewState = {
           ...idleState(),
           status: 'error',

@@ -25,5 +25,6 @@ files:
     filter:
       - package.json
       - app
+      - '!**/*.map'
 
 publish: null

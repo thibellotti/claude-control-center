@@ -161,6 +161,9 @@ async function startWatching() {
   // Find recently modified JSONL files (last 30 min)
   const cutoff = Date.now() - 30 * 60 * 1000;
 
+  // Track which file paths are still active this scan
+  const activeFilePaths = new Set<string>();
+
   try {
     const projectDirs = await fs.readdir(CLAUDE_PROJECTS_DIR);
     for (const dir of projectDirs) {
@@ -200,6 +203,8 @@ async function startWatching() {
           .slice(0, 3);
 
         for (const file of files) {
+          activeFilePaths.add(file.path);
+
           if (watchers.has(file.path)) continue;
 
           // Start at end of file (only show new activity)
@@ -221,6 +226,15 @@ async function startWatching() {
         }
       } catch (error: unknown) {
         log('warn', 'live-feed', `Failed to scan project directory ${projectDir}`, error);
+      }
+    }
+
+    // Close watchers for files that are no longer active
+    for (const [filePath, watcher] of watchers) {
+      if (!activeFilePaths.has(filePath)) {
+        watcher.close();
+        watchers.delete(filePath);
+        filePositions.delete(filePath);
       }
     }
   } catch (error: unknown) {

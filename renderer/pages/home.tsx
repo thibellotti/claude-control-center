@@ -9,6 +9,7 @@ import WorkspaceBoard from '../components/workspace/WorkspaceBoard';
 import CommandPalette from '../components/search/CommandPalette';
 import UsageTracker from '../components/usage/UsageTracker';
 import OnboardingWizard from '../components/dirigir/OnboardingWizard';
+import ProjectDetail from '../components/project/ProjectDetail';
 import dynamic from 'next/dynamic';
 
 const OrchestratorPage = dynamic(() => import('../components/orchestrator/OrchestratorPage'), { ssr: false });
@@ -76,12 +77,10 @@ export default function Home() {
 
   const { open, setOpen, query, setQuery, results } = useCommandPalette(projects);
 
-  // Clicking a project card opens Orchestrator with the saved (or default) mode
+  // Clicking a project card opens the Project Detail page
   const handleSelectProject = useCallback((project: Project) => {
-    const mode = getSavedMode(project.path);
-    saveMode(project.path, mode);
-    setLaunchProject({ path: project.path, mode });
-    setCurrentPage('sessions');
+    setSelectedProjectPath(project.path);
+    setCurrentPage('project');
   }, []);
 
   // Explicit open with a chosen mode (from inline buttons or project switcher)
@@ -166,7 +165,7 @@ export default function Home() {
   return (
     <ProjectProvider value={contextValue}>
       <AppLayout
-        selectedProject={currentPage === 'project' ? selectedProject : null}
+        selectedProject={null}
         onNavigate={handleNavigate}
         onBack={() => handleNavigate('dashboard')}
         currentPage={currentPage === 'project' ? 'dashboard' : currentPage as string}
@@ -184,6 +183,13 @@ export default function Home() {
           handleLaunchProject(path, mode);
         }}
       >
+        {currentPage === 'project' && selectedProject && (
+          <ProjectDetail
+            project={selectedProject}
+            onOpenInClaude={(mode) => handleLaunchProject(selectedProject.path, mode)}
+            onBack={() => handleNavigate('dashboard')}
+          />
+        )}
         {currentPage === 'dashboard' && <Dashboard />}
         {currentPage === 'workspaces' && <WorkspaceBoard />}
         {currentPage === 'prompts' && <PromptLibrary />}

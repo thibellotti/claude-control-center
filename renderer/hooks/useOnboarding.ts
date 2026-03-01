@@ -58,7 +58,7 @@ export function useOnboarding() {
         newState.completed = true;
       }
       // Persist async (fire-and-forget from setState)
-      window.api.writeFile(CONFIG_PATH, JSON.stringify(newState, null, 2)).catch(() => {});
+      window.api.writeFile(CONFIG_PATH, JSON.stringify(newState, null, 2)).catch((err) => console.error('Failed to persist onboarding state:', err));
       return newState;
     });
   }, []);

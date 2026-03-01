@@ -82,6 +82,7 @@ const PagesList = memo(function PagesList({
 }: PagesListProps) {
   const [pages, setPages] = useState<DetectedPage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activePath, setActivePath] = useState<string | null>(null);
 
   // Fetch pages on mount / when projectPath changes
@@ -90,14 +91,16 @@ const PagesList = memo(function PagesList({
 
     async function fetchPages() {
       setLoading(true);
+      setError(null);
       try {
         const result = await (window as any).api.getProjectPages(projectPath);
         if (!cancelled) {
           setPages(result ?? []);
         }
-      } catch {
+      } catch (err) {
         if (!cancelled) {
           setPages([]);
+          setError(err instanceof Error ? err.message : 'Failed to load pages');
         }
       } finally {
         if (!cancelled) {
@@ -138,8 +141,15 @@ const PagesList = memo(function PagesList({
         </div>
       )}
 
+      {/* Error state */}
+      {!loading && error && (
+        <span className="text-micro text-status-error px-3">
+          {error}
+        </span>
+      )}
+
       {/* Empty state */}
-      {!loading && pages.length === 0 && (
+      {!loading && !error && pages.length === 0 && (
         <span className="text-micro text-text-tertiary px-3">
           No pages detected
         </span>
