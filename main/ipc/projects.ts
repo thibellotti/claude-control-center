@@ -129,6 +129,12 @@ async function discoverProjects(): Promise<Project[]> {
   return projects;
 }
 
+function parseClient(claudeMd: string | null): string | null {
+  if (!claudeMd) return null;
+  const match = claudeMd.match(/^client:\s*(.+)$/mi);
+  return match ? match[1].trim() : null;
+}
+
 async function buildProjectSummary(projectPath: string): Promise<Project | null> {
   try {
     if (!(await pathExists(projectPath))) return null;
@@ -227,6 +233,7 @@ async function buildProjectSummary(projectPath: string): Promise<Project | null>
       lastActivity,
       status,
       hasClaudeDir,
+      client: parseClient(claudeMd),
       health,
     };
   } catch (error: unknown) {
