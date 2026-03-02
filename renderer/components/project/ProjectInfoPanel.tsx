@@ -25,7 +25,7 @@ function formatRelativeTime(dateStr: string): string {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-micro font-semibold uppercase tracking-wider text-text-tertiary mb-1.5">
+    <h3 className="text-micro font-semibold uppercase tracking-wider text-text-tertiary mb-2">
       {children}
     </h3>
   );
@@ -73,21 +73,21 @@ export default function ProjectInfoPanel({ project }: ProjectInfoPanelProps) {
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
               <div>
                 <span className="text-text-tertiary text-micro">Name</span>
-                <p className="text-text-primary font-mono text-[11px]">{project.packageJson.name}</p>
+                <p className="text-text-primary font-mono text-xs">{project.packageJson.name}</p>
               </div>
               <div>
                 <span className="text-text-tertiary text-micro">Version</span>
-                <p className="text-text-primary font-mono text-[11px]">{project.packageJson.version}</p>
+                <p className="text-text-primary font-mono text-xs">{project.packageJson.version}</p>
               </div>
               <div>
                 <span className="text-text-tertiary text-micro">Dependencies</span>
-                <p className="text-text-primary text-[11px]">
+                <p className="text-text-primary text-xs">
                   {Object.keys(project.packageJson.dependencies).length} deps / {Object.keys(project.packageJson.devDependencies).length} dev
                 </p>
               </div>
               <div>
                 <span className="text-text-tertiary text-micro">Scripts</span>
-                <p className="text-text-primary text-[11px]">
+                <p className="text-text-primary text-xs">
                   {Object.keys(project.packageJson.scripts).length} scripts
                 </p>
               </div>
@@ -109,7 +109,7 @@ export default function ProjectInfoPanel({ project }: ProjectInfoPanelProps) {
       {/* Tasks + Teams summary */}
       <section>
         <SectionLabel>Activity</SectionLabel>
-        <div className="flex items-center gap-3 text-[11px]">
+        <div className="flex items-center gap-3 text-xs">
           <span className="text-text-secondary">
             <strong className="text-text-primary">{project.tasks.filter((t) => t.status !== 'deleted').length}</strong> tasks
           </span>

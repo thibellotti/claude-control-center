@@ -1,6 +1,6 @@
 import { log } from './logger';
 
-type SecurityCategory = 'path-traversal' | 'command-injection' | 'auth' | 'encryption' | 'access-denied';
+type SecurityCategory = 'path-traversal' | 'command-injection' | 'auth' | 'encryption' | 'access-denied' | 'url-validation';
 type SecuritySeverity = 'low' | 'medium' | 'high' | 'critical';
 
 export function logSecurityEvent(

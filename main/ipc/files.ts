@@ -1,38 +1,8 @@
 import { ipcMain } from 'electron';
 import { readFileSync, writeFileSync, realpathSync, openSync, closeSync, constants } from 'fs';
 import path from 'path';
-import os from 'os';
 import { IPC_CHANNELS } from '../../shared/types';
-import { logSecurityEvent } from '../helpers/security-logger';
-
-const HOME = os.homedir();
-const REAL_HOME = realpathSync(HOME);
-
-function expandTilde(filePath: string): string {
-  if (filePath.startsWith('~/') || filePath === '~') {
-    return path.join(HOME, filePath.slice(1));
-  }
-  return filePath;
-}
-
-function isPathSafe(filePath: string): boolean {
-  const resolved = path.resolve(expandTilde(filePath));
-  try {
-    const real = realpathSync(resolved);
-    if (!real.startsWith(REAL_HOME)) {
-      logSecurityEvent('path-traversal', 'high', 'File access blocked: resolved path outside home', { filePath, resolved: real });
-      return false;
-    }
-    return true;
-  } catch {
-    // File doesn't exist yet (e.g. write to new file) -- fall back to string check
-    if (!resolved.startsWith(REAL_HOME)) {
-      logSecurityEvent('path-traversal', 'high', 'File access blocked: path outside home', { filePath, resolved });
-      return false;
-    }
-    return true;
-  }
-}
+import { isPathSafe, expandTilde, REAL_HOME } from '../helpers/path-safety';
 
 export function registerFileHandlers() {
   ipcMain.handle(IPC_CHANNELS.READ_FILE, async (_, filePath: string) => {

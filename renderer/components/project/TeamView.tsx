@@ -33,7 +33,7 @@ export default function TeamView({ teams }: TeamViewProps) {
           <div>
             <div className="flex items-center justify-between gap-2 min-w-0">
               <h4 className="text-sm font-semibold text-text-primary truncate">{team.name}</h4>
-              <span className="text-[11px] text-text-tertiary">
+              <span className="text-xs text-text-tertiary">
                 {formatDate(team.createdAt)}
               </span>
             </div>
@@ -48,7 +48,7 @@ export default function TeamView({ teams }: TeamViewProps) {
               <span className="text-micro font-semibold uppercase tracking-wider text-text-tertiary">
                 Members
               </span>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {team.members.map((member) => (
                   <div
                     key={member.agentId}
@@ -61,7 +61,7 @@ export default function TeamView({ teams }: TeamViewProps) {
                     <span className="text-sm text-text-primary font-medium truncate">
                       {member.name}
                     </span>
-                    <span className="text-[11px] text-text-tertiary font-mono shrink-0">
+                    <span className="text-xs text-text-tertiary font-mono shrink-0">
                       {member.agentType}
                     </span>
                     {member.model && (

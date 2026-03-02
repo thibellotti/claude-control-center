@@ -2,6 +2,7 @@ import { ipcMain } from 'electron';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { log } from '../helpers/logger';
+import { isPathSafe } from '../helpers/path-safety';
 
 interface DetectedPage {
   path: string;     // route path like "/" or "/about"
@@ -85,6 +86,7 @@ async function scanPagesRouter(baseDir: string, currentDir: string, pages: Detec
 
 export function registerPageHandlers() {
   ipcMain.handle('get-project-pages', async (_, projectPath: string) => {
+    if (!isPathSafe(projectPath)) return [];
     try {
       const pages = await detectNextJSPages(projectPath);
       log('info', 'pages', `Detected ${pages.length} pages in ${projectPath}`);

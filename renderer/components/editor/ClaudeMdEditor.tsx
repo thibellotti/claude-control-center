@@ -110,7 +110,7 @@ export default function ClaudeMdEditor({ filePath, onSave }: ClaudeMdEditorProps
         </div>
         <button
           onClick={createFile}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+          className="flex items-center gap-1 px-4 py-2 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
         >
           <PlusIcon />
           Create CLAUDE.md
@@ -125,20 +125,20 @@ export default function ClaudeMdEditor({ filePath, onSave }: ClaudeMdEditorProps
   return (
     <div className="relative">
       {/* Sticky save bar */}
-      <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-2.5 bg-surface-1 border border-border-subtle rounded-lg mb-4">
+      <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-2 bg-surface-1 border border-border-subtle rounded-lg mb-4">
         <div className="flex items-center gap-3">
           {isDirty ? (
-            <span className="flex items-center gap-1.5 text-xs text-status-dirty">
+            <span className="flex items-center gap-1 text-xs text-status-dirty">
               <span className="w-1.5 h-1.5 rounded-full bg-status-dirty" />
               Unsaved changes
             </span>
           ) : saveSuccess ? (
-            <span className="flex items-center gap-1.5 text-xs text-status-clean">
+            <span className="flex items-center gap-1 text-xs text-status-clean">
               <span className="w-1.5 h-1.5 rounded-full bg-status-clean" />
               Saved
             </span>
           ) : (
-            <span className="flex items-center gap-1.5 text-xs text-text-tertiary">
+            <span className="flex items-center gap-1 text-xs text-text-tertiary">
               <span className="w-1.5 h-1.5 rounded-full bg-text-tertiary" />
               No changes
             </span>
@@ -151,7 +151,7 @@ export default function ClaudeMdEditor({ filePath, onSave }: ClaudeMdEditorProps
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowRaw(!showRaw)}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-button text-xs font-medium transition-colors ${
+            className={`flex items-center gap-1 px-2 py-1 rounded-button text-xs font-medium transition-colors ${
               showRaw
                 ? 'bg-accent-muted text-accent'
                 : 'text-text-tertiary hover:text-text-secondary hover:bg-surface-2'
@@ -164,7 +164,7 @@ export default function ClaudeMdEditor({ filePath, onSave }: ClaudeMdEditorProps
           <button
             onClick={handleSave}
             disabled={!isDirty || isSaving}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-button text-xs font-medium transition-colors ${
+            className={`flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium transition-colors ${
               isDirty
                 ? 'bg-accent text-white hover:bg-accent-hover'
                 : 'bg-surface-2 text-text-tertiary cursor-not-allowed'
@@ -182,7 +182,7 @@ export default function ClaudeMdEditor({ filePath, onSave }: ClaudeMdEditorProps
           <textarea
             value={getRawContent()}
             readOnly
-            className="w-full min-h-[400px] bg-transparent text-[12px] font-mono text-text-secondary leading-relaxed focus:outline-none resize-none"
+            className="w-full min-h-[400px] bg-transparent text-xs font-mono text-text-secondary leading-relaxed focus:outline-none resize-none"
             spellCheck={false}
           />
         </div>
@@ -215,7 +215,7 @@ export default function ClaudeMdEditor({ filePath, onSave }: ClaudeMdEditorProps
           <div className="relative mt-4" ref={addMenuRef}>
             <button
               onClick={() => setShowAddMenu(!showAddMenu)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-border-default text-xs text-text-tertiary hover:text-text-secondary hover:border-border-strong hover:bg-surface-1 transition-colors w-full justify-center"
+              className="flex items-center gap-1 px-3 py-2 rounded-lg border border-dashed border-border-default text-xs text-text-tertiary hover:text-text-secondary hover:border-border-strong hover:bg-surface-1 transition-colors w-full justify-center"
             >
               <PlusIcon />
               Add block
@@ -228,10 +228,10 @@ export default function ClaudeMdEditor({ filePath, onSave }: ClaudeMdEditorProps
                   <button
                     key={bt.type}
                     onClick={() => handleAddBlock(bt.type)}
-                    className="flex flex-col items-start w-full px-4 py-2.5 hover:bg-surface-3 transition-colors text-left"
+                    className="flex flex-col items-start w-full px-4 py-2 hover:bg-surface-3 transition-colors text-left"
                   >
                     <span className="text-xs font-medium text-text-primary">{bt.label}</span>
-                    <span className="text-[11px] text-text-tertiary">{bt.description}</span>
+                    <span className="text-xs text-text-tertiary">{bt.description}</span>
                   </button>
                 ))}
               </div>

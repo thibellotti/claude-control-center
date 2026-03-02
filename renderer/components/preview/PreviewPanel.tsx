@@ -18,7 +18,7 @@ interface PreviewPanelProps {
 
 function LoadingDots() {
   return (
-    <span className="inline-flex items-center gap-0.5">
+    <span className="inline-flex items-center gap-1">
       <span className="animate-bounce [animation-delay:0ms] w-1 h-1 rounded-full bg-text-tertiary inline-block" />
       <span className="animate-bounce [animation-delay:150ms] w-1 h-1 rounded-full bg-text-tertiary inline-block" />
       <span className="animate-bounce [animation-delay:300ms] w-1 h-1 rounded-full bg-text-tertiary inline-block" />
@@ -147,13 +147,13 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
         {state.status === 'idle' && showingProduction && productionUrl && (
           <div className="absolute inset-0 flex flex-col">
             {/* Production banner */}
-            <div className="flex items-center justify-between px-3 py-1.5 bg-surface-1 border-b border-border-subtle shrink-0">
+            <div className="flex items-center justify-between px-3 py-1 bg-surface-1 border-b border-border-subtle shrink-0">
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-status-active shrink-0" />
                 <span className="text-micro text-text-tertiary">Production</span>
                 <span className="text-micro text-text-secondary font-mono truncate max-w-[200px]">{productionUrl.replace(/^https?:\/\//, '')}</span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <button
                   onClick={() => window.open(productionUrl, '_blank')}
                   className="p-1 rounded text-text-tertiary hover:text-text-primary transition-colors"
@@ -163,7 +163,7 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
                 </button>
                 <button
                   onClick={() => { setShowingProduction(false); start(); }}
-                  className="flex items-center gap-1 px-2 py-0.5 rounded-button text-micro font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+                  className="flex items-center gap-1 px-2 py-1 rounded-button text-micro font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
                 >
                   Start Dev Server
                 </button>
@@ -297,7 +297,7 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
       {showConsole && (
         <div className="border-t border-border-subtle bg-surface-1 shrink-0" style={{ maxHeight: '200px' }}>
           {/* Console header */}
-          <div className="flex items-center justify-between px-3 py-1.5 border-b border-border-subtle">
+          <div className="flex items-center justify-between px-3 py-1 border-b border-border-subtle">
             <span className="text-micro font-medium text-text-tertiary uppercase tracking-wider">Console</span>
             <button
               onClick={clearConsole}

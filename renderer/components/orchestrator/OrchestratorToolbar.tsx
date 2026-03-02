@@ -28,7 +28,7 @@ export default function OrchestratorToolbar({
           {projectName || 'Orchestrator'}
         </span>
         {modeBadge && (
-          <span className={`px-1.5 py-0.5 rounded text-micro font-medium ${
+          <span className={`px-1 py-1 rounded text-micro font-medium ${
             modeBadge === 'Autopilot'
               ? 'bg-feedback-warning/10 text-feedback-warning'
               : 'bg-accent/10 text-accent'
@@ -44,7 +44,7 @@ export default function OrchestratorToolbar({
         <div className="relative">
           <button
             onClick={() => setShowAddMenu(!showAddMenu)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+            className="flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
           >
             <PlusIcon size={12} />
             Add

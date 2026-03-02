@@ -33,7 +33,7 @@ export default class ErrorBoundary extends React.Component<
           <div className="w-10 h-10 rounded-full bg-feedback-error/10 flex items-center justify-center">
             <span className="text-feedback-error text-lg">!</span>
           </div>
-          <h1 className="text-sm font-semibold text-text-primary">Something went wrong</h1>
+          <h2 className="text-sm font-semibold text-text-primary">Something went wrong</h2>
           <p className="text-xs text-text-tertiary text-center max-w-sm">
             {this.state.error?.message || 'An unexpected error occurred.'}
           </p>

@@ -90,7 +90,7 @@ export default function FigmaBridge({ projectId }: FigmaBridgeProps) {
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+            className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
           >
             <PlusIcon />
             Link Figma Frame
@@ -119,7 +119,7 @@ export default function FigmaBridge({ projectId }: FigmaBridgeProps) {
               autoFocus
             />
             {urlError && (
-              <p className="text-xs text-feedback-error mt-1.5">{urlError}</p>
+              <p className="text-xs text-feedback-error mt-1">{urlError}</p>
             )}
           </div>
 
@@ -135,14 +135,14 @@ export default function FigmaBridge({ projectId }: FigmaBridgeProps) {
             <button
               type="submit"
               disabled={isSaving}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50"
+              className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50"
             >
               {isSaving ? 'Adding...' : 'Add'}
             </button>
             <button
               type="button"
               onClick={handleCancel}
-              className="px-3 py-1.5 rounded-md text-xs text-text-secondary hover:text-text-primary hover:bg-surface-2 transition-colors"
+              className="px-3 py-1 rounded-md text-xs text-text-secondary hover:text-text-primary hover:bg-surface-2 transition-colors"
             >
               Cancel
             </button>

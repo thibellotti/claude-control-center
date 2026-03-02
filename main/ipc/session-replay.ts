@@ -1,11 +1,11 @@
 import { ipcMain } from 'electron';
-import { readdirSync, readFileSync, statSync, existsSync } from 'fs';
+import { readdirSync, readFileSync, statSync, existsSync, createReadStream, openSync, readSync, closeSync } from 'fs';
 import path from 'path';
-import os from 'os';
 import { IPC_CHANNELS } from '../../shared/types';
 import type { SessionTimeline, SessionAction } from '../../shared/types';
+import { isPathSafe, isSafeFileName, HOME } from '../helpers/path-safety';
+import { log } from '../helpers/logger';
 
-const HOME = os.homedir();
 const CLAUDE_PROJECTS_DIR = path.join(HOME, '.claude', 'projects');
 
 // Maximum number of actions to return per session to avoid memory issues
@@ -21,21 +21,40 @@ function encodeProjectPath(projectPath: string): string {
 
 /**
  * Read the first and last lines of a file efficiently.
- * For large files, we only read small chunks from the beginning and end.
+ * Only reads the first 4KB and last 4KB instead of loading the entire file.
  */
 function readFirstAndLastLines(filePath: string): { first: string | null; last: string | null } {
+  const CHUNK_SIZE = 4096;
+  let fd: number | null = null;
   try {
-    const content = readFileSync(filePath, 'utf-8');
-    const lines = content.split('\n').filter((l) => l.trim().length > 0);
+    const stat = statSync(filePath);
+    if (stat.size === 0) return { first: null, last: null };
 
-    if (lines.length === 0) return { first: null, last: null };
+    fd = openSync(filePath, 'r');
 
-    return {
-      first: lines[0],
-      last: lines[lines.length - 1],
-    };
+    // Read first chunk to get first line
+    const headBuf = Buffer.alloc(Math.min(CHUNK_SIZE, stat.size));
+    readSync(fd, headBuf, 0, headBuf.length, 0);
+    const headText = headBuf.toString('utf-8');
+    const firstLine = headText.split('\n').find((l) => l.trim().length > 0) || null;
+
+    // Read last chunk to get last line
+    let lastLine: string | null = null;
+    const tailOffset = Math.max(0, stat.size - CHUNK_SIZE);
+    const tailSize = stat.size - tailOffset;
+    const tailBuf = Buffer.alloc(tailSize);
+    readSync(fd, tailBuf, 0, tailSize, tailOffset);
+    const tailText = tailBuf.toString('utf-8');
+    const tailLines = tailText.split('\n').filter((l) => l.trim().length > 0);
+    lastLine = tailLines.length > 0 ? tailLines[tailLines.length - 1] : null;
+
+    return { first: firstLine, last: lastLine };
   } catch {
     return { first: null, last: null };
+  } finally {
+    if (fd !== null) {
+      try { closeSync(fd); } catch { /* ignore */ }
+    }
   }
 }
 
@@ -234,6 +253,7 @@ export function registerSessionReplayHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GET_SESSION_TIMELINES,
     async (_, projectPath: string): Promise<SessionTimeline[]> => {
+      if (!isPathSafe(projectPath)) return [];
       try {
         const encoded = encodeProjectPath(projectPath);
         const projectDir = path.join(CLAUDE_PROJECTS_DIR, encoded);
@@ -266,14 +286,25 @@ export function registerSessionReplayHandlers() {
           const endTime =
             lastEntry ? extractTimestamp(lastEntry) : startTime;
 
-          // Count lines (rough action count)
-          let lineCount = 0;
-          try {
-            const content = readFileSync(file.fullPath, 'utf-8');
-            lineCount = content.split('\n').filter((l) => l.trim().length > 0).length;
-          } catch {
-            lineCount = 0;
-          }
+          // Count lines using streaming to avoid loading entire file into memory
+          const lineCount = await new Promise<number>((resolve) => {
+            let count = 0;
+            const stream = createReadStream(file.fullPath);
+            let leftover = '';
+            stream.on('data', (chunk: string | Buffer) => {
+              const text = leftover + (typeof chunk === 'string' ? chunk : chunk.toString('utf-8'));
+              const lines = text.split('\n');
+              leftover = lines.pop() || '';
+              for (const line of lines) {
+                if (line.trim().length > 0) count++;
+              }
+            });
+            stream.on('end', () => {
+              if (leftover.trim().length > 0) count++;
+              resolve(count);
+            });
+            stream.on('error', () => resolve(0));
+          });
 
           // Extract session ID from filename (remove .jsonl extension)
           const sessionId = file.name.replace('.jsonl', '');
@@ -290,7 +321,7 @@ export function registerSessionReplayHandlers() {
 
         return timelines;
       } catch (err) {
-        console.error('Failed to get session timelines:', err);
+        log('warn', 'session-replay', 'Failed to get session timelines', err);
         return [];
       }
     }
@@ -304,6 +335,8 @@ export function registerSessionReplayHandlers() {
       projectPath: string,
       fileName: string
     ): Promise<SessionTimeline | null> => {
+      if (!isPathSafe(projectPath)) return null;
+      if (!isSafeFileName(fileName)) return null;
       try {
         const encoded = encodeProjectPath(projectPath);
         const filePath = path.join(CLAUDE_PROJECTS_DIR, encoded, fileName);
@@ -350,7 +383,7 @@ export function registerSessionReplayHandlers() {
           actions: trimmedActions,
         };
       } catch (err) {
-        console.error('Failed to load session timeline detail:', err);
+        log('warn', 'session-replay', 'Failed to load session timeline detail', err);
         return null;
       }
     }

@@ -117,7 +117,7 @@ export default function PreviewToolbar({
         </button>
 
         {/* Separator */}
-        <div className="w-px h-4 bg-border-subtle mx-0.5" />
+        <div className="w-px h-4 bg-border-subtle mx-1" />
 
         {/* Viewport presets */}
         {(['desktop', 'tablet', 'mobile'] as const).map((v) => (
@@ -138,7 +138,7 @@ export default function PreviewToolbar({
         ))}
 
         {/* Separator */}
-        <div className="w-px h-4 bg-border-subtle mx-0.5" />
+        <div className="w-px h-4 bg-border-subtle mx-1" />
 
         {/* Console toggle */}
         <button
@@ -152,7 +152,7 @@ export default function PreviewToolbar({
         >
           <ConsoleIcon />
           {consoleCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] flex items-center justify-center px-0.5 rounded-full bg-accent text-[9px] font-bold text-white leading-none">
+            <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] flex items-center justify-center px-1 rounded-full bg-accent text-[9px] font-bold text-white leading-none">
               {consoleCount > 99 ? '99+' : consoleCount}
             </span>
           )}

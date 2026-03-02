@@ -7,13 +7,12 @@ import {
   unlinkSync,
 } from 'fs';
 import path from 'path';
-import os from 'os';
 import { randomUUID } from 'crypto';
 import { IPC_CHANNELS } from '../../shared/types';
 import type { ScreenshotEntry } from '../../shared/types';
 import { logSecurityEvent } from '../helpers/security-logger';
+import { isLocalhostUrl, sanitizeId, HOME } from '../helpers/path-safety';
 
-const HOME = os.homedir();
 const SCREENSHOTS_DIR = path.join(HOME, '.claude', 'studio', 'screenshots');
 const REQUESTS_DIR = path.join(HOME, '.claude', 'studio', 'requests');
 
@@ -26,7 +25,8 @@ function isAllowedImagePath(imagePath: string): boolean {
  * Ensure the screenshots directory exists for a given project.
  */
 function ensureDir(projectId: string): string {
-  const dir = path.join(SCREENSHOTS_DIR, projectId);
+  const safe = sanitizeId(projectId);
+  const dir = path.join(SCREENSHOTS_DIR, safe);
   mkdirSync(dir, { recursive: true });
   return dir;
 }
@@ -48,6 +48,12 @@ export function registerScreenshotHandlers() {
     ): Promise<ScreenshotEntry> => {
       const { url, label, projectId, viewport, commitHash, commitMessage } =
         opts;
+
+      // Validate URL — only allow localhost for security
+      if (!isLocalhostUrl(url)) {
+        logSecurityEvent('url-validation', 'high', 'Screenshot blocked: non-localhost URL', { url });
+        throw new Error('Only localhost URLs are allowed for screenshots');
+      }
 
       // Clamp viewport width for reasonable file sizes
       const width = Math.min(viewport.width, 1440);
@@ -116,7 +122,7 @@ export function registerScreenshotHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GET_SCREENSHOTS,
     async (_, projectId: string): Promise<ScreenshotEntry[]> => {
-      const dir = path.join(SCREENSHOTS_DIR, projectId);
+      const dir = path.join(SCREENSHOTS_DIR, sanitizeId(projectId));
 
       try {
         const files = readdirSync(dir).filter((f) => f.endsWith('.json'));
@@ -155,9 +161,9 @@ export function registerScreenshotHandlers() {
       _,
       opts: { projectId: string; screenshotId: string }
     ): Promise<boolean> => {
-      const dir = path.join(SCREENSHOTS_DIR, opts.projectId);
-      const pngPath = path.join(dir, `${opts.screenshotId}.png`);
-      const jsonPath = path.join(dir, `${opts.screenshotId}.json`);
+      const dir = path.join(SCREENSHOTS_DIR, sanitizeId(opts.projectId));
+      const pngPath = path.join(dir, `${sanitizeId(opts.screenshotId)}.png`);
+      const jsonPath = path.join(dir, `${sanitizeId(opts.screenshotId)}.json`);
 
       try {
         try { unlinkSync(pngPath); } catch { /* already gone */ }

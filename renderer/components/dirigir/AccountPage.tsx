@@ -109,7 +109,7 @@ const PlanCard = React.memo<PlanCardProps>(function PlanCard({ plan, isActive, o
         <span className="text-xs text-text-secondary font-mono">{plan.price}</span>
       </div>
 
-      <ul className="space-y-1.5 mb-4">
+      <ul className="space-y-1 mb-4">
         {plan.features.map((f) => (
           <li key={f.name} className="flex items-center gap-2 text-xs">
             <span className={f.included ? 'text-feedback-success' : 'text-text-tertiary'}>
@@ -123,13 +123,13 @@ const PlanCard = React.memo<PlanCardProps>(function PlanCard({ plan, isActive, o
       </ul>
 
       {isActive ? (
-        <span className="inline-block px-3 py-1.5 rounded-button text-xs font-medium bg-accent/10 text-accent">
+        <span className="inline-block px-3 py-1 rounded-button text-xs font-medium bg-accent/10 text-accent">
           Current plan
         </span>
       ) : (
         <button
           onClick={onUpgrade}
-          className="px-3 py-1.5 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+          className="px-3 py-1 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
         >
           Upgrade
         </button>
@@ -268,7 +268,7 @@ const AccountPage = React.memo(function AccountPage() {
       <Section title="Plan">
         <div className="flex items-center gap-2 mb-4">
           <span className="text-xs text-text-secondary">Current plan:</span>
-          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-accent/10 text-accent capitalize">
+          <span className="inline-block px-2 py-1 rounded-full text-xs font-semibold bg-accent/10 text-accent capitalize">
             {account.plan}
           </span>
         </div>
@@ -289,7 +289,7 @@ const AccountPage = React.memo(function AccountPage() {
       <Section title="Account Info">
         <div className="space-y-4">
           <div>
-            <label className="block text-xs text-text-secondary mb-1.5">Email (optional)</label>
+            <label className="block text-xs text-text-secondary mb-2">Email (optional)</label>
             <input
               type="email"
               value={emailDraft}
@@ -300,7 +300,7 @@ const AccountPage = React.memo(function AccountPage() {
           </div>
 
           <div>
-            <label className="block text-xs text-text-secondary mb-1.5">License Key</label>
+            <label className="block text-xs text-text-secondary mb-2">License Key</label>
             <input
               type="text"
               value={licenseDraft}

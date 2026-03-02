@@ -88,12 +88,12 @@ export default function LiveFeed({ entries, onClear }: LiveFeedProps) {
         {entries.map((entry, i) => (
           <div
             key={`${entry.timestamp}-${i}`}
-            className="flex items-start gap-2 px-3 py-1.5 hover:bg-surface-2 transition-colors border-b border-border-subtle/30"
+            className="flex items-start gap-2 px-3 py-1 hover:bg-surface-2 transition-colors border-b border-border-subtle/30"
           >
-            <span className="text-micro font-mono text-text-tertiary shrink-0 mt-0.5 w-[56px]">
+            <span className="text-micro font-mono text-text-tertiary shrink-0 mt-1 w-[56px]">
               {formatTime(entry.timestamp)}
             </span>
-            <span className={`text-micro font-mono font-semibold shrink-0 mt-0.5 w-[26px] ${getTypeColor(entry.type)}`}>
+            <span className={`text-micro font-mono font-semibold shrink-0 mt-1 w-[26px] ${getTypeColor(entry.type)}`}>
               {getTypeLabel(entry.type)}
             </span>
             <div className="min-w-0 flex-1">
@@ -101,7 +101,7 @@ export default function LiveFeed({ entries, onClear }: LiveFeedProps) {
                 {entry.summary}
               </p>
               {entry.projectPath && (
-                <p className="text-micro text-text-tertiary font-mono truncate mt-0.5">
+                <p className="text-micro text-text-tertiary font-mono truncate mt-1">
                   {shortenPath(entry.projectPath)}
                 </p>
               )}

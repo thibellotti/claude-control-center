@@ -48,7 +48,7 @@ export default function PreviewWorkspace({ project }: PreviewWorkspaceProps) {
               <div className="flex flex-col items-center justify-center h-full gap-3 px-6">
                 <p className="text-sm text-text-secondary text-center">No dev script found</p>
                 <p className="text-xs text-text-tertiary text-center">
-                  Add a <code className="px-1 py-0.5 bg-surface-2 rounded text-micro">dev</code> script to package.json
+                  Add a <code className="px-1 py-1 bg-surface-2 rounded text-micro">dev</code> script to package.json
                 </p>
               </div>
             )}
@@ -63,11 +63,11 @@ export default function PreviewWorkspace({ project }: PreviewWorkspaceProps) {
                 {/* Terminal header */}
                 <div className="flex items-center h-7 shrink-0 px-2 bg-surface-1 border-b border-border-subtle">
                   <TerminalIcon size={12} />
-                  <span className="text-micro font-medium text-text-secondary ml-1.5">Shell</span>
+                  <span className="text-micro font-medium text-text-secondary ml-1">Shell</span>
                   <div className="flex-1" />
                   <button
                     onClick={() => setShowTerminal(false)}
-                    className="p-0.5 rounded text-text-tertiary hover:text-text-primary transition-colors"
+                    className="p-1 rounded text-text-tertiary hover:text-text-primary transition-colors"
                     title="Collapse terminal"
                   >
                     <ChevronDownIcon />
@@ -94,7 +94,7 @@ export default function PreviewWorkspace({ project }: PreviewWorkspaceProps) {
         {!showTerminal && (
           <button
             onClick={() => setShowTerminal(true)}
-            className="flex items-center gap-1 px-2.5 h-9 text-[11px] font-medium text-text-tertiary hover:text-text-secondary transition-colors"
+            className="flex items-center gap-1 px-2 h-9 text-xs font-medium text-text-tertiary hover:text-text-secondary transition-colors"
             title="Show terminal"
           >
             <TerminalIcon size={12} />

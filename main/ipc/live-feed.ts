@@ -1,7 +1,8 @@
 import { ipcMain, BrowserWindow } from 'electron';
-import { watch, promises as fs, realpathSync } from 'fs';
+import { promises as fs, realpathSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
+import chokidar from 'chokidar';
 import { IPC_CHANNELS } from '../../shared/types';
 import { log } from '../helpers/logger';
 import { logSecurityEvent } from '../helpers/security-logger';
@@ -21,7 +22,7 @@ interface FeedEntry {
 }
 
 // Track file watchers and file positions
-const watchers = new Map<string, ReturnType<typeof watch>>();
+const watchers = new Map<string, chokidar.FSWatcher>();
 const filePositions = new Map<string, number>();
 let feedActive = false;
 let rescanInterval: ReturnType<typeof setInterval> | null = null;
@@ -239,7 +240,12 @@ async function startWatching() {
 
           const sessionId = file.name.replace('.jsonl', '');
 
-          const watcher = watch(file.path, () => {
+          const watcher = chokidar.watch(file.path, {
+            persistent: true,
+            ignoreInitial: true,
+            awaitWriteFinish: { stabilityThreshold: 100, pollInterval: 50 },
+          });
+          watcher.on('change', () => {
             processNewLines(file.path, projectPath, sessionId);
           });
 

@@ -13,6 +13,7 @@ import ProjectDetail from '../components/project/ProjectDetail';
 import dynamic from 'next/dynamic';
 
 const OrchestratorPage = dynamic(() => import('../components/orchestrator/OrchestratorPage'), { ssr: false });
+const VisualEditorPage = dynamic(() => import('../components/visual-editor/VisualEditorPage'), { ssr: false });
 import { useProjects, useProjectDetail } from '../hooks/useProjects';
 import { useCommandPalette } from '../hooks/useCommandPalette';
 import { useToast } from '../hooks/useToast';
@@ -67,7 +68,8 @@ export default function Home() {
 
   const { projects, loading } = useProjects(handleRefresh);
   const { sessions: activeSessions, getSessionForProject } = useActiveSessions();
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts' | 'workspaces' | 'usage' | 'sessions'>('dashboard');
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts' | 'workspaces' | 'usage' | 'sessions' | 'visual-editor'>('dashboard');
+  const [visualEditorParams, setVisualEditorParams] = useState<{ projectPath: string; previewUrl: string } | null>(null);
   const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(null);
   const { project: selectedProject } = useProjectDetail(
     currentPage === 'project' ? selectedProjectPath : null
@@ -90,8 +92,13 @@ export default function Home() {
     setCurrentPage('sessions');
   }, []);
 
+  const handleOpenVisualEditor = useCallback((projectPath: string, previewUrl: string) => {
+    setVisualEditorParams({ projectPath, previewUrl });
+    setCurrentPage('visual-editor');
+  }, []);
+
   const handleNavigate = useCallback((page: string) => {
-    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'workspaces' || page === 'usage' || page === 'sessions') {
+    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'workspaces' || page === 'usage' || page === 'sessions' || page === 'visual-editor') {
       setCurrentPage(page);
       setSelectedProjectPath(null);
       if (page !== 'sessions') {
@@ -127,6 +134,8 @@ export default function Home() {
       ? 'Usage & Costs'
       : currentPage === 'sessions'
       ? 'Orchestrator'
+      : currentPage === 'visual-editor'
+      ? 'Visual Editor'
       : selectedProject?.name || 'Project';
 
   const contextValue = useMemo(
@@ -135,11 +144,12 @@ export default function Home() {
       selectedProjectPath,
       onSelectProject: handleSelectProject,
       onOpenProject: handleLaunchProject,
+      onOpenVisualEditor: handleOpenVisualEditor,
       activeProjectPath: launchProject?.path || null,
       activeSessions: activeSessions || [],
       getSessionForProject: getSessionForProject || (() => null),
     }),
-    [projects, selectedProjectPath, handleSelectProject, handleLaunchProject, launchProject, activeSessions, getSessionForProject]
+    [projects, selectedProjectPath, handleSelectProject, handleLaunchProject, handleOpenVisualEditor, launchProject, activeSessions, getSessionForProject]
   );
 
   if (loading || onboardingLoading) {
@@ -168,7 +178,7 @@ export default function Home() {
         selectedProject={null}
         onNavigate={handleNavigate}
         onBack={() => handleNavigate('dashboard')}
-        currentPage={currentPage === 'project' ? 'dashboard' : currentPage as string}
+        currentPage={currentPage as string}
         pageTitle={pageTitle}
         onOpenSearch={() => setOpen(true)}
         activeProject={launchProject ? {
@@ -197,6 +207,16 @@ export default function Home() {
         {currentPage === 'sessions' && (
           <OrchestratorPage
             initialProject={launchProject ? { path: launchProject.path, mode: launchProject.mode as 'claude' | 'claude --dangerously-skip-permissions' } : undefined}
+          />
+        )}
+        {currentPage === 'visual-editor' && visualEditorParams && (
+          <VisualEditorPage
+            projectPath={visualEditorParams.projectPath}
+            previewUrl={visualEditorParams.previewUrl}
+            onExit={() => {
+              setVisualEditorParams(null);
+              setCurrentPage('dashboard');
+            }}
           />
         )}
         {currentPage === 'settings' && <SettingsPage />}

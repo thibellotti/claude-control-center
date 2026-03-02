@@ -22,6 +22,7 @@ import { registerLiveFeedHandlers, cleanupLiveFeed } from './ipc/live-feed'
 import { registerSupabaseHandlers } from './ipc/supabase-info'
 import { registerGitHubHandlers } from './ipc/github-info'
 import { registerRequestHandlers, cleanupRequests } from './ipc/requests'
+import { registerVisualEditorHandlers, cleanupVisualEditor } from './ipc/visual-editor'
 import { registerPageHandlers } from './ipc/pages'
 import { registerTemplateHandlers } from './ipc/templates'
 import { registerAccountHandlers } from './ipc/account'
@@ -62,6 +63,7 @@ if (isProd) {
   registerPageHandlers()
   registerTemplateHandlers()
   registerAccountHandlers()
+  registerVisualEditorHandlers()
 
   const mainWindow = createWindow('main', {
     width: 1400,
@@ -75,7 +77,7 @@ if (isProd) {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
-      sandbox: false, // needed for preload script
+      sandbox: true,
       webSecurity: true,
     },
   })
@@ -90,6 +92,7 @@ if (isProd) {
     cleanupTerminalSessions()
     cleanupLiveFeed()
     cleanupRequests()
+    cleanupVisualEditor()
   })
 
   if (isProd) {

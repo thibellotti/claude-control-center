@@ -79,9 +79,9 @@ function SessionCard({
       }`}
     >
       <p className="text-sm font-medium text-text-primary">{date}</p>
-      <p className="text-xs text-text-tertiary mt-0.5">{time}</p>
-      <div className="flex items-center gap-1.5 mt-2">
-        <span className="text-[11px] text-text-tertiary">{session.actionCount} entries</span>
+      <p className="text-xs text-text-tertiary mt-1">{time}</p>
+      <div className="flex items-center gap-1 mt-2">
+        <span className="text-xs text-text-tertiary">{session.actionCount} entries</span>
       </div>
     </button>
   );
@@ -109,7 +109,7 @@ function FilterBar({
         <button
           key={f.id}
           onClick={() => onChange(f.id)}
-          className={`px-3 py-1.5 rounded-button text-xs font-medium transition-colors ${
+          className={`px-3 py-1 rounded-button text-xs font-medium transition-colors ${
             filter === f.id
               ? 'bg-accent text-white'
               : 'bg-surface-2 text-text-tertiary hover:text-text-secondary'
@@ -117,7 +117,7 @@ function FilterBar({
         >
           {f.label}
           {counts[f.id] > 0 && (
-            <span className="ml-1.5 opacity-70">{counts[f.id]}</span>
+            <span className="ml-1 opacity-70">{counts[f.id]}</span>
           )}
         </button>
       ))}
@@ -208,7 +208,7 @@ export default function SessionReplay({ projectPath }: SessionReplayProps) {
                 <p className="text-sm font-medium text-text-primary truncate">
                   {formatTimeRange(selectedSession.startTime, selectedSession.endTime)}
                 </p>
-                <p className="text-xs text-text-tertiary font-mono truncate mt-0.5">
+                <p className="text-xs text-text-tertiary font-mono truncate mt-1">
                   {selectedSession.fileName}
                 </p>
               </div>

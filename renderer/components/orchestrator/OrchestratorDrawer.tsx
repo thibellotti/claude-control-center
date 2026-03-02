@@ -46,7 +46,7 @@ function FeedContent({ projectPath }: { projectPath: string | null }) {
           filtered.map((entry, i) => (
             <div
               key={`${entry.timestamp}-${i}`}
-              className="flex items-start gap-1.5 px-2.5 py-1 border-b border-border-subtle/20"
+              className="flex items-start gap-1 px-2 py-1 border-b border-border-subtle/20"
             >
               <span className="text-micro font-mono text-text-tertiary shrink-0 mt-px w-[50px]">
                 {new Date(entry.timestamp).toLocaleTimeString('en-US', {
@@ -63,7 +63,7 @@ function FeedContent({ projectPath }: { projectPath: string | null }) {
           ))
         )}
       </div>
-      <div className="flex items-center justify-between px-2.5 py-1 border-t border-border-subtle bg-surface-0 shrink-0">
+      <div className="flex items-center justify-between px-2 py-1 border-t border-border-subtle bg-surface-0 shrink-0">
         <span className="text-micro text-text-tertiary">{filtered.length} events</span>
         {filtered.length > 0 && (
           <span className="text-micro text-status-active font-medium">Live</span>
@@ -96,7 +96,7 @@ export default function OrchestratorDrawer({ open, projectPath, tasks }: Orchest
           <div className="flex border-b border-border-subtle shrink-0">
             <button
               onClick={() => setActiveTab('feed')}
-              className={`flex items-center gap-1.5 flex-1 px-3 py-2 text-xs font-medium transition-colors ${
+              className={`flex items-center gap-1 flex-1 px-3 py-2 text-xs font-medium transition-colors ${
                 activeTab === 'feed'
                   ? 'bg-surface-1 text-text-primary border-b-2 border-accent'
                   : 'text-text-tertiary hover:text-text-secondary'
@@ -107,7 +107,7 @@ export default function OrchestratorDrawer({ open, projectPath, tasks }: Orchest
             </button>
             <button
               onClick={() => setActiveTab('tasks')}
-              className={`flex items-center gap-1.5 flex-1 px-3 py-2 text-xs font-medium transition-colors ${
+              className={`flex items-center gap-1 flex-1 px-3 py-2 text-xs font-medium transition-colors ${
                 activeTab === 'tasks'
                   ? 'bg-surface-1 text-text-primary border-b-2 border-accent'
                   : 'text-text-tertiary hover:text-text-secondary'

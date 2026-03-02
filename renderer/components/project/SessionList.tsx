@@ -43,7 +43,7 @@ export default function SessionList({ projectPath }: SessionListProps) {
   }
 
   return (
-    <div className="space-y-1.5 py-6">
+    <div className="space-y-1 py-6">
       {sessions.map((session, idx) => {
         const { date, time } = formatSessionDate(session.timestamp);
         return (
@@ -53,7 +53,7 @@ export default function SessionList({ projectPath }: SessionListProps) {
           >
             <div className="shrink-0 text-right w-24">
               <p className="text-xs text-text-secondary">{date}</p>
-              <p className="text-[11px] text-text-tertiary">{time}</p>
+              <p className="text-xs text-text-tertiary">{time}</p>
             </div>
             <div className="w-px h-8 bg-border-subtle" />
             <p className="text-sm text-text-secondary truncate flex-1">

@@ -222,8 +222,13 @@ async function buildProjectSummary(
     const gitDir = path.join(projectPath, '.git');
     const hasGitDir = await pathExists(gitDir);
 
+    // Create a single simpleGit instance to reuse for both getGitInfo and getProjectHealth
+    const gitInstance = hasGitDir
+      ? simpleGit({ baseDir: projectPath, timeout: { block: 5000 } })
+      : null;
+
     const [git, packageJson, tasks, teams] = await Promise.all([
-      getGitInfo(projectPath),
+      getGitInfo(projectPath, gitInstance),
       readPackageJson(projectPath),
       getTasksForProject(projectPath),
       getTeamsForProject(projectPath),
@@ -231,8 +236,7 @@ async function buildProjectSummary(
 
     // Get project health (only meaningful for git repos)
     let health: ProjectHealth | null = null;
-    if (hasGitDir) {
-      const gitInstance = simpleGit({ baseDir: projectPath, timeout: { block: 5000 } });
+    if (hasGitDir && gitInstance) {
       health = await getProjectHealth(projectPath, gitInstance);
     }
 
@@ -283,12 +287,15 @@ async function buildProjectSummary(
   }
 }
 
-async function getGitInfo(projectPath: string): Promise<GitInfo | null> {
+async function getGitInfo(
+  projectPath: string,
+  existingGit?: ReturnType<typeof simpleGit> | null
+): Promise<GitInfo | null> {
   try {
     const gitDir = path.join(projectPath, '.git');
     if (!(await pathExists(gitDir))) return null;
 
-    const git = simpleGit({ baseDir: projectPath, timeout: { block: 5000 } });
+    const git = existingGit || simpleGit({ baseDir: projectPath, timeout: { block: 5000 } });
 
     const [statusResult, logResult, remotes] = await Promise.all([
       git.status().catch(() => null),

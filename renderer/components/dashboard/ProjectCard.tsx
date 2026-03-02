@@ -87,7 +87,7 @@ export default memo(function ProjectCard({
               </span>
             )}
           </h3>
-          <p className="text-[11px] font-mono text-text-tertiary truncate mt-0.5">
+          <p className="text-xs font-mono text-text-tertiary truncate mt-1">
             {shortenPath(project.path)}
           </p>
         </div>
@@ -99,7 +99,7 @@ export default memo(function ProjectCard({
         <div className="mb-3 space-y-1">
           <GitBadge branch={project.git.branch} status={project.git.status} />
           {project.git.lastCommit && (
-            <p className="text-[11px] text-text-tertiary truncate pl-0.5">
+            <p className="text-xs text-text-tertiary truncate pl-1">
               {project.git.lastCommit.message}
             </p>
           )}
@@ -112,7 +112,7 @@ export default memo(function ProjectCard({
           {stack.map((tag) => (
             <span
               key={tag}
-              className="px-1.5 py-0.5 rounded bg-surface-3 text-micro font-mono text-text-tertiary"
+              className="px-1 py-1 rounded bg-surface-3 text-micro font-mono text-text-tertiary"
             >
               {tag}
             </span>
@@ -121,7 +121,7 @@ export default memo(function ProjectCard({
       )}
 
       {/* Stats row */}
-      <div className="flex items-center gap-3 text-[11px] text-text-tertiary">
+      <div className="flex items-center gap-3 text-xs text-text-tertiary">
         {activeTasks > 0 && (
           <span>{activeTasks} task{activeTasks !== 1 ? 's' : ''}</span>
         )}
@@ -145,7 +145,7 @@ export default memo(function ProjectCard({
                 e.stopPropagation();
                 onOpenProject(project.path, 'claude');
               }}
-              className="p-1.5 rounded-button bg-surface-3 text-text-tertiary hover:text-accent hover:bg-surface-4 transition-colors"
+              className="p-1 rounded-button bg-surface-3 text-text-tertiary hover:text-accent hover:bg-surface-4 transition-colors"
               title="Open with Claude"
             >
               <ClaudeIcon size={14} />
@@ -155,7 +155,7 @@ export default memo(function ProjectCard({
                 e.stopPropagation();
                 onOpenProject(project.path, 'claude --dangerously-skip-permissions');
               }}
-              className="p-1.5 rounded-button bg-surface-3 text-feedback-warning/60 hover:text-feedback-warning hover:bg-surface-4 transition-colors"
+              className="p-1 rounded-button bg-surface-3 text-feedback-warning/60 hover:text-feedback-warning hover:bg-surface-4 transition-colors"
               title="Open with Autopilot"
             >
               <ClaudeIcon size={14} />
@@ -167,7 +167,7 @@ export default memo(function ProjectCard({
             e.stopPropagation();
             onOpenEditor(project.path);
           }}
-          className="p-1.5 rounded-button bg-surface-3 text-text-tertiary hover:text-text-primary hover:bg-surface-4 transition-colors"
+          className="p-1 rounded-button bg-surface-3 text-text-tertiary hover:text-text-primary hover:bg-surface-4 transition-colors"
           title="Open in editor"
         >
           <PencilIcon size={14} />

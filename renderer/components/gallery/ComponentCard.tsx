@@ -12,7 +12,7 @@ export default memo(function ComponentCard({ component }: ComponentCardProps) {
   return (
     <div className="bg-surface-1 border border-border-subtle rounded-lg p-3 hover:border-border-default transition-colors">
       {/* Header row */}
-      <div className="flex items-start justify-between gap-2 mb-1.5">
+      <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             {component.hasTests && (
@@ -25,19 +25,19 @@ export default memo(function ComponentCard({ component }: ComponentCardProps) {
               {component.name}
             </span>
           </div>
-          <p className="text-xs font-mono text-text-tertiary truncate mt-0.5">
+          <p className="text-xs font-mono text-text-tertiary truncate mt-1">
             {component.relativePath}
           </p>
         </div>
       </div>
 
       {/* Badges row */}
-      <div className="flex items-center gap-1.5 mt-2">
-        <span className="px-1.5 py-0.5 rounded text-micro font-medium bg-surface-3 text-text-secondary">
+      <div className="flex items-center gap-1 mt-2">
+        <span className="px-1 py-1 rounded text-micro font-medium bg-surface-3 text-text-secondary">
           {component.exportType}
         </span>
         {component.props.length > 0 && (
-          <span className="px-1.5 py-0.5 rounded text-micro font-medium bg-accent-muted text-accent">
+          <span className="px-1 py-1 rounded text-micro font-medium bg-accent-muted text-accent">
             {component.props.length} prop{component.props.length !== 1 ? 's' : ''}
           </span>
         )}
@@ -51,18 +51,18 @@ export default memo(function ComponentCard({ component }: ComponentCardProps) {
         <div className="mt-2 pt-2 border-t border-border-subtle">
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1 text-[11px] text-text-tertiary hover:text-text-secondary transition-colors w-full"
+            className="flex items-center gap-1 text-xs text-text-tertiary hover:text-text-secondary transition-colors w-full"
           >
             <ChevronDownIcon className={`transition-transform ${expanded ? 'rotate-180' : ''}`} size={12} />
             <span>Props</span>
           </button>
 
           {expanded && (
-            <div className="mt-1.5 space-y-1">
+            <div className="mt-1 space-y-1">
               {component.props.map((prop) => (
                 <div
                   key={prop.name}
-                  className="flex items-center gap-2 text-[11px] pl-4"
+                  className="flex items-center gap-2 text-xs pl-4"
                 >
                   <div className="flex items-center gap-1 min-w-0">
                     {prop.required && (

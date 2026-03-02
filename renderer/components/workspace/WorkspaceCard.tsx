@@ -50,7 +50,7 @@ export default memo(function WorkspaceCard({
             <h3 className="text-sm font-medium text-text-primary truncate">
               {workspace.name}
             </h3>
-            <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-surface-3 text-micro font-medium text-text-secondary">
+            <span className="shrink-0 px-1 py-1 rounded-full bg-surface-3 text-micro font-medium text-text-secondary">
               {workspaceProjects.length}
             </span>
           </div>
@@ -103,7 +103,7 @@ export default memo(function WorkspaceCard({
                     e.stopPropagation();
                     onRemoveProject(workspace.id, project.path);
                   }}
-                  className="shrink-0 p-0.5 rounded-button text-text-tertiary hover:text-feedback-error hover:bg-feedback-error-muted transition-colors opacity-0 group-hover/project:opacity-100"
+                  className="shrink-0 p-1 rounded-button text-text-tertiary hover:text-feedback-error hover:bg-feedback-error-muted transition-colors opacity-0 group-hover/project:opacity-100"
                   aria-label={`Remove ${project.name} from workspace`}
                   title="Remove from workspace"
                 >
@@ -119,7 +119,7 @@ export default memo(function WorkspaceCard({
                   e.stopPropagation();
                   handleCardClick();
                 }}
-                className="flex items-center gap-1 px-2 py-1 text-[11px] text-text-tertiary hover:text-text-secondary transition-colors"
+                className="flex items-center gap-1 px-2 py-1 text-xs text-text-tertiary hover:text-text-secondary transition-colors"
               >
                 <span
                   className={`transition-transform duration-150 ${expanded ? 'rotate-180' : ''}`}

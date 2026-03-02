@@ -1,31 +1,18 @@
 import { ipcMain } from 'electron';
 import { spawn, exec, execFileSync } from 'child_process';
 import { promisify } from 'util';
-import { promises as fsAsync, existsSync, readFileSync, realpathSync } from 'fs';
+import { promises as fsAsync, existsSync, readFileSync } from 'fs';
 import path from 'path';
-import os from 'os';
 import { IPC_CHANNELS, DeployConfig, DeployResult, VercelDeployment, VercelProjectInfo } from '../../shared/types';
 import { log } from '../helpers/logger';
 import { logSecurityEvent } from '../helpers/security-logger';
 import { cleanEnv } from './terminal';
+import { isPathSafe, HOME } from '../helpers/path-safety';
 
 const execAsync = promisify(exec);
 
-const HOME = os.homedir();
-const REAL_HOME = realpathSync(HOME);
-
 const DEPLOY_TIMEOUT_MS = 120_000;
 const MAX_OUTPUT_BYTES = 50 * 1024 * 1024; // 50 MB
-
-function isProjectPathSafe(projectPath: string): boolean {
-  const resolved = path.resolve(projectPath);
-  try {
-    const real = realpathSync(resolved);
-    return real.startsWith(REAL_HOME);
-  } catch {
-    return resolved.startsWith(REAL_HOME);
-  }
-}
 const DEPLOYS_DIR = path.join(HOME, '.claude', 'studio', 'deploys');
 
 // Ensure the deploys directory exists
@@ -79,7 +66,7 @@ export function registerDeployHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.DETECT_DEPLOY_PROVIDER,
     async (_event, projectPath: string): Promise<DeployConfig> => {
-      if (!isProjectPathSafe(projectPath)) {
+      if (!isPathSafe(projectPath)) {
         logSecurityEvent('path-traversal', 'high', 'Deploy provider detection blocked for unsafe path', { projectPath });
         throw new Error('Access denied: project path is outside the home directory');
       }
@@ -130,7 +117,7 @@ export function registerDeployHandlers() {
       projectPath: string,
       provider: 'vercel' | 'netlify'
     ): Promise<DeployResult> => {
-      if (!isProjectPathSafe(projectPath)) {
+      if (!isPathSafe(projectPath)) {
         logSecurityEvent('command-injection', 'critical', 'Deploy blocked for unsafe project path', { projectPath, provider });
         return {
           success: false,
@@ -242,7 +229,7 @@ export function registerDeployHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GET_DEPLOY_HISTORY,
     async (_event, projectPath: string): Promise<DeployResult[]> => {
-      if (!isProjectPathSafe(projectPath)) {
+      if (!isPathSafe(projectPath)) {
         logSecurityEvent('path-traversal', 'high', 'Deploy history access blocked for unsafe path', { projectPath });
         throw new Error('Access denied: project path is outside the home directory');
       }
@@ -257,7 +244,7 @@ export function registerDeployHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GET_VERCEL_DEPLOYMENTS,
     async (_event, projectPath: string): Promise<{ deployments: VercelDeployment[] }> => {
-      if (!isProjectPathSafe(projectPath)) {
+      if (!isPathSafe(projectPath)) {
         logSecurityEvent('path-traversal', 'high', 'Vercel deployments access blocked for unsafe path', { projectPath });
         throw new Error('Access denied: project path is outside the home directory');
       }
@@ -294,7 +281,7 @@ export function registerDeployHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GET_VERCEL_PROJECT_INFO,
     async (_event, projectPath: string): Promise<VercelProjectInfo> => {
-      if (!isProjectPathSafe(projectPath)) {
+      if (!isPathSafe(projectPath)) {
         logSecurityEvent('path-traversal', 'high', 'Vercel project info access blocked for unsafe path', { projectPath });
         throw new Error('Access denied: project path is outside the home directory');
       }

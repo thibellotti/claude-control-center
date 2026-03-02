@@ -67,7 +67,7 @@ export default function HandoffExport({ projectPath }: HandoffExportProps) {
           </p>
           <button
             onClick={generate}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+            className="flex items-center gap-1 px-4 py-2 rounded-md text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
           >
             Generate Handoff
           </button>
@@ -101,7 +101,7 @@ export default function HandoffExport({ projectPath }: HandoffExportProps) {
           <button
             onClick={() => exportHandoff('markdown')}
             disabled={isExporting}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50"
           >
             <DownloadIcon />
             {isExporting ? 'Saving...' : 'Save as HANDOFF.md'}
@@ -109,14 +109,14 @@ export default function HandoffExport({ projectPath }: HandoffExportProps) {
           <button
             onClick={() => exportHandoff('json')}
             disabled={isExporting}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-surface-2 border border-border-subtle text-text-secondary hover:text-text-primary hover:border-border-default transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium bg-surface-2 border border-border-subtle text-text-secondary hover:text-text-primary hover:border-border-default transition-colors disabled:opacity-50"
           >
             <DownloadIcon />
             Save as JSON
           </button>
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-surface-2 border border-border-subtle text-text-secondary hover:text-text-primary hover:border-border-default transition-colors"
+            className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium bg-surface-2 border border-border-subtle text-text-secondary hover:text-text-primary hover:border-border-default transition-colors"
           >
             {copied ? (
               <>
@@ -133,7 +133,7 @@ export default function HandoffExport({ projectPath }: HandoffExportProps) {
           <button
             onClick={generate}
             disabled={isGenerating}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-surface-2 border border-border-subtle text-text-secondary hover:text-text-primary hover:border-border-default transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium bg-surface-2 border border-border-subtle text-text-secondary hover:text-text-primary hover:border-border-default transition-colors disabled:opacity-50"
           >
             Regenerate
           </button>
@@ -163,7 +163,7 @@ export default function HandoffExport({ projectPath }: HandoffExportProps) {
         {(Object.keys(SECTION_LABELS) as (keyof HandoffSections)[]).map((key) => (
           <label
             key={key}
-            className="flex items-center gap-1.5 cursor-pointer select-none"
+            className="flex items-center gap-1 cursor-pointer select-none"
           >
             <input
               type="checkbox"

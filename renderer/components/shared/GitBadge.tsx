@@ -8,7 +8,7 @@ interface GitBadgeProps {
 
 export default memo(function GitBadge({ branch, status }: GitBadgeProps) {
   return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-3 text-[11px] font-mono text-text-secondary min-w-0 overflow-hidden max-w-[150px]">
+    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-surface-3 text-xs font-mono text-text-secondary min-w-0 overflow-hidden max-w-[150px]">
       <BranchIcon size={12} />
       <span className="truncate">{branch}</span>
       <span

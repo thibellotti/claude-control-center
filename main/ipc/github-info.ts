@@ -1,8 +1,10 @@
 import { ipcMain } from 'electron';
 import { promisify } from 'util';
 import { IPC_CHANNELS, GitHubRepoInfo, GitHubCommitInfo, GitHubPRInfo } from '../../shared/types';
+import { isPathSafe } from '../helpers/path-safety';
+import { exec } from 'child_process';
 
-const execAsync = promisify(require('child_process').exec);
+const execAsync = promisify(exec);
 
 /**
  * Parse owner/repo from a GitHub remote URL.
@@ -30,6 +32,7 @@ export function registerGitHubHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GET_GITHUB_INFO,
     async (_event, projectPath: string): Promise<{ detected: false } | GitHubRepoInfo> => {
+      if (!isPathSafe(projectPath)) return { detected: false };
       // Step 1: Get remote URL
       let remoteUrl: string;
       try {

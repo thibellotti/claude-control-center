@@ -39,7 +39,7 @@ export default function EmbeddedTerminal({ projectPath }: EmbeddedTerminalProps)
           <button
             key={session.id}
             onClick={() => setActiveId(session.id)}
-            className={`flex items-center gap-1.5 px-3 h-full text-[11px] font-medium border-r border-border-subtle transition-colors group shrink-0 ${
+            className={`flex items-center gap-1 px-3 h-full text-xs font-medium border-r border-border-subtle transition-colors group shrink-0 ${
               activeId === session.id
                 ? 'bg-terminal-bg text-white'
                 : 'text-text-tertiary hover:text-text-secondary hover:bg-surface-2'
@@ -57,7 +57,7 @@ export default function EmbeddedTerminal({ projectPath }: EmbeddedTerminalProps)
         ))}
 
         {/* New session buttons */}
-        <div className="flex items-center gap-0.5 px-1.5 shrink-0">
+        <div className="flex items-center gap-1 px-1 shrink-0">
           <button
             onClick={handleNewClaude}
             className="flex items-center gap-1 px-2 py-1 rounded text-micro text-text-tertiary hover:text-text-secondary hover:bg-surface-2 transition-colors"

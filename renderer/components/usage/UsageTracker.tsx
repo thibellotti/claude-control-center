@@ -41,7 +41,7 @@ function TokensIcon() {
       <div className="flex gap-[2px]">
         <div className="w-[3px] h-3 bg-blue-400/80 rounded-full" />
         <div className="w-[3px] h-2 bg-blue-400/50 rounded-full mt-1" />
-        <div className="w-[3px] h-3.5 bg-blue-400/80 rounded-full -mt-0.5" />
+        <div className="w-[3px] h-3.5 bg-blue-400/80 rounded-full -mt-1" />
       </div>
     </div>
   );
@@ -142,7 +142,7 @@ export default function UsageTracker() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold text-text-primary">Usage & Costs</h1>
-          <p className="text-sm text-text-tertiary mt-0.5">
+          <p className="text-sm text-text-tertiary mt-1">
             Estimated API usage from Claude session data
           </p>
         </div>
@@ -161,7 +161,7 @@ export default function UsageTracker() {
           <button
             key={range.value}
             onClick={() => setDateRange(range.value)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+            className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
               dateRange === range.value
                 ? 'bg-accent text-white'
                 : 'bg-surface-2 text-text-secondary hover:bg-surface-3 hover:text-text-primary'
@@ -178,7 +178,7 @@ export default function UsageTracker() {
           {/* Div-based chart illustration */}
           <div className="relative mb-6">
             {/* Background circle */}
-            <div className="w-20 h-20 rounded-full bg-surface-2 flex items-end justify-center pb-4 gap-1.5">
+            <div className="w-20 h-20 rounded-full bg-surface-2 flex items-end justify-center pb-4 gap-1">
               {/* Bars */}
               <div className="w-2.5 h-4 bg-surface-3 rounded-t" />
               <div className="w-2.5 h-7 bg-surface-3 rounded-t" />
@@ -190,7 +190,7 @@ export default function UsageTracker() {
             <div className="absolute -bottom-1 -left-2 w-1.5 h-1.5 rounded-full bg-surface-3" />
           </div>
           <span className="text-text-secondary text-sm font-medium">No usage data found</span>
-          <span className="text-text-tertiary text-xs mt-1.5 max-w-xs text-center leading-relaxed">
+          <span className="text-text-tertiary text-xs mt-1 max-w-xs text-center leading-relaxed">
             Usage data is parsed from Claude session files in ~/.claude/projects/
           </span>
         </div>
@@ -208,16 +208,16 @@ export default function UsageTracker() {
                 {formatCost(summary.totalCostUSD)}
               </div>
               {costTrend !== null && (
-                <div className="mt-1.5 flex items-center gap-1">
+                <div className="mt-1 flex items-center gap-1">
                   <span
-                    className={`text-[10px] font-medium ${
+                    className={`text-micro font-medium ${
                       costTrend > 0 ? 'text-red-400' : costTrend < 0 ? 'text-emerald-400' : 'text-text-tertiary'
                     }`}
                   >
                     {costTrend > 0 ? '+' : ''}
                     {costTrend.toFixed(0)}%
                   </span>
-                  <span className="text-[10px] text-text-tertiary">vs prev period</span>
+                  <span className="text-micro text-text-tertiary">vs prev period</span>
                 </div>
               )}
             </div>
@@ -231,7 +231,7 @@ export default function UsageTracker() {
               <div className="text-xl font-semibold text-text-primary">
                 {formatTokens(summary.totalInputTokens + summary.totalOutputTokens)}
               </div>
-              <div className="mt-1.5 flex items-center gap-2 text-[10px] text-text-tertiary">
+              <div className="mt-1 flex items-center gap-2 text-micro text-text-tertiary">
                 <span>
                   In <span className="text-text-secondary">{formatTokens(summary.totalInputTokens)}</span>
                 </span>
@@ -251,7 +251,7 @@ export default function UsageTracker() {
               <div className="text-xl font-semibold text-text-primary">
                 {summary.totalSessions.toLocaleString()}
               </div>
-              <div className="mt-1.5 text-[10px] text-text-tertiary">
+              <div className="mt-1 text-micro text-text-tertiary">
                 ~{avgSessionsPerDay.toFixed(1)} per day
               </div>
             </div>
@@ -265,7 +265,7 @@ export default function UsageTracker() {
               <div className="text-xl font-semibold text-text-primary">
                 {formatCost(avgCostPerSession)}
               </div>
-              <div className="mt-1.5 text-[10px] text-text-tertiary">
+              <div className="mt-1 text-micro text-text-tertiary">
                 ~{formatTokens(avgTokensPerSession)} tokens
               </div>
             </div>
@@ -278,7 +278,7 @@ export default function UsageTracker() {
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setChartMode('cost')}
-                  className={`px-2.5 py-1 text-xs rounded-button transition-colors ${
+                  className={`px-2 py-1 text-xs rounded-button transition-colors ${
                     chartMode === 'cost'
                       ? 'bg-surface-3 text-text-primary'
                       : 'text-text-tertiary hover:text-text-secondary'
@@ -288,7 +288,7 @@ export default function UsageTracker() {
                 </button>
                 <button
                   onClick={() => setChartMode('tokens')}
-                  className={`px-2.5 py-1 text-xs rounded-button transition-colors ${
+                  className={`px-2 py-1 text-xs rounded-button transition-colors ${
                     chartMode === 'tokens'
                       ? 'bg-surface-3 text-text-primary'
                       : 'text-text-tertiary hover:text-text-secondary'
@@ -306,7 +306,7 @@ export default function UsageTracker() {
             <h2 className="text-sm font-medium text-text-secondary mb-3">Project Breakdown</h2>
             <div className="bg-surface-1 rounded-lg border border-border-subtle overflow-hidden">
               {/* Table header */}
-              <div className="grid grid-cols-[1fr_60px_80px_100px_100px_90px] gap-4 px-4 py-2.5 border-b border-border-subtle text-xs font-medium text-text-tertiary uppercase tracking-wider">
+              <div className="grid grid-cols-[1fr_60px_80px_100px_100px_90px] gap-4 px-4 py-2 border-b border-border-subtle text-xs font-medium text-text-tertiary uppercase tracking-wider">
                 <span>Project</span>
                 <span className="text-right">%</span>
                 <span className="text-right">Sessions</span>
@@ -321,7 +321,7 @@ export default function UsageTracker() {
                 return (
                   <div
                     key={project.projectPath}
-                    className={`grid grid-cols-[1fr_60px_80px_100px_100px_90px] gap-4 px-4 py-2.5 text-sm ${
+                    className={`grid grid-cols-[1fr_60px_80px_100px_100px_90px] gap-4 px-4 py-2 text-sm ${
                       i % 2 === 0 ? 'bg-surface-1' : 'bg-surface-2/50'
                     }`}
                   >

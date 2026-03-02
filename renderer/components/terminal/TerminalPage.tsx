@@ -63,14 +63,14 @@ export default function TerminalPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={handleNewTerminal}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-button text-xs font-medium bg-surface-3 text-text-secondary hover:text-text-primary hover:bg-surface-4 transition-colors"
+            className="flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium bg-surface-3 text-text-secondary hover:text-text-primary hover:bg-surface-4 transition-colors"
           >
             <PlusIcon />
             Terminal
           </button>
           <button
             onClick={() => handleNewClaudeSession()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+            className="flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
           >
             <PlusIcon />
             Claude Session
@@ -99,7 +99,7 @@ export default function TerminalPage() {
             <button
               key={session.id}
               onClick={() => setActiveId(session.id)}
-              className={`group flex items-center gap-1.5 px-3 py-1.5 text-xs border-b-2 transition-colors shrink-0 ${
+              className={`group flex items-center gap-1 px-3 py-1 text-xs border-b-2 transition-colors shrink-0 ${
                 activeId === session.id
                   ? 'border-accent text-text-primary bg-surface-1'
                   : 'border-transparent text-text-tertiary hover:text-text-secondary hover:bg-surface-1'
@@ -135,14 +135,14 @@ export default function TerminalPage() {
                 <div className="flex items-center justify-center gap-3">
                   <button
                     onClick={handleNewTerminal}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-button text-xs font-medium bg-surface-2 border border-border-subtle text-text-secondary hover:text-text-primary hover:border-border-default transition-colors"
+                    className="flex items-center gap-1 px-4 py-2 rounded-button text-xs font-medium bg-surface-2 border border-border-subtle text-text-secondary hover:text-text-primary hover:border-border-default transition-colors"
                   >
                     <PlusIcon />
                     Terminal
                   </button>
                   <button
                     onClick={() => handleNewClaudeSession()}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+                    className="flex items-center gap-1 px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
                   >
                     <PlusIcon />
                     Claude Session

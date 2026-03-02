@@ -64,7 +64,7 @@ const RequestBar = React.memo(function RequestBar({
       <div className="bg-surface-1/95 backdrop-blur-xl border border-border-default rounded-card shadow-lg">
         {/* Processing status */}
         {isProcessing && (
-          <div className="flex items-center gap-2 px-4 py-2.5 text-sm">
+          <div className="flex items-center gap-2 px-4 py-2 text-sm">
             <span className="shrink-0 w-2 h-2 rounded-full bg-accent animate-pulse" />
             <span className="text-text-secondary truncate flex-1">
               {activeRequestPrompt || 'Processing...'}
@@ -79,12 +79,12 @@ const RequestBar = React.memo(function RequestBar({
         {!isOpen && !isProcessing && (
           <button
             onClick={() => setIsOpen(true)}
-            className="flex items-center gap-2 w-full px-4 py-2.5 text-text-tertiary text-sm cursor-pointer"
+            className="flex items-center gap-2 w-full px-4 py-2 text-text-tertiary text-sm cursor-pointer"
           >
             <span className="flex-1 text-left">
               Describe what you want to change...
             </span>
-            <kbd className="px-1.5 py-0.5 rounded bg-surface-3 border border-border-subtle text-micro font-mono text-text-tertiary">
+            <kbd className="px-1 py-1 rounded bg-surface-3 border border-border-subtle text-micro font-mono text-text-tertiary">
               {'\u2318'}K
             </kbd>
           </button>
@@ -108,7 +108,7 @@ const RequestBar = React.memo(function RequestBar({
             {/* Bottom bar */}
             <div className="flex items-center justify-between px-4 py-2 border-t border-border-subtle">
               {/* Attachment placeholders */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <button className="px-2 py-1 rounded-button text-micro text-text-tertiary hover:text-text-secondary hover:bg-surface-2 transition-colors">
                   Figma
                 </button>
@@ -121,7 +121,7 @@ const RequestBar = React.memo(function RequestBar({
               <button
                 onClick={handleSubmit}
                 disabled={!prompt.trim() || isProcessing}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover disabled:opacity-50 transition-colors"
+                className="flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover disabled:opacity-50 transition-colors"
               >
                 Go
               </button>

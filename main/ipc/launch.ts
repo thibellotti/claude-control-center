@@ -1,29 +1,9 @@
 import { ipcMain, shell } from 'electron';
 import { execFile } from 'child_process';
-import { realpathSync } from 'fs';
-import path from 'path';
-import os from 'os';
 import { IPC_CHANNELS } from '../../shared/types';
 import { log } from '../helpers/logger';
 import { logSecurityEvent } from '../helpers/security-logger';
-
-const HOME = os.homedir();
-let REAL_HOME: string;
-try {
-  REAL_HOME = realpathSync(HOME);
-} catch {
-  REAL_HOME = HOME;
-}
-
-function isPathSafe(projectPath: string): boolean {
-  const resolved = path.resolve(projectPath);
-  try {
-    const real = realpathSync(resolved);
-    return real.startsWith(REAL_HOME);
-  } catch {
-    return resolved.startsWith(REAL_HOME);
-  }
-}
+import { isPathSafe } from '../helpers/path-safety';
 
 export function registerLaunchHandlers() {
   ipcMain.handle(IPC_CHANNELS.OPEN_IN_TERMINAL, async (_, projectPath: string) => {

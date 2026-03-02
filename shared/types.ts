@@ -98,25 +98,12 @@ export interface ClaudeSettings {
   enabledPlugins: Record<string, boolean>;
 }
 
-export interface RefreshEvent {
-  refresh: boolean;
-  hints?: string[];
-}
-
 export interface ClaudeMdBlock {
   id: string;
   type: 'heading' | 'rule' | 'text' | 'list' | 'code';
   content: string;
   level?: number;
   language?: string;
-}
-
-export interface PreviewState {
-  url: string | null;
-  isRunning: boolean;
-  port: number | null;
-  output: string[];
-  error: string | null;
 }
 
 export interface Workspace {
@@ -345,6 +332,61 @@ export interface TranslatedFeedEntry {
   requestId: string;
 }
 
+// -- Visual Editor --
+
+export interface SelectedElement {
+  selector: string;
+  tagName: string;
+  className: string;
+  textContent: string;
+  computedStyles: Record<string, string>;
+  boundingRect: { x: number; y: number; width: number; height: number };
+  reactComponent?: string;
+  reactProps?: Record<string, unknown>;
+  reactFiber: boolean;
+  sourceFile?: string;
+  sourceLine?: number;
+}
+
+export type VisualActionType = 'prop-change' | 'style-change' | 'reorder' | 'prompt';
+
+export interface VisualAction {
+  id: string;
+  type: VisualActionType;
+  element: SelectedElement;
+  // prop-change
+  propName?: string;
+  oldValue?: string;
+  newValue?: string;
+  // style-change
+  oldClass?: string;
+  newClass?: string;
+  // reorder
+  targetSelector?: string;
+  position?: 'before' | 'after';
+  // prompt
+  userPrompt?: string;
+  attachments?: string[];
+}
+
+export interface VisualCheckpoint {
+  id: string;
+  timestamp: number;
+  action: VisualAction;
+  stashRef: string;
+  status: 'applied' | 'undone';
+}
+
+export interface VisualEditorState {
+  active: boolean;
+  selectedElement: SelectedElement | null;
+  checkpoints: VisualCheckpoint[];
+  undoIndex: number;
+  isApplying: boolean;
+  lastError: string | null;
+  viewport: 'desktop' | 'tablet' | 'mobile';
+}
+
 // -- Orchestrator --
 
 export type LayoutPreset = 'focus' | 'split' | 'quad' | 'main-side';
@@ -463,4 +505,11 @@ export const IPC_CHANNELS = {
   SAVE_ACCOUNT: 'save-account',
   GET_PLAN_LIMITS: 'get-plan-limits',
   OPEN_BILLING_PORTAL: 'open-billing-portal',
+  // Visual Editor
+  VISUAL_EDITOR_INJECT: 'visual-editor:inject',
+  VISUAL_EDITOR_REMOVE: 'visual-editor:remove',
+  VISUAL_EDITOR_EXECUTE: 'visual-editor:execute',
+  VISUAL_EDITOR_UNDO: 'visual-editor:undo',
+  VISUAL_EDITOR_REDO: 'visual-editor:redo',
+  VISUAL_EDITOR_CHECKPOINT: 'visual-editor:checkpoint',
 } as const;

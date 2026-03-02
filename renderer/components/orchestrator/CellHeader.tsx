@@ -26,7 +26,7 @@ const typeLabels: Record<string, string> = {
 export default function CellHeader({ cell, isActive, onClose, onFocus }: CellHeaderProps) {
   return (
     <div
-      className={`flex items-center gap-2 px-2.5 py-1.5 border-b shrink-0 cursor-pointer transition-colors ${
+      className={`flex items-center gap-2 px-2 py-1 border-b shrink-0 cursor-pointer transition-colors ${
         isActive ? 'border-accent bg-surface-1' : 'border-border-subtle bg-surface-1'
       }`}
       onClick={onFocus}
@@ -43,7 +43,7 @@ export default function CellHeader({ cell, isActive, onClose, onFocus }: CellHea
           e.stopPropagation();
           onClose();
         }}
-        className="p-0.5 rounded text-text-tertiary hover:text-status-dirty hover:bg-surface-3 transition-colors shrink-0"
+        className="p-1 rounded text-text-tertiary hover:text-status-dirty hover:bg-surface-3 transition-colors shrink-0"
         title="Close"
       >
         <CloseIcon size={10} />

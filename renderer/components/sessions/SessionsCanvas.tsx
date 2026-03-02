@@ -77,7 +77,7 @@ function DetectedCard({ session, entries }: DetectedCardProps) {
             {shortPath(session.projectPath)} &middot; PID {session.pid}
           </p>
         </div>
-        <span className="px-1.5 py-0.5 rounded text-micro font-medium bg-accent/10 text-accent shrink-0">
+        <span className="px-1 py-1 rounded text-micro font-medium bg-accent/10 text-accent shrink-0">
           External
         </span>
       </div>
@@ -98,7 +98,7 @@ function DetectedCard({ session, entries }: DetectedCardProps) {
             {recent.map((entry, i) => (
               <div
                 key={`${entry.timestamp}-${i}`}
-                className="flex items-start gap-1.5 px-2.5 py-1 border-b border-border-subtle/20"
+                className="flex items-start gap-1 px-2 py-1 border-b border-border-subtle/20"
               >
                 <span className="text-micro font-mono text-text-tertiary shrink-0 mt-px w-[50px]">
                   {formatTime(entry.timestamp)}
@@ -116,7 +116,7 @@ function DetectedCard({ session, entries }: DetectedCardProps) {
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-t border-border-subtle bg-surface-0 shrink-0">
+      <div className="flex items-center justify-between px-3 py-1 border-t border-border-subtle bg-surface-0 shrink-0">
         <span className="text-micro text-text-tertiary">{recent.length} events</span>
         <span className="text-micro text-status-active font-medium">Live</span>
       </div>
@@ -144,7 +144,7 @@ function TerminalTile({ session, onClose, isFocused, onFocus }: TerminalTileProp
       onClick={() => onFocus(session.id)}
     >
       {/* Header */}
-      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border-subtle bg-surface-1 shrink-0">
+      <div className="flex items-center gap-2 px-3 py-1 border-b border-border-subtle bg-surface-1 shrink-0">
         <span className="relative flex h-1.5 w-1.5 shrink-0">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-active opacity-75" />
           <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-status-active" />
@@ -230,14 +230,14 @@ function EmptyState({ onAddShell, onAddClaude }: { onAddShell: () => void; onAdd
         <div className="flex items-center justify-center gap-3">
           <button
             onClick={onAddShell}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-button text-xs font-medium bg-surface-2 border border-border-subtle text-text-secondary hover:text-text-primary transition-colors"
+            className="flex items-center gap-1 px-4 py-2 rounded-button text-xs font-medium bg-surface-2 border border-border-subtle text-text-secondary hover:text-text-primary transition-colors"
           >
             <TerminalIcon size={14} />
             Shell
           </button>
           <button
             onClick={onAddClaude}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+            className="flex items-center gap-1 px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
           >
             <ClaudeIcon size={14} />
             Claude Session
@@ -310,11 +310,11 @@ export default function SessionsCanvas() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-2.5 border-b border-border-subtle bg-surface-0 shrink-0">
+      <div className="flex items-center justify-between px-5 py-2 border-b border-border-subtle bg-surface-0 shrink-0">
         <div className="flex items-center gap-3">
           <h1 className="text-sm font-semibold text-text-primary">Sessions</h1>
           {detectedSessions.length > 0 && (
-            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-status-active/10 text-status-active text-micro font-medium">
+            <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-status-active/10 text-status-active text-micro font-medium">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-active opacity-75" />
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-status-active" />
@@ -331,7 +331,7 @@ export default function SessionsCanvas() {
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+            className="flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
           >
             <PlusIcon size={12} />
             New

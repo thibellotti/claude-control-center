@@ -33,7 +33,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
       <div className="mt-auto w-full pt-8">
         <button
           onClick={onNext}
-          className="w-full py-2.5 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+          className="w-full py-2 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
         >
           Continue
         </button>
@@ -72,7 +72,7 @@ function ApiKeyStep({
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
           placeholder="sk-ant-..."
-          className="w-full bg-surface-1 border border-border-default rounded-input px-3 py-2.5 text-sm text-text-primary font-mono placeholder:text-text-tertiary focus:outline-none focus:border-accent transition-colors"
+          className="w-full bg-surface-1 border border-border-default rounded-input px-3 py-2 text-sm text-text-primary font-mono placeholder:text-text-tertiary focus:outline-none focus:border-accent transition-colors"
         />
         <a
           href="https://console.anthropic.com"
@@ -87,7 +87,7 @@ function ApiKeyStep({
         <button
           onClick={handleContinue}
           disabled={!isValid}
-          className="w-full py-2.5 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full py-2 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           Continue
         </button>
@@ -199,7 +199,7 @@ function QuickTourStep({ onFinish }: { onFinish: () => void }) {
             </span>
             <div>
               <p className="text-sm font-medium text-text-primary">{item.title}</p>
-              <p className="text-xs text-text-tertiary mt-0.5">{item.description}</p>
+              <p className="text-xs text-text-tertiary mt-1">{item.description}</p>
             </div>
           </div>
         ))}
@@ -207,7 +207,7 @@ function QuickTourStep({ onFinish }: { onFinish: () => void }) {
       <div className="mt-auto w-full pt-8">
         <button
           onClick={onFinish}
-          className="w-full py-2.5 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+          className="w-full py-2 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
         >
           Start Building
         </button>

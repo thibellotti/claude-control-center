@@ -88,7 +88,7 @@ export default function UsageChart({ data, mode }: UsageChartProps) {
           {[...yTicks].reverse().map((tick, i) => (
             <span
               key={i}
-              className="text-[10px] leading-none text-text-tertiary text-right"
+              className="text-micro leading-none text-text-tertiary text-right"
             >
               {formatYLabel(tick, mode)}
             </span>
@@ -133,7 +133,7 @@ export default function UsageChart({ data, mode }: UsageChartProps) {
                       <div className="text-text-primary font-medium mb-1">
                         {day.date}
                         {isTodayBar && (
-                          <span className="ml-1.5 text-accent text-[10px] font-normal">today</span>
+                          <span className="ml-1 text-accent text-micro font-normal">today</span>
                         )}
                       </div>
                       <div className="text-text-secondary">Cost: {formatCost(day.costUSD)}</div>
@@ -159,7 +159,7 @@ export default function UsageChart({ data, mode }: UsageChartProps) {
 
                   {/* Today dot indicator */}
                   {isTodayBar && (
-                    <div className="absolute -bottom-1.5 w-1 h-1 rounded-full bg-accent" />
+                    <div className="absolute -bottom-1 w-1 h-1 rounded-full bg-accent" />
                   )}
                 </div>
               );
@@ -169,7 +169,7 @@ export default function UsageChart({ data, mode }: UsageChartProps) {
       </div>
 
       {/* X-axis labels */}
-      <div className="flex justify-between mt-2.5 pl-12">
+      <div className="flex justify-between mt-2 pl-12">
         {data.length <= 14
           ? data.map((d) => (
               <span key={d.date} className="text-micro text-text-tertiary flex-1 text-center">

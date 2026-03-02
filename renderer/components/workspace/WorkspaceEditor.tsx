@@ -111,7 +111,7 @@ export default function WorkspaceEditor({
         <div className="px-6 py-4 space-y-4">
           {/* Name */}
           <div>
-            <label className="block text-[11px] font-medium uppercase tracking-wider text-text-tertiary mb-1.5">
+            <label className="block text-xs font-medium uppercase tracking-wider text-text-tertiary mb-2">
               Name
             </label>
             <input
@@ -126,7 +126,7 @@ export default function WorkspaceEditor({
 
           {/* Description */}
           <div>
-            <label className="block text-[11px] font-medium uppercase tracking-wider text-text-tertiary mb-1.5">
+            <label className="block text-xs font-medium uppercase tracking-wider text-text-tertiary mb-2">
               Description
             </label>
             <textarea
@@ -140,7 +140,7 @@ export default function WorkspaceEditor({
 
           {/* Color */}
           <div>
-            <label className="block text-[11px] font-medium uppercase tracking-wider text-text-tertiary mb-2">
+            <label className="block text-xs font-medium uppercase tracking-wider text-text-tertiary mb-2">
               Color
             </label>
             <div className="flex items-center gap-3">
@@ -175,13 +175,13 @@ export default function WorkspaceEditor({
                     <span className="text-xs text-text-tertiary">Delete this workspace?</span>
                     <button
                       onClick={handleDelete}
-                      className="px-2.5 py-1 rounded-button text-xs font-medium bg-feedback-error-muted text-feedback-error hover:bg-feedback-error-muted transition-colors"
+                      className="px-2 py-1 rounded-button text-xs font-medium bg-feedback-error-muted text-feedback-error hover:bg-feedback-error-muted transition-colors"
                     >
                       Confirm
                     </button>
                     <button
                       onClick={() => setShowDeleteConfirm(false)}
-                      className="px-2.5 py-1 rounded-button text-xs text-text-tertiary hover:text-text-secondary transition-colors"
+                      className="px-2 py-1 rounded-button text-xs text-text-tertiary hover:text-text-secondary transition-colors"
                     >
                       Cancel
                     </button>
@@ -189,7 +189,7 @@ export default function WorkspaceEditor({
                 ) : (
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="px-2.5 py-1 rounded-button text-xs text-feedback-error hover:bg-feedback-error-muted transition-colors"
+                    className="px-2 py-1 rounded-button text-xs text-feedback-error hover:bg-feedback-error-muted transition-colors"
                   >
                     Delete
                   </button>
@@ -200,14 +200,14 @@ export default function WorkspaceEditor({
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-3 py-1.5 rounded-button text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-surface-3 transition-colors"
+              className="px-3 py-1 rounded-button text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-surface-3 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={!canSave}
-              className="px-4 py-1.5 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-1 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               {isEditing ? 'Save Changes' : 'Create'}
             </button>

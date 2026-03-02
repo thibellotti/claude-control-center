@@ -75,7 +75,7 @@ const ViewportSelector = React.memo(function ViewportSelector({
           <button
             key={vp.width}
             onClick={() => onChangeWidth(vp.width)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-badge text-xs transition-colors ${
+            className={`flex items-center gap-1 px-2 py-1 rounded-badge text-xs transition-colors ${
               isActive
                 ? 'bg-surface-0 text-text-primary shadow-sm'
                 : 'text-text-tertiary hover:text-text-secondary'
@@ -85,7 +85,7 @@ const ViewportSelector = React.memo(function ViewportSelector({
             <Icon />
             <span>{vp.label}</span>
             {isActive && (
-              <span className="text-micro text-text-tertiary ml-0.5">
+              <span className="text-micro text-text-tertiary ml-1">
                 {vp.width}px
               </span>
             )}

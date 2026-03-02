@@ -35,7 +35,7 @@ function TaskCard({ task }: { task: TaskItem }) {
       <div className="flex items-start justify-between gap-2 min-w-0">
         <h4 className="text-sm font-medium text-text-primary truncate min-w-0">{task.subject}</h4>
         {task.owner && (
-          <span className="shrink-0 px-2 py-0.5 rounded-full bg-surface-3 text-micro font-mono text-text-tertiary">
+          <span className="shrink-0 px-2 py-1 rounded-full bg-surface-3 text-micro font-mono text-text-tertiary">
             {task.owner}
           </span>
         )}
@@ -90,7 +90,7 @@ export default function TaskList({ tasks }: TaskListProps) {
               <span className={`text-xs font-semibold uppercase tracking-wider ${config.color}`}>
                 {config.label}
               </span>
-              <span className={`px-1.5 py-0.5 rounded-full text-micro font-medium ${config.bgColor} ${config.color}`}>
+              <span className={`px-1 py-1 rounded-full text-micro font-medium ${config.bgColor} ${config.color}`}>
                 {group.tasks.length}
               </span>
             </div>

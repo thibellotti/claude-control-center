@@ -65,7 +65,7 @@ function HeadingBlock({
       <select
         value={level}
         onChange={(e) => onUpdate({ level: parseInt(e.target.value) })}
-        className="shrink-0 mt-0.5 bg-surface-2 border border-border-subtle rounded-button px-1.5 py-0.5 text-[11px] font-mono text-text-secondary focus:outline-none focus:border-accent cursor-pointer"
+        className="shrink-0 mt-1 bg-surface-2 border border-border-subtle rounded-button px-1 py-1 text-xs font-mono text-text-secondary focus:outline-none focus:border-accent cursor-pointer"
       >
         <option value={1}>H1</option>
         <option value={2}>H2</option>
@@ -174,7 +174,7 @@ function ListBlock({
           {items.length > 1 && (
             <button
               onClick={() => removeItem(index)}
-              className="shrink-0 p-0.5 text-text-tertiary opacity-0 group-hover/item:opacity-100 hover:text-status-dirty transition-all"
+              className="shrink-0 p-1 text-text-tertiary opacity-0 group-hover/item:opacity-100 hover:text-status-dirty transition-all"
               title="Remove item"
             >
               <CloseIcon />
@@ -184,7 +184,7 @@ function ListBlock({
       ))}
       <button
         onClick={addItem}
-        className="flex items-center gap-1.5 text-[11px] text-text-tertiary hover:text-accent transition-colors mt-1"
+        className="flex items-center gap-1 text-xs text-text-tertiary hover:text-accent transition-colors mt-1"
       >
         <PlusIcon />
         Add item
@@ -212,13 +212,13 @@ function CodeBlock({
 
   return (
     <div className="bg-surface-3 border border-border-subtle rounded-md overflow-hidden">
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-border-subtle">
+      <div className="flex items-center justify-between px-3 py-1 border-b border-border-subtle">
         <input
           type="text"
           value={block.language || ''}
           onChange={(e) => onUpdate({ language: e.target.value })}
           placeholder="language"
-          className="bg-transparent text-[11px] font-mono text-text-tertiary focus:outline-none focus:text-text-secondary placeholder:text-text-tertiary w-24"
+          className="bg-transparent text-xs font-mono text-text-tertiary focus:outline-none focus:text-text-secondary placeholder:text-text-tertiary w-24"
         />
       </div>
       <textarea
@@ -226,7 +226,7 @@ function CodeBlock({
         value={block.content}
         onChange={(e) => onUpdate({ content: e.target.value })}
         placeholder="// Code here..."
-        className="w-full resize-none bg-transparent p-3 text-[12px] font-mono text-text-secondary leading-relaxed focus:outline-none"
+        className="w-full resize-none bg-transparent p-3 text-xs font-mono text-text-secondary leading-relaxed focus:outline-none"
         rows={3}
         spellCheck={false}
       />
@@ -274,7 +274,7 @@ export default function EditorBlock({
     >
       {/* Left action bar */}
       <div
-        className={`flex flex-col items-center gap-0.5 pt-1 pr-2 shrink-0 transition-opacity duration-150 ${
+        className={`flex flex-col items-center gap-1 pt-1 pr-2 shrink-0 transition-opacity duration-150 ${
           isHovered ? 'opacity-100' : 'opacity-0'
         }`}
       >
@@ -284,7 +284,7 @@ export default function EditorBlock({
         <button
           onClick={() => onMove(block.id, 'up')}
           disabled={index === 0}
-          className="p-0.5 text-text-tertiary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="p-1 text-text-tertiary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           title="Move up"
         >
           <ChevronUpIcon />
@@ -292,7 +292,7 @@ export default function EditorBlock({
         <button
           onClick={() => onMove(block.id, 'down')}
           disabled={index === totalBlocks - 1}
-          className="p-0.5 text-text-tertiary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="p-1 text-text-tertiary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           title="Move down"
         >
           <ChevronDownIcon />

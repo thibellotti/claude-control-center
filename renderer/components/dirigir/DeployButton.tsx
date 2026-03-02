@@ -226,7 +226,7 @@ const DeployButton = React.memo(function DeployButton({
       <div className="w-full px-3 py-2">
         <div className="bg-feedback-success-muted border border-feedback-success-border rounded-card p-2">
           {/* Header row */}
-          <div className="flex items-center gap-1.5 mb-1">
+          <div className="flex items-center gap-1 mb-1">
             <span className="text-feedback-success shrink-0">
               <CheckIcon />
             </span>
@@ -235,7 +235,7 @@ const DeployButton = React.memo(function DeployButton({
 
           {/* URL + copy */}
           {deployUrl && (
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <button
                 onClick={() => window.open(deployUrl, '_blank')}
                 className="text-micro text-accent truncate cursor-pointer hover:underline flex-1 text-left"
@@ -245,7 +245,7 @@ const DeployButton = React.memo(function DeployButton({
               </button>
               <button
                 onClick={handleCopyUrl}
-                className="text-micro text-text-tertiary hover:text-text-secondary shrink-0 flex items-center gap-0.5 transition-colors"
+                className="text-micro text-text-tertiary hover:text-text-secondary shrink-0 flex items-center gap-1 transition-colors"
                 title="Copy URL"
               >
                 <CopyIcon />
@@ -257,7 +257,7 @@ const DeployButton = React.memo(function DeployButton({
           {/* Deploy again */}
           <button
             onClick={handleReset}
-            className="text-micro text-text-tertiary hover:text-text-secondary mt-1.5 transition-colors"
+            className="text-micro text-text-tertiary hover:text-text-secondary mt-1 transition-colors"
           >
             Deploy again
           </button>
@@ -272,7 +272,7 @@ const DeployButton = React.memo(function DeployButton({
       <div className="w-full px-3 py-2">
         <div className="bg-feedback-error-muted border border-feedback-error-border rounded-card p-2">
           {/* Header row */}
-          <div className="flex items-center gap-1.5 mb-1">
+          <div className="flex items-center gap-1 mb-1">
             <span className="text-feedback-error shrink-0">
               <ErrorIcon />
             </span>
@@ -289,7 +289,7 @@ const DeployButton = React.memo(function DeployButton({
           {/* Retry */}
           <button
             onClick={handleReset}
-            className="text-micro text-text-tertiary hover:text-text-secondary mt-1.5 transition-colors"
+            className="text-micro text-text-tertiary hover:text-text-secondary mt-1 transition-colors"
           >
             Try again
           </button>

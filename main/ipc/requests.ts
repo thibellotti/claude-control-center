@@ -1,25 +1,14 @@
 import { ipcMain, BrowserWindow } from 'electron';
-import { promises as fs, realpathSync } from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
-import os from 'os';
 import { v4 as uuidv4 } from 'uuid';
 import { IPC_CHANNELS, DesignRequest } from '../../shared/types';
 import { log } from '../helpers/logger';
 import { logSecurityEvent } from '../helpers/security-logger';
+import { cleanEnv } from './terminal';
+import { isPathSafe, HOME } from '../helpers/path-safety';
 
-const HOME = os.homedir();
-const REAL_HOME = realpathSync(HOME);
 const REQUESTS_DIR = path.join(HOME, '.claude', 'studio', 'requests');
-
-function isProjectPathSafe(projectPath: string): boolean {
-  const resolved = path.resolve(projectPath);
-  try {
-    const real = realpathSync(resolved);
-    return real.startsWith(REAL_HOME);
-  } catch {
-    return resolved.startsWith(REAL_HOME);
-  }
-}
 
 // In-memory request store (persisted to disk)
 let requests: DesignRequest[] = [];
@@ -102,7 +91,7 @@ async function captureMainWindowScreenshot(filePath: string): Promise<boolean> {
 }
 
 async function executeRequest(request: DesignRequest) {
-  if (!isProjectPathSafe(request.projectPath)) {
+  if (!isPathSafe(request.projectPath)) {
     logSecurityEvent('path-traversal', 'high', 'Request execution blocked for unsafe project path', { projectPath: request.projectPath, requestId: request.id });
     request.status = 'rejected';
     request.error = 'Access denied: project path is outside the home directory';
@@ -136,7 +125,7 @@ async function executeRequest(request: DesignRequest) {
     rows: 30,
     cwd: request.projectPath,
     env: {
-      ...process.env,
+      ...cleanEnv(),
       TERM: 'xterm-256color',
     },
   });
@@ -193,8 +182,13 @@ async function executeRequest(request: DesignRequest) {
   });
 }
 
+// Promise that resolves once persisted requests have been loaded into memory.
+// All IPC handlers await this before accessing the `requests` array to prevent
+// race conditions where a CREATE_REQUEST arrives before the initial load finishes.
+let requestsReady: Promise<void>;
+
 export function registerRequestHandlers() {
-  loadRequests().then((loaded) => {
+  requestsReady = loadRequests().then((loaded) => {
     requests = loaded;
     log('info', 'requests', `Loaded ${requests.length} persisted requests`);
   });
@@ -205,6 +199,7 @@ export function registerRequestHandlers() {
     prompt: string;
     attachments?: DesignRequest['attachments'];
   }) => {
+    await requestsReady;
     const request: DesignRequest = {
       id: uuidv4(),
       projectId: data.projectId,
@@ -226,6 +221,7 @@ export function registerRequestHandlers() {
   });
 
   ipcMain.handle(IPC_CHANNELS.GET_REQUESTS, async (_, projectId?: string) => {
+    await requestsReady;
     if (projectId) {
       return requests.filter((r) => r.projectId === projectId);
     }
@@ -233,6 +229,7 @@ export function registerRequestHandlers() {
   });
 
   ipcMain.handle(IPC_CHANNELS.CANCEL_REQUEST, async (_, requestId: string) => {
+    await requestsReady;
     const proc = activeProcesses.get(requestId);
     if (proc) {
       proc.kill();
@@ -250,6 +247,7 @@ export function registerRequestHandlers() {
   });
 
   ipcMain.handle(IPC_CHANNELS.APPROVE_REQUEST, async (_, requestId: string) => {
+    await requestsReady;
     const request = requests.find((r) => r.id === requestId);
     if (request) {
       request.status = 'approved';
@@ -260,6 +258,7 @@ export function registerRequestHandlers() {
   });
 
   ipcMain.handle(IPC_CHANNELS.REJECT_REQUEST, async (_, requestId: string) => {
+    await requestsReady;
     const request = requests.find((r) => r.id === requestId);
     if (request) {
       request.status = 'rejected';

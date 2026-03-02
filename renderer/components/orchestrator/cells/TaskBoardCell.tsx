@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { CellConfigTaskBoard, Team } from '../../../../shared/types';
+import type { CellConfigTaskBoard, Team, TaskItem } from '../../../../shared/types';
 import TaskList from '../../project/TaskList';
 
 interface TaskBoardCellProps {
@@ -7,8 +7,8 @@ interface TaskBoardCellProps {
 }
 
 export default function TaskBoardCell({ config }: TaskBoardCellProps) {
-  const [tasks] = useState([]);
   const [team, setTeam] = useState<Team | null>(null);
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,8 +24,19 @@ export default function TaskBoardCell({ config }: TaskBoardCellProps) {
           const teamData = JSON.parse(teamRaw) as Team;
           setTeam(teamData);
         }
+
+        // Load tasks from the team's tasks file
+        const tasksPath = `~/.claude/teams/${config.teamName}/tasks.json`;
+        const tasksRaw = await window.api.readFile(tasksPath);
+        if (cancelled) return;
+
+        if (tasksRaw) {
+          setTasks(JSON.parse(tasksRaw) as TaskItem[]);
+        } else {
+          setTasks([]);
+        }
       } catch {
-        // Team may not exist yet
+        // Team or tasks file may not exist yet
       } finally {
         if (!cancelled) setLoading(false);
       }

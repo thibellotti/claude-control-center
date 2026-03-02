@@ -130,13 +130,13 @@ function SectionHeader({
   count?: number;
 }) {
   return (
-    <div id={id} className="flex items-center gap-2.5 mb-4 scroll-mt-24">
+    <div id={id} className="flex items-center gap-2 mb-4 scroll-mt-24">
       {SECTION_ICONS[id]}
       <h2 className="text-xs font-semibold uppercase tracking-wider text-text-tertiary">
         {title}
       </h2>
       {count !== undefined && (
-        <span className="px-1.5 py-0.5 rounded-full bg-surface-3 text-micro font-mono text-text-tertiary">
+        <span className="px-1 py-1 rounded-full bg-surface-3 text-micro font-mono text-text-tertiary">
           {count}
         </span>
       )}
@@ -154,7 +154,7 @@ function SectionNav({ activeSection }: { activeSection: SectionId }) {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-10 bg-surface-0/80 backdrop-blur-sm border-b border-border-subtle -mx-6 px-6 py-2.5 mb-8">
+    <nav className="sticky top-0 z-10 bg-surface-0/80 backdrop-blur-sm border-b border-border-subtle -mx-6 px-6 py-2 mb-8">
       <div className="flex items-center gap-1">
         {SECTIONS.map((section) => {
           const isActive = activeSection === section.id;
@@ -162,7 +162,7 @@ function SectionNav({ activeSection }: { activeSection: SectionId }) {
             <button
               key={section.id}
               onClick={() => handleClick(section.id)}
-              className={`px-3 py-1.5 rounded-button text-xs font-medium transition-colors ${
+              className={`px-3 py-1 rounded-button text-xs font-medium transition-colors ${
                 isActive
                   ? 'bg-surface-2 text-text-primary'
                   : 'text-text-tertiary hover:text-text-secondary hover:bg-surface-1'
@@ -258,40 +258,40 @@ function ThemeCard({
       >
         {isSplit ? (
           <>
-            <div className="absolute inset-0" style={{ background: '#f8f8f8' }} />
+            <div className="absolute inset-0 bg-surface-0" />
             <div
               className="absolute inset-0"
               style={{
                 clipPath: 'polygon(40% 0, 100% 0, 100% 100%, 20% 100%)',
-                background: '#1a1a1a',
+                background: 'var(--surface-4)',
               }}
             />
             {/* Left sidebar (light) */}
             <div
               className="absolute top-[8%] left-[4%] w-[20%] h-[84%] rounded-sm"
-              style={{ background: '#e8e8e8' }}
+              style={{ background: 'var(--surface-2)' }}
             />
             {/* Right sidebar (dark) */}
             <div
               className="absolute top-[8%] right-[4%] w-[20%] h-[84%] rounded-sm"
-              style={{ background: '#252525' }}
+              style={{ background: 'var(--surface-1)' }}
             />
             {/* Content lines */}
             <div
               className="absolute top-[20%] left-[30%] w-[25%] h-[6%] rounded-sm"
-              style={{ background: '#c0c0c0' }}
+              style={{ background: 'var(--border-strong)' }}
             />
             <div
               className="absolute top-[34%] left-[30%] w-[18%] h-[6%] rounded-sm"
-              style={{ background: '#d4d4d4' }}
+              style={{ background: 'var(--border-default)' }}
             />
             <div
               className="absolute top-[20%] right-[30%] w-[20%] h-[6%] rounded-sm"
-              style={{ background: '#444444' }}
+              style={{ background: 'var(--border-strong)' }}
             />
             <div
               className="absolute top-[34%] right-[30%] w-[15%] h-[6%] rounded-sm"
-              style={{ background: '#383838' }}
+              style={{ background: 'var(--border-default)' }}
             />
           </>
         ) : (
@@ -388,7 +388,7 @@ function PermissionsSection({ permissions }: { permissions: string[] }) {
             {groups.map((group) => (
               <div key={group.key}>
                 {/* Group sub-header */}
-                <div className="flex items-center gap-2 mb-2.5">
+                <div className="flex items-center gap-2 mb-2">
                   <span className="text-micro font-semibold uppercase tracking-wider text-text-tertiary">
                     {group.label}
                   </span>
@@ -398,11 +398,11 @@ function PermissionsSection({ permissions }: { permissions: string[] }) {
                   <div className="flex-1 h-px bg-border-subtle" />
                 </div>
                 {/* Permission pills */}
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1">
                   {group.permissions.map((perm) => (
                     <span
                       key={perm}
-                      className="px-2.5 py-1 rounded bg-surface-3 text-xs font-mono text-text-secondary leading-tight"
+                      className="px-2 py-1 rounded bg-surface-3 text-xs font-mono text-text-secondary leading-tight"
                       title={perm}
                     >
                       {perm}
@@ -435,7 +435,7 @@ function CopyButton({ value }: { value: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="opacity-0 group-hover:opacity-100 transition-opacity px-1.5 py-0.5 rounded text-micro text-text-tertiary hover:text-text-primary hover:bg-surface-3 shrink-0"
+      className="opacity-0 group-hover:opacity-100 transition-opacity px-1 py-1 rounded text-micro text-text-tertiary hover:text-text-primary hover:bg-surface-3 shrink-0"
       title="Copy value"
     >
       {copied ? 'Copied' : 'Copy'}
@@ -474,7 +474,7 @@ function EnvironmentSection({
               return (
                 <div
                   key={key}
-                  className={`group flex items-center gap-4 px-4 py-2.5 min-w-0 ${
+                  className={`group flex items-center gap-4 px-4 py-2 min-w-0 ${
                     index % 2 === 0 ? 'bg-surface-1' : 'bg-surface-0/50'
                   }`}
                 >
@@ -543,7 +543,7 @@ function PluginsSection({
               </div>
               {/* Status */}
               <div
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full shrink-0 ${
+                className={`flex items-center gap-1 px-2 py-1 rounded-full shrink-0 ${
                   enabled
                     ? 'bg-status-active/10'
                     : 'bg-status-idle/10'
@@ -596,7 +596,7 @@ function InfoSection() {
       <div className="bg-surface-1 border border-border-subtle rounded-card divide-y divide-border-subtle">
         {paths.map((item) => (
           <div key={item.path} className="flex items-start gap-3 px-4 py-3">
-            <div className="w-1.5 h-1.5 rounded-full bg-text-tertiary mt-1.5 shrink-0" />
+            <div className="w-1.5 h-1.5 rounded-full bg-text-tertiary mt-1 shrink-0" />
             <div className="min-w-0">
               <div className="flex items-baseline gap-2">
                 <span className="text-xs font-medium text-text-secondary">
@@ -606,7 +606,7 @@ function InfoSection() {
                   {item.path}
                 </span>
               </div>
-              <p className="text-micro text-text-tertiary mt-0.5">
+              <p className="text-micro text-text-tertiary mt-1">
                 {item.description}
               </p>
             </div>

@@ -2,6 +2,7 @@ import { ipcMain } from 'electron';
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';
 import { IPC_CHANNELS } from '../../shared/types';
+import { isPathSafe } from '../helpers/path-safety';
 
 export interface SupabaseInfo {
   hasSupabase: boolean;
@@ -102,6 +103,9 @@ export function registerSupabaseHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GET_SUPABASE_INFO,
     async (_event, projectPath: string): Promise<SupabaseInfo> => {
+      if (!isPathSafe(projectPath)) {
+        return { hasSupabase: false, envVars: { hasUrl: false, hasAnonKey: false, hasServiceKey: false }, hasLocalConfig: false, projectUrl: null };
+      }
       const hasSupabase = checkPackageJsonForSupabase(projectPath);
       const envVars = scanEnvFiles(projectPath);
       const hasLocalConfig = existsSync(path.join(projectPath, 'supabase'));

@@ -1,8 +1,7 @@
 import { ipcMain } from 'electron';
 import { spawn, ChildProcess } from 'child_process';
-import { readFileSync, existsSync, realpathSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import path from 'path';
-import os from 'os';
 import {
   IPC_CHANNELS,
   PreviewStatus,
@@ -10,6 +9,7 @@ import {
 } from '../../shared/types';
 import { log } from '../helpers/logger';
 import { logSecurityEvent } from '../helpers/security-logger';
+import { isPathSafe } from '../helpers/path-safety';
 
 // Chokidar loaded via require (CJS compat in Electron main process)
 const chokidar = require('chokidar');
@@ -82,20 +82,6 @@ function idleState(): EnhancedPreviewState {
 
 import { cleanEnv } from './terminal';
 
-const HOME = os.homedir();
-let REAL_HOME: string;
-try { REAL_HOME = realpathSync(HOME); } catch { REAL_HOME = HOME; }
-
-function isProjectPathSafe(projectPath: string): boolean {
-  const resolved = path.resolve(projectPath);
-  try {
-    const real = realpathSync(resolved);
-    return real.startsWith(REAL_HOME);
-  } catch {
-    return resolved.startsWith(REAL_HOME);
-  }
-}
-
 const PORT_REGEX = /(?:localhost|127\.0\.0\.1|0\.0\.0\.0):(\d{4,5})/;
 
 const IGNORED_DIRS = [
@@ -136,7 +122,7 @@ export function registerPreviewHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.START_DEV_SERVER,
     async (_, projectPath: string): Promise<EnhancedPreviewState> => {
-      if (!isProjectPathSafe(projectPath)) {
+      if (!isPathSafe(projectPath)) {
         logSecurityEvent('path-traversal', 'high', 'Dev server start blocked for unsafe path', { projectPath });
         return { ...idleState(), status: 'error', error: 'Access denied: path is outside the home directory' };
       }

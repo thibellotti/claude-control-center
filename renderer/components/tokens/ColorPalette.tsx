@@ -83,7 +83,7 @@ function ColorSwatch({ name, path, value, onUpdate }: ColorSwatchProps) {
   }
 
   return (
-    <div className="group flex flex-col items-center gap-1.5">
+    <div className="group flex flex-col items-center gap-1">
       {/* Color swatch */}
       <button
         onClick={handleSwatchClick}
@@ -129,7 +129,7 @@ function ColorSwatch({ name, path, value, onUpdate }: ColorSwatchProps) {
             if (e.key === 'Enter') handleHexSubmit();
             if (e.key === 'Escape') setIsEditing(false);
           }}
-          className="w-16 text-micro font-mono text-text-secondary text-center bg-surface-2 border border-border-default rounded px-1 py-0.5 outline-none focus:border-accent"
+          className="w-16 text-micro font-mono text-text-secondary text-center bg-surface-2 border border-border-default rounded px-1 py-1 outline-none focus:border-accent"
         />
       ) : (
         <button
@@ -151,7 +151,7 @@ function ColorSwatch({ name, path, value, onUpdate }: ColorSwatchProps) {
 
 function SectionHeader({ title }: { title: string }) {
   return (
-    <h4 className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary mb-3">
+    <h4 className="text-xs font-semibold uppercase tracking-wider text-text-tertiary mb-3">
       {title}
     </h4>
   );

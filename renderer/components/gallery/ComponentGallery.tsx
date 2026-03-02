@@ -60,7 +60,7 @@ export default function ComponentGallery({ projectPath }: ComponentGalleryProps)
         </p>
         <button
           onClick={rescan}
-          className="mt-4 flex items-center gap-1.5 px-3 py-1.5 rounded-button bg-surface-2 border border-border-subtle text-xs text-text-secondary hover:text-text-primary hover:border-border-default transition-colors mx-auto"
+          className="mt-4 flex items-center gap-1 px-3 py-1 rounded-button bg-surface-2 border border-border-subtle text-xs text-text-secondary hover:text-text-primary hover:border-border-default transition-colors mx-auto"
         >
           <RefreshIcon />
           Rescan
@@ -88,13 +88,13 @@ export default function ComponentGallery({ projectPath }: ComponentGalleryProps)
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-medium text-text-primary">Components</h3>
-          <span className="px-1.5 py-0.5 rounded-full text-micro font-medium bg-surface-3 text-text-tertiary">
+          <span className="px-1 py-1 rounded-full text-micro font-medium bg-surface-3 text-text-tertiary">
             {stats.total}
           </span>
         </div>
         <button
           onClick={rescan}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-button bg-surface-2 border border-border-subtle text-xs text-text-secondary hover:text-text-primary hover:border-border-default transition-colors"
+          className="flex items-center gap-1 px-3 py-1 rounded-button bg-surface-2 border border-border-subtle text-xs text-text-secondary hover:text-text-primary hover:border-border-default transition-colors"
         >
           <RefreshIcon />
           Rescan
@@ -102,7 +102,7 @@ export default function ComponentGallery({ projectPath }: ComponentGalleryProps)
       </div>
 
       {/* Stats bar */}
-      <div className="flex items-center gap-4 mb-4 text-[11px] text-text-tertiary">
+      <div className="flex items-center gap-4 mb-4 text-xs text-text-tertiary">
         <span>{stats.total} total</span>
         <span className="flex items-center gap-1">
           <span className="w-1.5 h-1.5 rounded-full bg-feedback-success" />
@@ -127,10 +127,10 @@ export default function ComponentGallery({ projectPath }: ComponentGalleryProps)
 
       {/* Directory filter pills */}
       {directories.length > 1 && (
-        <div className="flex items-center gap-1.5 mb-4 overflow-x-auto pb-1">
+        <div className="flex items-center gap-1 mb-4 overflow-x-auto pb-1">
           <button
             onClick={() => setSelectedDirectory(null)}
-            className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors whitespace-nowrap ${
+            className={`px-2 py-1 rounded-full text-xs font-medium transition-colors whitespace-nowrap ${
               selectedDirectory === null
                 ? 'bg-accent text-white'
                 : 'bg-surface-2 text-text-tertiary hover:text-text-secondary'
@@ -144,7 +144,7 @@ export default function ComponentGallery({ projectPath }: ComponentGalleryProps)
               onClick={() =>
                 setSelectedDirectory(selectedDirectory === dir ? null : dir)
               }
-              className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors whitespace-nowrap ${
+              className={`px-2 py-1 rounded-full text-xs font-medium transition-colors whitespace-nowrap ${
                 selectedDirectory === dir
                   ? 'bg-accent text-white'
                   : 'bg-surface-2 text-text-tertiary hover:text-text-secondary'

@@ -199,7 +199,7 @@ export default function VisualDiff({ projectId }: VisualDiffProps) {
         <div className="bg-surface-1 border border-border-subtle rounded-lg p-4 space-y-3">
           {/* URL input */}
           <div>
-            <label className="block text-[11px] text-text-tertiary mb-1">URL</label>
+            <label className="block text-xs text-text-tertiary mb-1">URL</label>
             <input
               type="text"
               value={url}
@@ -211,7 +211,7 @@ export default function VisualDiff({ projectId }: VisualDiffProps) {
 
           {/* Label input */}
           <div>
-            <label className="block text-[11px] text-text-tertiary mb-1">Label</label>
+            <label className="block text-xs text-text-tertiary mb-1">Label</label>
             <input
               type="text"
               value={label}
@@ -223,13 +223,13 @@ export default function VisualDiff({ projectId }: VisualDiffProps) {
 
           {/* Viewport presets */}
           <div>
-            <label className="block text-[11px] text-text-tertiary mb-1">Viewport</label>
-            <div className="flex items-center gap-1.5">
+            <label className="block text-xs text-text-tertiary mb-1">Viewport</label>
+            <div className="flex items-center gap-1">
               {VIEWPORT_PRESETS.map((preset, i) => (
                 <button
                   key={preset.label}
                   onClick={() => setViewportIndex(i)}
-                  className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
+                  className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
                     viewportIndex === i
                       ? 'bg-accent text-white'
                       : 'bg-surface-2 text-text-tertiary hover:text-text-secondary'
@@ -246,7 +246,7 @@ export default function VisualDiff({ projectId }: VisualDiffProps) {
             <button
               onClick={handleCapture}
               disabled={isCapturing || !url.trim()}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1 px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isCapturing ? (
                 <>
@@ -275,7 +275,7 @@ export default function VisualDiff({ projectId }: VisualDiffProps) {
             <h3 className="text-sm font-medium text-text-primary">Compare</h3>
             <button
               onClick={clearComparison}
-              className="flex items-center gap-1 px-2 py-1 rounded-button text-[11px] text-text-tertiary hover:text-text-secondary transition-colors"
+              className="flex items-center gap-1 px-2 py-1 rounded-button text-xs text-text-tertiary hover:text-text-secondary transition-colors"
             >
               <CloseIcon size={12} />
               Clear
@@ -283,7 +283,7 @@ export default function VisualDiff({ projectId }: VisualDiffProps) {
           </div>
 
           {/* Labels for what is being compared */}
-          <div className="flex items-center justify-between mb-2 text-[11px] text-text-tertiary">
+          <div className="flex items-center justify-between mb-2 text-xs text-text-tertiary">
             <span>
               Before: <span className="text-text-secondary font-medium">{selectedPair[0].label}</span>
             </span>
@@ -313,13 +313,13 @@ export default function VisualDiff({ projectId }: VisualDiffProps) {
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-medium text-text-primary">Gallery</h3>
             {screenshots.length > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full text-micro font-medium bg-surface-3 text-text-tertiary">
+              <span className="px-1 py-1 rounded-full text-micro font-medium bg-surface-3 text-text-tertiary">
                 {screenshots.length}
               </span>
             )}
           </div>
           {selectedIds.length > 0 && selectedIds.length < 2 && (
-            <p className="text-[11px] text-text-tertiary">
+            <p className="text-xs text-text-tertiary">
               Select one more to compare
             </p>
           )}

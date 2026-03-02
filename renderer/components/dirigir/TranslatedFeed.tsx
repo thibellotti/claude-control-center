@@ -44,7 +44,7 @@ const FeedEntry = React.memo(function FeedEntry({
   return (
     <div>
       <div
-        className="px-3 py-1.5 hover:bg-surface-2 transition-colors cursor-pointer flex items-center gap-2"
+        className="px-3 py-1 hover:bg-surface-2 transition-colors cursor-pointer flex items-center gap-2"
         onClick={toggle}
       >
         {/* Type dot */}
@@ -65,7 +65,7 @@ const FeedEntry = React.memo(function FeedEntry({
 
       {/* Expandable detail */}
       {expanded && entry.detail && (
-        <div className="mx-3 mb-1.5 text-micro font-mono text-text-tertiary bg-surface-2 p-2 rounded-button whitespace-pre-wrap break-all">
+        <div className="mx-3 mb-2 text-micro font-mono text-text-tertiary bg-surface-2 p-2 rounded-button whitespace-pre-wrap break-all">
           {entry.detail}
         </div>
       )}

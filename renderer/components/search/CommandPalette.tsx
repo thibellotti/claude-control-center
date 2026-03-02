@@ -101,12 +101,19 @@ export default function CommandPalette({
           <input
             ref={inputRef}
             type="text"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-controls="command-palette-results"
+            aria-activedescendant={
+              results.length > 0 ? `command-palette-option-${selectedIndex}` : undefined
+            }
+            aria-expanded={results.length > 0}
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder="Search projects, tasks, plans..."
             className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-tertiary outline-none"
           />
-          <kbd className="px-1.5 py-0.5 rounded bg-surface-3 border border-border-subtle text-micro font-mono text-text-tertiary">
+          <kbd className="px-1 py-1 rounded bg-surface-3 border border-border-subtle text-micro font-mono text-text-tertiary">
             ESC
           </kbd>
         </div>
@@ -122,18 +129,21 @@ export default function CommandPalette({
           )}
 
           {results.length > 0 && (
-            <div className="py-2">
+            <div id="command-palette-results" role="listbox" aria-label="Search results" className="py-2">
               {results.map((result, index) => {
                 const isSelected = index === selectedIndex;
                 return (
                   <button
                     key={`${result.type}-${result.title}-${index}`}
+                    id={`command-palette-option-${index}`}
+                    role="option"
+                    aria-selected={isSelected}
                     onClick={() => {
                       onSelect(result);
                       onClose();
                     }}
                     onMouseEnter={() => setSelectedIndex(index)}
-                    className={`flex items-center gap-3 w-full px-4 py-2.5 text-left transition-colors ${
+                    className={`flex items-center gap-3 w-full px-4 py-2 text-left transition-colors ${
                       isSelected ? 'bg-surface-3' : 'hover:bg-surface-2'
                     }`}
                   >
@@ -147,7 +157,7 @@ export default function CommandPalette({
                       <p className="text-sm text-text-primary truncate">
                         {result.title}
                       </p>
-                      <p className="text-[11px] text-text-tertiary truncate">
+                      <p className="text-xs text-text-tertiary truncate">
                         {result.subtitle}
                       </p>
                     </div>

@@ -1,12 +1,12 @@
 import { ipcMain } from 'electron';
 import { promises as fs } from 'fs';
 import path from 'path';
-import os from 'os';
 import { simpleGit } from 'simple-git';
 import { IPC_CHANNELS, HandoffPackage } from '../../shared/types';
 import { log } from '../helpers/logger';
+import { isPathSafe, HOME } from '../helpers/path-safety';
 
-const HOME = os.homedir();
+
 const CLAUDE_TASKS_DIR = path.join(HOME, '.claude', 'tasks');
 
 // Directories to skip when generating the file tree
@@ -85,6 +85,7 @@ export function registerHandoffHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GENERATE_HANDOFF,
     async (_event, projectPath: string): Promise<HandoffPackage> => {
+      if (!isPathSafe(projectPath)) throw new Error('Access denied: path outside home directory');
       return generateHandoff(projectPath);
     }
   );
@@ -96,6 +97,7 @@ export function registerHandoffHandlers() {
       projectPath: string,
       format: 'markdown' | 'json'
     ): Promise<{ filePath: string }> => {
+      if (!isPathSafe(projectPath)) throw new Error('Access denied: path outside home directory');
       const handoff = await generateHandoff(projectPath);
       return exportHandoff(projectPath, handoff, format);
     }

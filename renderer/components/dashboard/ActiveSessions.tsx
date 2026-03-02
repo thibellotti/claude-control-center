@@ -67,12 +67,12 @@ export default function ActiveSessions({ sessions }: ActiveSessionsProps) {
                   </span>
                 </div>
                 {subtitle && (
-                  <p className="text-xs text-text-secondary truncate mt-0.5">
+                  <p className="text-xs text-text-secondary truncate mt-1">
                     {subtitle}
                   </p>
                 )}
                 {!isHomeDir(session.projectPath) && (
-                  <p className="text-micro text-text-tertiary font-mono truncate mt-0.5">
+                  <p className="text-micro text-text-tertiary font-mono truncate mt-1">
                     {shortenPath(session.projectPath)}
                   </p>
                 )}

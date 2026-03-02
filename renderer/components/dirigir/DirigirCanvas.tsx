@@ -58,7 +58,7 @@ export default function DirigirCanvas({ project, onBack }: DirigirCanvasProps) {
       <div className="h-10 px-4 flex items-center border-b border-border-subtle bg-surface-0 shrink-0">
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 text-text-secondary hover:text-text-primary transition-colors mr-3"
+          className="flex items-center gap-1 text-text-secondary hover:text-text-primary transition-colors mr-3"
         >
           <ChevronLeftIcon size={14} />
         </button>

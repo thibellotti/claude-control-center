@@ -37,7 +37,7 @@ export default function SupabasePanel({ projectPath }: SupabasePanelProps) {
         <div className="opacity-30"><SupabaseIcon size={18} /></div>
         <p className="text-sm text-text-secondary text-center">Supabase not detected</p>
         <p className="text-xs text-text-tertiary text-center">
-          Add <code className="px-1 py-0.5 bg-surface-2 rounded text-micro">@supabase/supabase-js</code> to use this panel
+          Add <code className="px-1 py-1 bg-surface-2 rounded text-micro">@supabase/supabase-js</code> to use this panel
         </p>
       </div>
     );
@@ -60,7 +60,7 @@ export default function SupabasePanel({ projectPath }: SupabasePanelProps) {
         {/* Environment Variables */}
         <div>
           <h3 className="text-micro font-medium text-text-tertiary uppercase tracking-wider mb-2">Environment</h3>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <div className="flex items-center gap-2 text-xs">
               <StatusDot active={info.envVars.hasUrl} />
               <span className="text-text-secondary font-mono">SUPABASE_URL</span>

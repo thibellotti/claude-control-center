@@ -57,7 +57,7 @@ function CompactIndicators({ health }: { health: ProjectHealth }) {
   if (indicators.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-1.5 text-micro">
+    <div className="flex items-center gap-1 text-micro">
       {indicators}
     </div>
   );
@@ -71,7 +71,7 @@ function FullIndicators({ health }: { health: ProjectHealth }) {
     pills.push(
       <span
         key="uncommitted"
-        className="inline-flex items-center px-2 py-0.5 rounded bg-surface-3 text-[11px] text-status-dirty"
+        className="inline-flex items-center px-2 py-1 rounded bg-surface-3 text-xs text-status-dirty"
       >
         {health.uncommittedCount} uncommitted file{health.uncommittedCount !== 1 ? 's' : ''}
       </span>
@@ -82,7 +82,7 @@ function FullIndicators({ health }: { health: ProjectHealth }) {
     pills.push(
       <span
         key="stale"
-        className="inline-flex items-center px-2 py-0.5 rounded bg-surface-3 text-[11px] text-text-tertiary"
+        className="inline-flex items-center px-2 py-1 rounded bg-surface-3 text-xs text-text-tertiary"
       >
         {formatDaysAgo(health.daysSinceLastCommit)} since commit
       </span>
@@ -93,7 +93,7 @@ function FullIndicators({ health }: { health: ProjectHealth }) {
     pills.push(
       <span
         key="deps"
-        className="inline-flex items-center px-2 py-0.5 rounded bg-surface-3 text-[11px] text-status-dirty"
+        className="inline-flex items-center px-2 py-1 rounded bg-surface-3 text-xs text-status-dirty"
       >
         outdated deps
       </span>
@@ -102,14 +102,14 @@ function FullIndicators({ health }: { health: ProjectHealth }) {
 
   if (pills.length === 0) {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded bg-surface-3 text-[11px] text-status-clean">
+      <span className="inline-flex items-center px-2 py-1 rounded bg-surface-3 text-xs text-status-clean">
         all good
       </span>
     );
   }
 
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-1">
       {pills}
     </div>
   );

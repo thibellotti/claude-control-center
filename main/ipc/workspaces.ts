@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
 import { IPC_CHANNELS, Workspace } from '../../shared/types';
@@ -7,28 +7,28 @@ import { IPC_CHANNELS, Workspace } from '../../shared/types';
 const STUDIO_DIR = path.join(os.homedir(), '.claude', 'studio');
 const WORKSPACES_FILE = path.join(STUDIO_DIR, 'workspaces.json');
 
-function ensureFile(): void {
-  if (!existsSync(STUDIO_DIR)) {
-    mkdirSync(STUDIO_DIR, { recursive: true });
-  }
-  if (!existsSync(WORKSPACES_FILE)) {
-    writeFileSync(WORKSPACES_FILE, '[]', 'utf-8');
+async function ensureFile(): Promise<void> {
+  await fs.mkdir(STUDIO_DIR, { recursive: true });
+  try {
+    await fs.access(WORKSPACES_FILE);
+  } catch {
+    await fs.writeFile(WORKSPACES_FILE, '[]', 'utf-8');
   }
 }
 
-function readAll(): Workspace[] {
-  ensureFile();
+async function readAll(): Promise<Workspace[]> {
+  await ensureFile();
   try {
-    const raw = readFileSync(WORKSPACES_FILE, 'utf-8');
+    const raw = await fs.readFile(WORKSPACES_FILE, 'utf-8');
     return JSON.parse(raw) as Workspace[];
   } catch {
     return [];
   }
 }
 
-function writeAll(workspaces: Workspace[]): void {
-  ensureFile();
-  writeFileSync(WORKSPACES_FILE, JSON.stringify(workspaces, null, 2), 'utf-8');
+async function writeAll(workspaces: Workspace[]): Promise<void> {
+  await ensureFile();
+  await fs.writeFile(WORKSPACES_FILE, JSON.stringify(workspaces, null, 2), 'utf-8');
 }
 
 function generateId(): string {
@@ -37,11 +37,11 @@ function generateId(): string {
 
 export function registerWorkspaceHandlers(): void {
   ipcMain.handle(IPC_CHANNELS.GET_WORKSPACES, async () => {
-    return readAll();
+    return await readAll();
   });
 
   ipcMain.handle(IPC_CHANNELS.SAVE_WORKSPACE, async (_, workspace: Workspace) => {
-    const workspaces = readAll();
+    const workspaces = await readAll();
     const now = Date.now();
 
     const toSave: Workspace = {
@@ -58,15 +58,15 @@ export function registerWorkspaceHandlers(): void {
       workspaces.push(toSave);
     }
 
-    writeAll(workspaces);
+    await writeAll(workspaces);
     return toSave;
   });
 
   ipcMain.handle(IPC_CHANNELS.DELETE_WORKSPACE, async (_, id: string) => {
-    const workspaces = readAll();
+    const workspaces = await readAll();
     const filtered = workspaces.filter((w) => w.id !== id);
     if (filtered.length !== workspaces.length) {
-      writeAll(filtered);
+      await writeAll(filtered);
       return true;
     }
     return false;

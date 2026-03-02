@@ -80,7 +80,7 @@ const TemplateSelector = React.memo(function TemplateSelector({ onSelect }: Temp
                 : 'bg-surface-1 border-border-subtle hover:border-accent hover:bg-surface-2'
             }`}
           >
-            <Icon className="mt-0.5 shrink-0 text-text-secondary" />
+            <Icon className="mt-1 shrink-0 text-text-secondary" />
             <div className="min-w-0">
               <div className="text-sm font-medium text-text-primary">{template.name}</div>
               <div className="text-xs text-text-secondary mt-1">{template.description}</div>

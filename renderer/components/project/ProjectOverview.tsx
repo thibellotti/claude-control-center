@@ -27,7 +27,7 @@ function formatRelativeTime(dateStr: string): string {
 
 function SectionHeader({ title }: { title: string }) {
   return (
-    <h3 className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary mb-3">
+    <h3 className="text-xs font-semibold uppercase tracking-wider text-text-tertiary mb-3">
       {title}
     </h3>
   );
@@ -55,7 +55,7 @@ export default function ProjectOverview({ project }: ProjectOverviewProps) {
             <GitBadge branch={project.git.branch} status={project.git.status} />
             {project.git.lastCommit && (
               <div className="text-sm flex items-baseline gap-2 min-w-0">
-                <span className="font-mono text-[11px] text-text-tertiary shrink-0">
+                <span className="font-mono text-xs text-text-tertiary shrink-0">
                   {project.git.lastCommit.hash.slice(0, 7)}
                 </span>
                 <span className="text-text-secondary truncate">
@@ -78,19 +78,19 @@ export default function ProjectOverview({ project }: ProjectOverviewProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-text-tertiary text-xs">Name</span>
-                <p className="text-text-primary font-mono text-xs mt-0.5">
+                <p className="text-text-primary font-mono text-xs mt-1">
                   {project.packageJson.name}
                 </p>
               </div>
               <div>
                 <span className="text-text-tertiary text-xs">Version</span>
-                <p className="text-text-primary font-mono text-xs mt-0.5">
+                <p className="text-text-primary font-mono text-xs mt-1">
                   {project.packageJson.version}
                 </p>
               </div>
               <div>
                 <span className="text-text-tertiary text-xs">Dependencies</span>
-                <p className="text-text-primary text-xs mt-0.5">
+                <p className="text-text-primary text-xs mt-1">
                   {Object.keys(project.packageJson.dependencies).length} deps
                   {' / '}
                   {Object.keys(project.packageJson.devDependencies).length} dev
@@ -98,7 +98,7 @@ export default function ProjectOverview({ project }: ProjectOverviewProps) {
               </div>
               <div>
                 <span className="text-text-tertiary text-xs">Scripts</span>
-                <p className="text-text-primary text-xs mt-0.5">
+                <p className="text-text-primary text-xs mt-1">
                   {Object.keys(project.packageJson.scripts).length} scripts
                 </p>
               </div>
@@ -120,20 +120,20 @@ export default function ProjectOverview({ project }: ProjectOverviewProps) {
       {/* Claude Config section — always visible to allow creating CLAUDE.md */}
       <section>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-tertiary">
             Claude Config
           </h3>
           {isEditingClaudeMd ? (
             <button
               onClick={() => setIsEditingClaudeMd(false)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-button text-[11px] font-medium text-text-secondary hover:text-text-primary bg-surface-2 border border-border-subtle hover:border-border-default transition-colors"
+              className="flex items-center gap-1 px-2 py-1 rounded-button text-xs font-medium text-text-secondary hover:text-text-primary bg-surface-2 border border-border-subtle hover:border-border-default transition-colors"
             >
               Done
             </button>
           ) : (
             <button
               onClick={() => setIsEditingClaudeMd(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-button text-[11px] font-medium text-text-tertiary hover:text-text-secondary transition-colors"
+              className="flex items-center gap-1 px-2 py-1 rounded-button text-xs font-medium text-text-tertiary hover:text-text-secondary transition-colors"
             >
               <EditIcon />
               Edit

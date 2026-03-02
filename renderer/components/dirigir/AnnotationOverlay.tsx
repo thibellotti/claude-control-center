@@ -99,7 +99,7 @@ function AnnotationBubble({
             rows={3}
             className="w-full text-xs text-text-primary bg-surface-1 border border-border-default rounded-card p-2 resize-none outline-none focus:border-accent placeholder:text-text-tertiary"
           />
-          <div className="flex items-center justify-between mt-1.5">
+          <div className="flex items-center justify-between mt-1">
             <button
               onClick={handleDelete}
               className="text-micro text-feedback-error hover:underline cursor-pointer"
@@ -198,7 +198,7 @@ const AnnotationOverlay = React.memo(function AnnotationOverlay({
       {filledCount > 0 && (
         <button
           onClick={handleSubmitAll}
-          className="fixed top-4 right-4 z-50 px-3 py-1.5 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors cursor-pointer shadow-md"
+          className="fixed top-4 right-4 z-50 px-3 py-1 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors cursor-pointer shadow-md"
         >
           Submit {filledCount} annotation{filledCount !== 1 ? 's' : ''}
         </button>

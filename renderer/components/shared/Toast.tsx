@@ -54,7 +54,22 @@ function ToastItem({ id, message, type, onDismiss }: ToastItemProps) {
       <span className="text-sm font-medium leading-none" aria-hidden="true">
         {TYPE_ICONS[type]}
       </span>
-      <span className="text-sm leading-snug">{message}</span>
+      <span className="text-sm leading-snug flex-1">{message}</span>
+      <button
+        onClick={(e) => { e.stopPropagation(); onDismiss(id); }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onDismiss(id);
+          }
+        }}
+        aria-label="Dismiss notification"
+        className="shrink-0 ml-2 p-0.5 rounded text-text-tertiary hover:text-text-primary transition-colors"
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      </button>
     </div>
   );
 }

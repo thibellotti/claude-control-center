@@ -1,22 +1,13 @@
 import { ipcMain } from 'electron';
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  writeFileSync,
-  unlinkSync,
-} from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
 import { IPC_CHANNELS, Prompt } from '../../shared/types';
 
 const PROMPTS_DIR = path.join(os.homedir(), '.claude', 'studio', 'prompts');
 
-function ensureDir() {
-  if (!existsSync(PROMPTS_DIR)) {
-    mkdirSync(PROMPTS_DIR, { recursive: true });
-  }
+async function ensureDir() {
+  await fs.mkdir(PROMPTS_DIR, { recursive: true });
 }
 
 function generateId(): string {
@@ -66,36 +57,37 @@ const STARTER_PROMPTS: Omit<Prompt, 'id' | 'createdAt' | 'updatedAt'>[] = [
   },
 ];
 
-function seedStarterPrompts(): Prompt[] {
+async function seedStarterPrompts(): Promise<Prompt[]> {
   const now = Date.now();
-  const prompts: Prompt[] = STARTER_PROMPTS.map((starter, i) => {
-    const prompt: Prompt = {
-      ...starter,
-      id: generateId(),
-      createdAt: now - (STARTER_PROMPTS.length - i) * 1000,
-      updatedAt: now - (STARTER_PROMPTS.length - i) * 1000,
-    };
-    const filePath = path.join(PROMPTS_DIR, `${prompt.id}.json`);
-    writeFileSync(filePath, JSON.stringify(prompt, null, 2), 'utf-8');
-    return prompt;
-  });
+  const prompts: Prompt[] = STARTER_PROMPTS.map((starter, i) => ({
+    ...starter,
+    id: generateId(),
+    createdAt: now - (STARTER_PROMPTS.length - i) * 1000,
+    updatedAt: now - (STARTER_PROMPTS.length - i) * 1000,
+  }));
+  await Promise.all(
+    prompts.map((prompt) => {
+      const filePath = path.join(PROMPTS_DIR, `${prompt.id}.json`);
+      return fs.writeFile(filePath, JSON.stringify(prompt, null, 2), 'utf-8');
+    })
+  );
   return prompts;
 }
 
-function readAllPrompts(): Prompt[] {
-  ensureDir();
+async function readAllPrompts(): Promise<Prompt[]> {
+  await ensureDir();
 
-  const files = readdirSync(PROMPTS_DIR).filter((f) => f.endsWith('.json'));
+  const files = (await fs.readdir(PROMPTS_DIR)).filter((f) => f.endsWith('.json'));
 
   // Seed starter prompts if directory is empty
   if (files.length === 0) {
-    return seedStarterPrompts();
+    return await seedStarterPrompts();
   }
 
   const prompts: Prompt[] = [];
   for (const file of files) {
     try {
-      const raw = readFileSync(path.join(PROMPTS_DIR, file), 'utf-8');
+      const raw = await fs.readFile(path.join(PROMPTS_DIR, file), 'utf-8');
       prompts.push(JSON.parse(raw));
     } catch {
       // Skip corrupted files
@@ -107,11 +99,11 @@ function readAllPrompts(): Prompt[] {
 
 export function registerPromptHandlers() {
   ipcMain.handle(IPC_CHANNELS.GET_PROMPTS, async () => {
-    return readAllPrompts();
+    return await readAllPrompts();
   });
 
   ipcMain.handle(IPC_CHANNELS.SAVE_PROMPT, async (_, prompt: Prompt) => {
-    ensureDir();
+    await ensureDir();
 
     const now = Date.now();
     const toSave: Prompt = {
@@ -122,16 +114,17 @@ export function registerPromptHandlers() {
     };
 
     const filePath = path.join(PROMPTS_DIR, `${toSave.id}.json`);
-    writeFileSync(filePath, JSON.stringify(toSave, null, 2), 'utf-8');
+    await fs.writeFile(filePath, JSON.stringify(toSave, null, 2), 'utf-8');
     return toSave;
   });
 
   ipcMain.handle(IPC_CHANNELS.DELETE_PROMPT, async (_, id: string) => {
     const filePath = path.join(PROMPTS_DIR, `${id}.json`);
-    if (existsSync(filePath)) {
-      unlinkSync(filePath);
+    try {
+      await fs.unlink(filePath);
       return true;
+    } catch {
+      return false;
     }
-    return false;
   });
 }

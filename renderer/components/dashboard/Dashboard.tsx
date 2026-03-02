@@ -4,32 +4,7 @@ import ProjectCard from './ProjectCard';
 import ActiveSessions from './ActiveSessions';
 import { ChevronDownIcon } from '../icons';
 import type { Project } from '../../../shared/types';
-
-// ---------------------------------------------------------------------------
-// Stats bar card
-// ---------------------------------------------------------------------------
-
-interface StatCardProps {
-  label: string;
-  value: string | number;
-  accent?: boolean;
-  warn?: boolean;
-}
-
-function StatCard({ label, value, accent, warn }: StatCardProps) {
-  let valueColor = 'text-text-primary';
-  if (accent) valueColor = 'text-accent';
-  if (warn) valueColor = 'text-status-dirty';
-
-  return (
-    <div className="flex-1 min-w-[140px] bg-surface-1 border border-border-subtle rounded-card p-4">
-      <p className="text-[11px] font-medium uppercase tracking-wider text-text-tertiary mb-1">
-        {label}
-      </p>
-      <p className={`text-2xl font-semibold ${valueColor}`}>{value}</p>
-    </div>
-  );
-}
+import StatCard from '../shared/StatCard';
 
 // ---------------------------------------------------------------------------
 // Client accordion section
@@ -75,10 +50,10 @@ function ClientAccordion({
             open ? '' : '-rotate-90'
           }`}
         />
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
+        <span className="text-xs font-semibold uppercase tracking-wider text-text-tertiary">
           {group.client}
         </span>
-        <span className="text-[11px] text-text-tertiary ml-1">
+        <span className="text-xs text-text-tertiary ml-1">
           {group.projects.length}
         </span>
         {group.hasActive && (

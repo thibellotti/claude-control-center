@@ -64,7 +64,7 @@ export default memo(function PromptCard({ prompt, onEdit, onToggleFavorite }: Pr
 
       {/* Category pill */}
       <div className="flex items-center gap-2 mb-3">
-        <span className="px-2 py-0.5 rounded-full bg-surface-3 text-micro font-medium text-text-secondary">
+        <span className="px-2 py-1 rounded-full bg-surface-3 text-micro font-medium text-text-secondary">
           {prompt.category}
         </span>
         {prompt.tags.length > 0 && (
@@ -78,7 +78,7 @@ export default memo(function PromptCard({ prompt, onEdit, onToggleFavorite }: Pr
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1.5 px-2 py-1 rounded-button text-[11px] text-text-tertiary hover:text-text-primary hover:bg-surface-3 transition-colors"
+          className="flex items-center gap-1 px-2 py-1 rounded-button text-xs text-text-tertiary hover:text-text-primary hover:bg-surface-3 transition-colors"
           title="Copy to clipboard"
         >
           <CopyIcon />
@@ -89,7 +89,7 @@ export default memo(function PromptCard({ prompt, onEdit, onToggleFavorite }: Pr
             e.stopPropagation();
             onEdit(prompt);
           }}
-          className="flex items-center gap-1.5 px-2 py-1 rounded-button text-[11px] text-text-tertiary hover:text-text-primary hover:bg-surface-3 transition-colors"
+          className="flex items-center gap-1 px-2 py-1 rounded-button text-xs text-text-tertiary hover:text-text-primary hover:bg-surface-3 transition-colors"
           title="Edit prompt"
         >
           <PencilIcon />

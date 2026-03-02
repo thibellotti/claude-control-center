@@ -196,7 +196,7 @@ export default function XTerminal({ sessionId, isVisible }: XTerminalProps) {
   if (loadError) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-surface-0">
-        <p className="text-sm text-status-error">Terminal failed to load: {loadError}</p>
+        <p className="text-sm text-feedback-error">Terminal failed to load: {loadError}</p>
       </div>
     );
   }

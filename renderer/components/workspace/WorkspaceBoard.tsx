@@ -44,7 +44,7 @@ function AssignDropdown({
               onAssign(ws.id);
               onClose();
             }}
-            className="flex items-center gap-2 w-full px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-3 transition-colors text-left"
+            className="flex items-center gap-2 w-full px-3 py-1 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-3 transition-colors text-left"
           >
             <span
               className="shrink-0 w-2 h-2 rounded-full"
@@ -140,7 +140,7 @@ export default function WorkspaceBoard() {
         </div>
         <button
           onClick={handleNewWorkspace}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+          className="flex items-center gap-2 px-3 py-1 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
         >
           <PlusIcon />
           <span>New Workspace</span>
@@ -157,7 +157,7 @@ export default function WorkspaceBoard() {
           </p>
           <button
             onClick={handleNewWorkspace}
-            className="mt-4 flex items-center gap-2 px-3 py-1.5 rounded-button text-xs font-medium bg-surface-3 text-text-secondary hover:text-text-primary hover:bg-surface-4 transition-colors"
+            className="mt-4 flex items-center gap-2 px-3 py-1 rounded-button text-xs font-medium bg-surface-3 text-text-secondary hover:text-text-primary hover:bg-surface-4 transition-colors"
           >
             <PlusIcon />
             <span>Create Workspace</span>
@@ -188,7 +188,7 @@ export default function WorkspaceBoard() {
                 <h2 className="text-xs font-semibold uppercase tracking-wider text-text-tertiary">
                   Unassigned Projects
                 </h2>
-                <span className="px-1.5 py-0.5 rounded-full bg-surface-3 text-micro font-medium text-text-tertiary">
+                <span className="px-1 py-1 rounded-full bg-surface-3 text-micro font-medium text-text-tertiary">
                   {unassignedProjects.length}
                 </span>
               </div>
@@ -196,7 +196,7 @@ export default function WorkspaceBoard() {
                 {unassignedProjects.map((project) => (
                   <div
                     key={project.path}
-                    className="relative group bg-surface-1/60 border border-border-subtle rounded-card px-3 py-2.5 hover:border-border-default transition-all duration-200"
+                    className="relative group bg-surface-1/60 border border-border-subtle rounded-card px-3 py-2 hover:border-border-default transition-all duration-200"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <button

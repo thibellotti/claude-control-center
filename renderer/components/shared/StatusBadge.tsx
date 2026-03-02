@@ -9,7 +9,7 @@ export default memo(function StatusBadge({ status }: StatusBadgeProps) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium ${
+      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
         isActive
           ? 'bg-status-active/10 text-status-active'
           : 'bg-status-idle/10 text-status-idle'

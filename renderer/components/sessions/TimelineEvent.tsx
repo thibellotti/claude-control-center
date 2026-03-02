@@ -61,14 +61,14 @@ export default memo(function TimelineEvent({ action, isLast }: TimelineEventProp
     <div className="flex gap-4 min-w-0">
       {/* Left side: timeline line and dot */}
       <div className="flex flex-col items-center shrink-0 w-6">
-        <div className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1.5 ${dotColor}`} />
+        <div className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1 ${dotColor}`} />
         {!isLast && <div className="w-[2px] flex-1 bg-border-subtle mt-1" />}
       </div>
 
       {/* Right side: content */}
       <div className={`flex-1 min-w-0 ${isLast ? 'pb-2' : 'pb-4'}`}>
         <div className="flex items-start gap-2 min-w-0">
-          <span className={`shrink-0 mt-0.5 ${iconColor}`}>
+          <span className={`shrink-0 mt-1 ${iconColor}`}>
             <IconComponent />
           </span>
 
@@ -91,13 +91,13 @@ export default memo(function TimelineEvent({ action, isLast }: TimelineEventProp
 
             {/* File path */}
             {action.filePath && (
-              <p className="text-xs font-mono text-text-tertiary truncate mt-0.5">
+              <p className="text-xs font-mono text-text-tertiary truncate mt-1">
                 {action.filePath}
               </p>
             )}
 
             {/* Timestamp */}
-            <p className="text-xs text-text-tertiary mt-0.5">
+            <p className="text-xs text-text-tertiary mt-1">
               {formatTime(action.timestamp)}
             </p>
 

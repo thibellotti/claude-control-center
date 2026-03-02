@@ -1,20 +1,14 @@
 import { ipcMain } from 'electron';
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
-} from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
 import { IPC_CHANNELS, FigmaLink } from '../../shared/types';
+import { sanitizeId } from '../helpers/path-safety';
 
 const FIGMA_DIR = path.join(os.homedir(), '.claude', 'studio', 'figma');
 
-function ensureDir() {
-  if (!existsSync(FIGMA_DIR)) {
-    mkdirSync(FIGMA_DIR, { recursive: true });
-  }
+async function ensureDir() {
+  await fs.mkdir(FIGMA_DIR, { recursive: true });
 }
 
 function generateId(): string {
@@ -22,27 +16,24 @@ function generateId(): string {
 }
 
 function getLinksFilePath(projectId: string): string {
-  return path.join(FIGMA_DIR, `${projectId}.json`);
+  return path.join(FIGMA_DIR, `${sanitizeId(projectId)}.json`);
 }
 
-function readLinks(projectId: string): FigmaLink[] {
-  ensureDir();
+async function readLinks(projectId: string): Promise<FigmaLink[]> {
+  await ensureDir();
   const filePath = getLinksFilePath(projectId);
-  if (!existsSync(filePath)) {
-    return [];
-  }
   try {
-    const raw = readFileSync(filePath, 'utf-8');
+    const raw = await fs.readFile(filePath, 'utf-8');
     return JSON.parse(raw) as FigmaLink[];
   } catch {
     return [];
   }
 }
 
-function writeLinks(projectId: string, links: FigmaLink[]) {
-  ensureDir();
+async function writeLinks(projectId: string, links: FigmaLink[]) {
+  await ensureDir();
   const filePath = getLinksFilePath(projectId);
-  writeFileSync(filePath, JSON.stringify(links, null, 2), 'utf-8');
+  await fs.writeFile(filePath, JSON.stringify(links, null, 2), 'utf-8');
 }
 
 /**
@@ -102,7 +93,7 @@ export function registerFigmaHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.GET_FIGMA_LINKS,
     async (_, projectId: string): Promise<FigmaLink[]> => {
-      return readLinks(projectId);
+      return await readLinks(projectId);
     }
   );
 
@@ -113,7 +104,7 @@ export function registerFigmaHandlers() {
       projectId: string,
       link: Omit<FigmaLink, 'id' | 'createdAt'>
     ): Promise<FigmaLink> => {
-      const links = readLinks(projectId);
+      const links = await readLinks(projectId);
 
       const newLink: FigmaLink = {
         ...link,
@@ -122,7 +113,7 @@ export function registerFigmaHandlers() {
       };
 
       links.push(newLink);
-      writeLinks(projectId, links);
+      await writeLinks(projectId, links);
       return newLink;
     }
   );
@@ -130,14 +121,14 @@ export function registerFigmaHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.DELETE_FIGMA_LINK,
     async (_, projectId: string, linkId: string): Promise<boolean> => {
-      const links = readLinks(projectId);
+      const links = await readLinks(projectId);
       const filtered = links.filter((l) => l.id !== linkId);
 
       if (filtered.length === links.length) {
         return false; // Nothing was removed
       }
 
-      writeLinks(projectId, filtered);
+      await writeLinks(projectId, filtered);
       return true;
     }
   );

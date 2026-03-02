@@ -33,7 +33,7 @@ function toPxString(size: string): string {
 
 function SectionHeader({ title }: { title: string }) {
   return (
-    <h4 className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary mb-3">
+    <h4 className="text-xs font-semibold uppercase tracking-wider text-text-tertiary mb-3">
       {title}
     </h4>
   );

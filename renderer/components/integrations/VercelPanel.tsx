@@ -43,7 +43,7 @@ export default function VercelPanel({ projectPath }: VercelPanelProps) {
         <div className="text-text-tertiary/30"><VercelIcon /></div>
         <p className="text-sm text-text-secondary text-center">Vercel not detected</p>
         <p className="text-xs text-text-tertiary text-center">
-          Run <code className="px-1 py-0.5 bg-surface-2 rounded text-micro">vercel</code> in your project to link it
+          Run <code className="px-1 py-1 bg-surface-2 rounded text-micro">vercel</code> in your project to link it
         </p>
       </div>
     );
@@ -59,7 +59,7 @@ export default function VercelPanel({ projectPath }: VercelPanelProps) {
           <span className="text-text-primary"><VercelIcon /></span>
           <span className="text-sm font-medium text-text-primary">Vercel</span>
           {projectInfo.framework && (
-            <span className="px-1.5 py-0.5 bg-surface-2 rounded text-micro text-text-tertiary">{projectInfo.framework}</span>
+            <span className="px-1 py-1 bg-surface-2 rounded text-micro text-text-tertiary">{projectInfo.framework}</span>
           )}
         </div>
         <button onClick={refresh} className="p-1.5 rounded-button text-text-tertiary hover:text-text-primary hover:bg-surface-2 transition-colors" title="Refresh">
@@ -76,7 +76,7 @@ export default function VercelPanel({ projectPath }: VercelPanelProps) {
               href={projectInfo.productionUrl.startsWith('http') ? projectInfo.productionUrl : `https://${projectInfo.productionUrl}`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 text-xs text-accent hover:text-accent-hover transition-colors truncate"
+              className="flex items-center gap-1 text-xs text-accent hover:text-accent-hover transition-colors truncate"
             >
               {projectInfo.productionUrl}
               <ExternalLinkIcon size={12} />
@@ -88,7 +88,7 @@ export default function VercelPanel({ projectPath }: VercelPanelProps) {
         <button
           onClick={deploy}
           disabled={deploying}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-60"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-60"
         >
           {deploying ? (
             <>
@@ -108,7 +108,7 @@ export default function VercelPanel({ projectPath }: VercelPanelProps) {
             </h3>
             <div className="space-y-1">
               {deployments.slice(0, 8).map((d, i) => (
-                <div key={i} className="flex items-center gap-2 py-1.5 text-xs">
+                <div key={i} className="flex items-center gap-2 py-1 text-xs">
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusColor(d.state)}`} />
                   <span className="text-text-secondary truncate flex-1 font-mono">{d.url}</span>
                   <span className="text-text-tertiary text-micro shrink-0">{relativeTime(d.createdAt)}</span>

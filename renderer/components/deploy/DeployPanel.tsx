@@ -92,7 +92,7 @@ export default function DeployPanel({ projectPath }: DeployPanelProps) {
               <p className="text-xs font-medium text-text-secondary mb-2 flex items-center gap-2">
                 <VercelIcon /> Vercel
               </p>
-              <pre className="text-[11px] font-mono text-text-tertiary bg-surface-2 rounded px-3 py-2">
+              <pre className="text-xs font-mono text-text-tertiary bg-surface-2 rounded px-3 py-2">
                 npm i -g vercel{'\n'}vercel login
               </pre>
             </div>
@@ -100,7 +100,7 @@ export default function DeployPanel({ projectPath }: DeployPanelProps) {
               <p className="text-xs font-medium text-text-secondary mb-2 flex items-center gap-2">
                 <NetlifyIcon /> Netlify
               </p>
-              <pre className="text-[11px] font-mono text-text-tertiary bg-surface-2 rounded px-3 py-2">
+              <pre className="text-xs font-mono text-text-tertiary bg-surface-2 rounded px-3 py-2">
                 npm i -g netlify-cli{'\n'}netlify login
               </pre>
             </div>
@@ -132,14 +132,14 @@ export default function DeployPanel({ projectPath }: DeployPanelProps) {
               {config.lastDeployUrl && (
                 <button
                   onClick={() => window.open(config.lastDeployUrl, '_blank')}
-                  className="text-xs text-accent hover:underline flex items-center gap-1 mt-0.5"
+                  className="text-xs text-accent hover:underline flex items-center gap-1 mt-1"
                 >
                   {config.lastDeployUrl}
                   <ExternalLinkIcon size={12} />
                 </button>
               )}
               {config.lastDeployTime && !config.lastDeployUrl && (
-                <p className="text-xs text-text-tertiary mt-0.5">
+                <p className="text-xs text-text-tertiary mt-1">
                   Last deploy: {formatTimestamp(config.lastDeployTime)}
                 </p>
               )}
@@ -148,7 +148,7 @@ export default function DeployPanel({ projectPath }: DeployPanelProps) {
           <button
             onClick={deploy}
             disabled={isDeploying}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isDeploying ? (
               <>
@@ -180,13 +180,13 @@ export default function DeployPanel({ projectPath }: DeployPanelProps) {
             className="bg-surface-2 border border-border-subtle rounded-lg p-3 max-h-48 overflow-y-auto"
           >
             {result && result.output.length > 0 ? (
-              <pre className="text-[11px] font-mono text-text-tertiary leading-relaxed whitespace-pre-wrap break-all">
+              <pre className="text-xs font-mono text-text-tertiary leading-relaxed whitespace-pre-wrap break-all">
                 {result.output.join('')}
               </pre>
             ) : isDeploying ? (
-              <p className="text-[11px] font-mono text-text-tertiary">Waiting for output...</p>
+              <p className="text-xs font-mono text-text-tertiary">Waiting for output...</p>
             ) : (
-              <p className="text-[11px] font-mono text-text-tertiary">No output captured.</p>
+              <p className="text-xs font-mono text-text-tertiary">No output captured.</p>
             )}
           </div>
         </div>
@@ -247,7 +247,7 @@ export default function DeployPanel({ projectPath }: DeployPanelProps) {
 
 function DeployHistoryEntry({ entry }: { entry: DeployResult }) {
   return (
-    <div className="flex items-center gap-3 px-4 py-2.5">
+    <div className="flex items-center gap-3 px-4 py-2">
       <StatusDot success={entry.success} />
       <div className="flex-1 min-w-0">
         {entry.url ? (

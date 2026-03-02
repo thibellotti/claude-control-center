@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useOrchestrator } from '../../hooks/useOrchestrator';
 import { useTerminalSessions } from '../../hooks/useTerminal';
-import { useProjects } from '../../hooks/useProjects';
+import { useProjectContext } from '../../hooks/useProjectContext';
 import OrchestratorToolbar from './OrchestratorToolbar';
 import OrchestratorGrid from './OrchestratorGrid';
 import OrchestratorDrawer from './OrchestratorDrawer';
@@ -20,7 +20,7 @@ interface OrchestratorPageProps {
 export default function OrchestratorPage({ initialProject }: OrchestratorPageProps) {
   const orchestrator = useOrchestrator();
   const { createSession, killSession } = useTerminalSessions();
-  const { projects } = useProjects();
+  const { projects } = useProjectContext();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Restore workspace on mount — skip if initialProject will create fresh cells
@@ -182,14 +182,14 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => handleAddTerminal('claude')}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+                className="flex items-center gap-1 px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
               >
                 <ClaudeIcon size={14} />
                 Claude
               </button>
               <button
                 onClick={() => handleAddTerminal()}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-button text-xs font-medium bg-surface-2 border border-border-subtle text-text-secondary hover:text-text-primary transition-colors"
+                className="flex items-center gap-1 px-4 py-2 rounded-button text-xs font-medium bg-surface-2 border border-border-subtle text-text-secondary hover:text-text-primary transition-colors"
               >
                 <TerminalIcon size={14} />
                 Shell

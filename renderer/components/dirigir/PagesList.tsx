@@ -21,7 +21,7 @@ interface PagesListProps {
 
 function SkeletonRow() {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 mx-2">
+    <div className="flex items-center gap-2 px-3 py-1 mx-2">
       <div className="w-4 h-4 rounded bg-surface-3 animate-pulse" />
       <div className="h-3 w-20 rounded bg-surface-3 animate-pulse" />
       <div className="h-2.5 w-12 rounded bg-surface-3 animate-pulse ml-auto" />
@@ -48,7 +48,7 @@ const PageRow = memo(function PageRow({
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-2 px-3 py-1.5 rounded-button mx-2 cursor-pointer transition-colors w-[calc(100%-16px)] text-left ${
+      className={`flex items-center gap-2 px-3 py-1 rounded-button mx-2 cursor-pointer transition-colors w-[calc(100%-16px)] text-left ${
         isActive
           ? 'bg-surface-2 border-l-2 border-accent'
           : 'hover:bg-surface-2'
@@ -143,7 +143,7 @@ const PagesList = memo(function PagesList({
 
       {/* Error state */}
       {!loading && error && (
-        <span className="text-micro text-status-error px-3">
+        <span className="text-micro text-feedback-error px-3">
           {error}
         </span>
       )}
@@ -157,7 +157,7 @@ const PagesList = memo(function PagesList({
 
       {/* Page list */}
       {!loading && pages.length > 0 && (
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col gap-1">
           {pages.map((page) => (
             <PageRow
               key={page.path}

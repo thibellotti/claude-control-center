@@ -6,6 +6,7 @@ interface ProjectContextValue {
   selectedProjectPath: string | null;
   onSelectProject: (project: Project) => void;
   onOpenProject: (path: string, mode: 'claude' | 'claude --dangerously-skip-permissions') => void;
+  onOpenVisualEditor?: (projectPath: string, previewUrl: string) => void;
   activeProjectPath: string | null;
   activeSessions: ActiveSession[];
   getSessionForProject: (projectPath: string) => ActiveSession | null;

@@ -3,6 +3,8 @@ import { readdirSync, readFileSync, statSync, existsSync } from 'fs';
 import path from 'path';
 import { IPC_CHANNELS } from '../../shared/types';
 import type { ComponentInfo, ComponentProp } from '../../shared/types';
+import { isPathSafe } from '../helpers/path-safety';
+import { log } from '../helpers/logger';
 
 // Directories to skip during scanning
 const SKIP_DIRS = new Set([
@@ -300,6 +302,7 @@ export function registerComponentHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.SCAN_COMPONENTS,
     async (_, projectPath: string): Promise<ComponentInfo[]> => {
+      if (!isPathSafe(projectPath)) return [];
       try {
         if (!existsSync(projectPath)) {
           return [];
@@ -333,7 +336,7 @@ export function registerComponentHandlers() {
 
         return allComponents;
       } catch (err) {
-        console.error('Failed to scan components:', err);
+        log('warn', 'components', 'Failed to scan components', err);
         return [];
       }
     }

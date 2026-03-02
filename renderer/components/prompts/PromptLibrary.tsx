@@ -72,7 +72,7 @@ export default function PromptLibrary() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold text-text-primary">Prompt Library</h1>
-          <p className="text-xs text-text-tertiary mt-0.5">
+          <p className="text-xs text-text-tertiary mt-1">
             Manage and organize your prompt templates
           </p>
         </div>
@@ -103,7 +103,7 @@ export default function PromptLibrary() {
           </div>
           <button
             onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-button text-xs font-medium border transition-colors ${
+            className={`flex items-center gap-1 px-3 py-2 rounded-button text-xs font-medium border transition-colors ${
               showFavoritesOnly
                 ? 'bg-feedback-warning-muted border-feedback-warning/30 text-feedback-warning'
                 : 'bg-surface-1 border-border-subtle text-text-tertiary hover:text-text-secondary hover:border-border-default'

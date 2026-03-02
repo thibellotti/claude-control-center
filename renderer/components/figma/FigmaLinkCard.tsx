@@ -37,7 +37,7 @@ export default function FigmaLinkCard({ link, onDelete }: FigmaLinkCardProps) {
           <p className="text-sm font-medium text-text-primary truncate">
             {link.label}
           </p>
-          <p className="text-xs font-mono text-text-tertiary truncate mt-0.5">
+          <p className="text-xs font-mono text-text-tertiary truncate mt-1">
             {truncateUrl(link.figmaUrl)}
           </p>
         </div>
@@ -45,7 +45,7 @@ export default function FigmaLinkCard({ link, onDelete }: FigmaLinkCardProps) {
         <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={handleOpenInFigma}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs text-text-secondary hover:text-text-primary hover:bg-surface-2 transition-colors"
+            className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-text-secondary hover:text-text-primary hover:bg-surface-2 transition-colors"
             title="Open in Figma"
           >
             <ExternalLinkIcon size={12} />
@@ -54,7 +54,7 @@ export default function FigmaLinkCard({ link, onDelete }: FigmaLinkCardProps) {
 
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs text-text-secondary hover:text-text-primary hover:bg-surface-2 transition-colors"
+            className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-text-secondary hover:text-text-primary hover:bg-surface-2 transition-colors"
             title={expanded ? 'Hide preview' : 'Show preview'}
           >
             {expanded ? <EyeOffIcon /> : <EyeIcon />}

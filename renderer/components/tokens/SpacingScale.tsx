@@ -74,7 +74,7 @@ export default function SpacingScale({ spacing }: SpacingScaleProps) {
         return (
           <div
             key={key}
-            className="grid grid-cols-[60px_80px_1fr] gap-3 items-center py-1.5 group hover:bg-surface-1 rounded transition-colors"
+            className="grid grid-cols-[60px_80px_1fr] gap-3 items-center py-1 group hover:bg-surface-1 rounded transition-colors"
           >
             {/* Key */}
             <span className="text-xs font-mono text-text-primary">{key}</span>

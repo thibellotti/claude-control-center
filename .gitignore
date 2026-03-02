@@ -14,3 +14,11 @@ dist
 
 # typescript
 tsconfig.tsbuildinfo
+renderer/tsconfig.tsbuildinfo
+
+# claude
+.claude/
+
+# env
+*.env
+*.env.local

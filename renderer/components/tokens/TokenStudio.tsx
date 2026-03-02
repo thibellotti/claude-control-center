@@ -79,7 +79,7 @@ export default function TokenStudio({ projectPath }: TokenStudioProps) {
         <div className="flex items-center gap-2">
           <span className="text-xs font-mono text-text-tertiary">{configFileName}</span>
           {isDirty && (
-            <span className="text-micro font-medium text-status-dirty px-1.5 py-0.5 bg-surface-2 rounded">
+            <span className="text-micro font-medium text-status-dirty px-1 py-1 bg-surface-2 rounded">
               Unsaved
             </span>
           )}
@@ -87,7 +87,7 @@ export default function TokenStudio({ projectPath }: TokenStudioProps) {
         <button
           onClick={handleSave}
           disabled={!isDirty || isSaving}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-button text-xs font-medium transition-colors ${
+          className={`flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium transition-colors ${
             isDirty
               ? 'bg-accent text-white hover:bg-accent-hover'
               : 'bg-surface-2 text-text-tertiary cursor-not-allowed'
@@ -113,7 +113,7 @@ export default function TokenStudio({ projectPath }: TokenStudioProps) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 ${
+              className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
                 isActive
                   ? 'text-text-primary border-accent'
                   : 'text-text-tertiary hover:text-text-secondary border-transparent'

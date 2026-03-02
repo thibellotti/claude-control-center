@@ -24,7 +24,7 @@ function renderMarkdown(md: string): string {
       const idx = codeBlocks.length;
       // Escape code block content separately (only HTML entities, not markdown)
       codeBlocks.push(
-        `<pre class="bg-surface-3 border border-border-subtle rounded-card p-3 overflow-x-auto my-3"><code class="text-[12px] font-mono text-text-secondary">${escapeHtml(code.trim())}</code></pre>`
+        `<pre class="bg-surface-3 border border-border-subtle rounded-card p-3 overflow-x-auto my-3"><code class="text-xs font-mono text-text-secondary">${escapeHtml(code.trim())}</code></pre>`
       );
       return `%%CODEBLOCK_${idx}%%`;
     }
@@ -37,7 +37,7 @@ function renderMarkdown(md: string): string {
     (_match, code) => {
       const idx = inlineCode.length;
       inlineCode.push(
-        `<code class="bg-surface-3 px-1.5 py-0.5 rounded text-[12px] font-mono text-text-secondary">${escapeHtml(code)}</code>`
+        `<code class="bg-surface-3 px-1 py-1 rounded text-xs font-mono text-text-secondary">${escapeHtml(code)}</code>`
       );
       return `%%INLINECODE_${idx}%%`;
     }
@@ -77,17 +77,17 @@ function renderMarkdown(md: string): string {
   // Checkboxes
   html = html.replace(
     /^- \[x\] (.+)$/gm,
-    '<div class="flex items-start gap-2 my-0.5"><span class="text-status-active mt-0.5">&#9745;</span><span class="text-text-secondary line-through">$1</span></div>'
+    '<div class="flex items-start gap-2 my-1"><span class="text-status-active mt-1">&#9745;</span><span class="text-text-secondary line-through">$1</span></div>'
   );
   html = html.replace(
     /^- \[ \] (.+)$/gm,
-    '<div class="flex items-start gap-2 my-0.5"><span class="text-text-tertiary mt-0.5">&#9744;</span><span class="text-text-secondary">$1</span></div>'
+    '<div class="flex items-start gap-2 my-1"><span class="text-text-tertiary mt-1">&#9744;</span><span class="text-text-secondary">$1</span></div>'
   );
 
   // Unordered lists
   html = html.replace(
     /^- (.+)$/gm,
-    '<div class="flex items-start gap-2 my-0.5 pl-1"><span class="text-text-tertiary">&#8226;</span><span class="text-text-secondary">$1</span></div>'
+    '<div class="flex items-start gap-2 my-1 pl-1"><span class="text-text-tertiary">&#8226;</span><span class="text-text-secondary">$1</span></div>'
   );
 
   // Paragraphs: wrap remaining lines that aren't already wrapped in HTML tags

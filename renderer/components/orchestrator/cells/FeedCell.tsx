@@ -37,7 +37,7 @@ export default function FeedCell({ config }: FeedCellProps) {
           filtered.map((entry, i) => (
             <div
               key={`${entry.timestamp}-${i}`}
-              className="flex items-start gap-1.5 px-2.5 py-1 border-b border-border-subtle/20"
+              className="flex items-start gap-1 px-2 py-1 border-b border-border-subtle/20"
             >
               <span className="text-micro font-mono text-text-tertiary shrink-0 mt-px w-[50px]">
                 {new Date(entry.timestamp).toLocaleTimeString('en-US', {
@@ -54,7 +54,7 @@ export default function FeedCell({ config }: FeedCellProps) {
           ))
         )}
       </div>
-      <div className="flex items-center justify-between px-2.5 py-1 border-t border-border-subtle bg-surface-0 shrink-0">
+      <div className="flex items-center justify-between px-2 py-1 border-t border-border-subtle bg-surface-0 shrink-0">
         <span className="text-micro text-text-tertiary">{filtered.length} events</span>
         {filtered.length > 0 && (
           <span className="text-micro text-status-active font-medium">Live</span>

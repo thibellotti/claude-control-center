@@ -73,7 +73,7 @@ export default function Sidebar({
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className={`p-1.5 rounded-button text-text-tertiary hover:text-text-secondary hover:bg-surface-3 transition-colors ${
+          className={`p-1 rounded-button text-text-tertiary hover:text-text-secondary hover:bg-surface-3 transition-colors ${
             collapsed ? 'mx-auto' : ''
           }`}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -127,14 +127,14 @@ export default function Sidebar({
                 <button
                   type="button"
                   onClick={() => toggleClient(group.client)}
-                  className="flex items-center gap-1.5 w-full px-3 py-1 text-micro font-medium uppercase tracking-wider text-text-tertiary hover:text-text-secondary transition-colors"
+                  className="flex items-center gap-1 w-full px-3 py-1 text-micro font-medium uppercase tracking-wider text-text-tertiary hover:text-text-secondary transition-colors"
                 >
                   <ChevronDownIcon
                     size={10}
                     className={`transition-transform duration-150 ${isGroupCollapsed ? '-rotate-90' : ''}`}
                   />
                   <span className="truncate">{group.client}</span>
-                  <span className="ml-auto text-[10px] opacity-60">{group.projects.length}</span>
+                  <span className="ml-auto text-micro opacity-60">{group.projects.length}</span>
                 </button>
               )}
               {/* Projects in group */}
@@ -152,7 +152,7 @@ export default function Sidebar({
                           onSelectProject(project);
                         }
                       }}
-                      className={`flex items-center gap-2.5 w-full py-1.5 rounded-button text-sm transition-colors ${
+                      className={`flex items-center gap-2 w-full py-1 rounded-button text-sm transition-colors ${
                         collapsed ? 'px-3 justify-center' : 'pl-6 pr-3'
                       } ${
                         isActive

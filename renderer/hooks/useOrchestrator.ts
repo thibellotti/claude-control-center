@@ -1,16 +1,10 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import type {
   OrchestratorCell,
   LayoutPreset,
   OrchestratorWorkspace,
   OrchestratorCellConfig,
 } from '../../shared/types';
-
-let cellCounter = 0;
-function generateCellId(): string {
-  cellCounter += 1;
-  return `cell-${Date.now()}-${cellCounter}`;
-}
 
 const STORAGE_KEY = 'orchestrator-workspace';
 const MAX_CELLS = 4;
@@ -50,6 +44,12 @@ function saveWorkspace(cells: OrchestratorCell[]): void {
 }
 
 export function useOrchestrator() {
+  const cellCounterRef = useRef(0);
+  function generateCellId(): string {
+    cellCounterRef.current += 1;
+    return `cell-${Date.now()}-${cellCounterRef.current}`;
+  }
+
   const [cells, setCells] = useState<OrchestratorCell[]>([]);
   const [activeCell, setActiveCell] = useState<string | null>(null);
 

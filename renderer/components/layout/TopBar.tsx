@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { SearchIcon, ChevronLeftIcon, ChevronDownIcon } from '../icons';
 
 export interface TopBarProps {
@@ -24,6 +24,41 @@ export default function TopBar({
   onSwitchProject,
 }: TopBarProps) {
   const [showSwitcher, setShowSwitcher] = useState(false);
+  const [switcherIndex, setSwitcherIndex] = useState(-1);
+  const switcherTriggerRef = useRef<HTMLButtonElement>(null);
+
+  // Reset selection when dropdown opens/closes
+  useEffect(() => {
+    if (!showSwitcher) setSwitcherIndex(-1);
+  }, [showSwitcher]);
+
+  // Keyboard handler for the project switcher dropdown
+  const handleSwitcherKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!showSwitcher || !recentProjects) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setShowSwitcher(false);
+        switcherTriggerRef.current?.focus();
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSwitcherIndex((prev) =>
+          prev < recentProjects.length - 1 ? prev + 1 : 0
+        );
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSwitcherIndex((prev) =>
+          prev > 0 ? prev - 1 : recentProjects.length - 1
+        );
+      } else if (e.key === 'Enter' && switcherIndex >= 0) {
+        e.preventDefault();
+        onSwitchProject?.(recentProjects[switcherIndex].path);
+        setShowSwitcher(false);
+        switcherTriggerRef.current?.focus();
+      }
+    },
+    [showSwitcher, recentProjects, switcherIndex, onSwitchProject]
+  );
 
   return (
     <header className="drag-region flex items-center justify-between h-[52px] px-6 border-b border-border-subtle bg-surface-1 shrink-0">
@@ -38,11 +73,11 @@ export default function TopBar({
           </button>
           <span className="text-sm font-medium text-text-primary">{activeProject.name}</span>
           {activeProject.client && (
-            <span className="px-1.5 py-0.5 rounded bg-surface-2 text-micro text-text-tertiary">
+            <span className="px-1 py-1 rounded bg-surface-2 text-micro text-text-tertiary">
               {activeProject.client}
             </span>
           )}
-          <span className={`px-1.5 py-0.5 rounded text-micro font-medium ${
+          <span className={`px-1 py-1 rounded text-micro font-medium ${
             activeProject.mode.includes('skip')
               ? 'bg-feedback-warning/10 text-feedback-warning'
               : 'bg-accent/10 text-accent'
@@ -58,8 +93,11 @@ export default function TopBar({
         {recentProjects && recentProjects.length > 0 && (
           <div className="relative no-drag">
             <button
+              ref={switcherTriggerRef}
               onClick={() => setShowSwitcher(!showSwitcher)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-button text-xs text-text-tertiary hover:text-text-secondary hover:bg-surface-2 transition-colors"
+              aria-haspopup="listbox"
+              aria-expanded={showSwitcher}
+              className="flex items-center gap-1 px-2 py-1 rounded-button text-xs text-text-tertiary hover:text-text-secondary hover:bg-surface-2 transition-colors"
               title="Switch project"
             >
               <ChevronDownIcon size={12} />
@@ -68,14 +106,21 @@ export default function TopBar({
             {showSwitcher && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowSwitcher(false)} />
-                <div className="absolute right-0 top-full mt-1 z-50 bg-surface-2 border border-border-subtle rounded-card shadow-xl py-1 min-w-[220px] max-h-[300px] overflow-y-auto">
-                  {recentProjects.map((p) => (
+                <div
+                  role="listbox"
+                  aria-label="Recent projects"
+                  onKeyDown={handleSwitcherKeyDown}
+                  className="absolute right-0 top-full mt-1 z-50 bg-surface-2 border border-border-subtle rounded-card shadow-xl py-1 min-w-[220px] max-h-[300px] overflow-y-auto"
+                >
+                  {recentProjects.map((p, index) => (
                     <button
                       key={p.path}
+                      role="option"
+                      aria-selected={index === switcherIndex || activeProject?.path === p.path}
                       onClick={() => { onSwitchProject?.(p.path); setShowSwitcher(false); }}
                       className={`flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-3 transition-colors ${
                         activeProject?.path === p.path ? 'bg-surface-3 text-text-primary' : ''
-                      }`}
+                      } ${index === switcherIndex ? 'bg-surface-3' : ''}`}
                     >
                       <span className="truncate flex-1 text-left">{p.name}</span>
                       {p.client && (
@@ -92,11 +137,11 @@ export default function TopBar({
         <button
           onClick={onOpenSearch}
           aria-label="Search projects (Cmd+K)"
-          className="no-drag flex items-center gap-2 px-3 py-1.5 rounded-button bg-surface-2 border border-border-subtle text-text-tertiary hover:text-text-secondary hover:border-border-default transition-colors text-xs"
+          className="no-drag flex items-center gap-2 px-3 py-1 rounded-button bg-surface-2 border border-border-subtle text-text-tertiary hover:text-text-secondary hover:border-border-default transition-colors text-xs"
         >
           <SearchIcon />
           <span>Search</span>
-          <kbd className="ml-1 px-1.5 py-0.5 rounded bg-surface-3 border border-border-subtle text-micro font-mono">
+          <kbd className="ml-1 px-1 py-1 rounded bg-surface-3 border border-border-subtle text-micro font-mono">
             {'\u2318'}K
           </kbd>
         </button>

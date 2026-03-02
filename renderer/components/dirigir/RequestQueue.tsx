@@ -68,9 +68,9 @@ const RequestCard = React.memo(function RequestCard({
       }`}
     >
       {/* Status badge */}
-      <div className="flex justify-end mb-1.5">
+      <div className="flex justify-end mb-2">
         <span
-          className={`inline-block px-1.5 py-0.5 rounded-full text-micro font-medium ${
+          className={`inline-block px-1 py-1 rounded-full text-micro font-medium ${
             statusStyles[request.status]
           }`}
         >

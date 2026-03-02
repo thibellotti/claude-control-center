@@ -77,10 +77,10 @@ export default function GitHubPanel({ projectPath, project }: GitHubPanelProps) 
           <div>
             <h3 className="text-micro font-medium text-text-tertiary uppercase tracking-wider mb-2">Status</h3>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2 py-0.5 bg-surface-2 rounded text-xs text-text-secondary font-mono">
+              <span className="px-2 py-1 bg-surface-2 rounded text-xs text-text-secondary font-mono">
                 {project.git.branch}
               </span>
-              <span className={`px-1.5 py-0.5 rounded text-micro ${project.git.status === 'clean' ? 'bg-status-active/15 text-status-active' : 'bg-status-dirty/15 text-status-dirty'}`}>
+              <span className={`px-1 py-1 rounded text-micro ${project.git.status === 'clean' ? 'bg-status-active/15 text-status-active' : 'bg-status-dirty/15 text-status-dirty'}`}>
                 {project.git.status}
               </span>
               {project.git.ahead > 0 && (
@@ -102,7 +102,7 @@ export default function GitHubPanel({ projectPath, project }: GitHubPanelProps) 
             <div className="space-y-1">
               {data.commits.slice(0, 6).map((commit) => (
                 <div key={commit.hash} className="flex items-start gap-2 py-1">
-                  <span className="text-text-tertiary mt-0.5 shrink-0"><CommitIcon size={12} /></span>
+                  <span className="text-text-tertiary mt-1 shrink-0"><CommitIcon size={12} /></span>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-text-secondary truncate">{commit.message}</p>
                     <p className="text-micro text-text-tertiary">
@@ -130,9 +130,9 @@ export default function GitHubPanel({ projectPath, project }: GitHubPanelProps) 
                   href={pr.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-start gap-2 py-1.5 hover:bg-surface-2 rounded px-1 -mx-1 transition-colors"
+                  className="flex items-start gap-2 py-1 hover:bg-surface-2 rounded px-1 -mx-1 transition-colors"
                 >
-                  <span className="text-text-tertiary mt-0.5 shrink-0"><PRIcon size={12} /></span>
+                  <span className="text-text-tertiary mt-1 shrink-0"><PRIcon size={12} /></span>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-text-secondary truncate">
                       <span className={prStateColor(pr.state)}>#{pr.number}</span>{' '}

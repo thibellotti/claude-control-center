@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface OnboardingState {
   completed: boolean;
@@ -45,29 +45,28 @@ export function useOnboarding() {
     }
   }, []);
 
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
   const completeStep = useCallback(async (step: keyof Omit<OnboardingState, 'completed'>) => {
-    let newState: OnboardingState | null = null;
+    const prev = stateRef.current;
+    const newState: OnboardingState = { ...prev, [step]: true };
 
-    setState((prev) => {
-      newState = { ...prev, [step]: true };
-      // Force completed when tourCompleted is set (final step)
-      if (step === 'tourCompleted') {
-        newState.completed = true;
-      }
-      // Also complete if all steps done
-      if (newState.apiKeyConfigured && newState.firstProjectCreated && newState.tourCompleted) {
-        newState.completed = true;
-      }
-      return newState;
-    });
+    // Force completed when tourCompleted is set (final step)
+    if (step === 'tourCompleted') {
+      newState.completed = true;
+    }
+    // Also complete if all steps done
+    if (newState.apiKeyConfigured && newState.firstProjectCreated && newState.tourCompleted) {
+      newState.completed = true;
+    }
 
-    // Persist outside of setState
-    if (newState) {
-      try {
-        await window.api.writeFile(CONFIG_PATH, JSON.stringify(newState, null, 2));
-      } catch (err) {
-        console.error('Failed to persist onboarding state:', err);
-      }
+    setState(newState);
+
+    try {
+      await window.api.writeFile(CONFIG_PATH, JSON.stringify(newState, null, 2));
+    } catch (err) {
+      console.error('Failed to persist onboarding state:', err);
     }
   }, []);
 

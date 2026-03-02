@@ -37,7 +37,7 @@ export default function IntegrationStrip({ project, activeOverlay, onToggleOverl
   if (integrations.length === 0) return null;
 
   return (
-    <div className="h-9 shrink-0 flex items-center gap-1.5 px-3 border-t border-border-subtle bg-surface-1">
+    <div className="h-9 shrink-0 flex items-center gap-1 px-3 border-t border-border-subtle bg-surface-1">
       {integrations.map((id) => {
         const info = INTEGRATION_MAP[id];
         const isActive = activeOverlay === id;
@@ -45,7 +45,7 @@ export default function IntegrationStrip({ project, activeOverlay, onToggleOverl
           <button
             key={id}
             onClick={() => onToggleOverlay(id)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
+            className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${
               isActive
                 ? 'bg-accent/10 text-accent'
                 : 'text-text-tertiary hover:text-text-secondary hover:bg-surface-2'

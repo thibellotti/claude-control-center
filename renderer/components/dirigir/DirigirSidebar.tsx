@@ -106,7 +106,7 @@ const DirigirSidebar = React.memo(function DirigirSidebar({
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className={`flex flex-col items-center gap-0.5 py-2 px-2 rounded-card cursor-pointer transition-colors ${
+              className={`flex flex-col items-center gap-1 py-2 px-2 rounded-card cursor-pointer transition-colors ${
                 isActive
                   ? 'bg-surface-2 text-text-primary'
                   : 'text-text-tertiary hover:text-text-secondary hover:bg-surface-1'
@@ -139,7 +139,7 @@ const DirigirSidebar = React.memo(function DirigirSidebar({
         {/* Settings */}
         <button
           onClick={() => onNavigate('settings')}
-          className={`flex flex-col items-center gap-0.5 py-2 px-2 rounded-card cursor-pointer transition-colors ${
+          className={`flex flex-col items-center gap-1 py-2 px-2 rounded-card cursor-pointer transition-colors ${
             currentPage === 'settings'
               ? 'bg-surface-2 text-text-primary'
               : 'text-text-tertiary hover:text-text-secondary hover:bg-surface-1'
