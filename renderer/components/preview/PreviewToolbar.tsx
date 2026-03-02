@@ -1,7 +1,7 @@
 import React from 'react';
 import type { EnhancedPreviewState } from '../../../shared/types';
 import type { ViewportState } from '../../hooks/usePreview';
-import { PlayIcon, StopIcon, RefreshIcon, DesktopIcon, TabletIcon, MobileIcon, ExternalLinkIcon, ConsoleIcon } from '../icons';
+import { PlayIcon, StopIcon, RefreshIcon, DesktopIcon, TabletIcon, MobileIcon, ExternalLinkIcon, ConsoleIcon, EyeIcon } from '../icons';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -18,6 +18,7 @@ interface PreviewToolbarProps {
   onViewportChange: (mode: string, width?: number) => void;
   onToggleConsole: () => void;
   onOpenBrowser: () => void;
+  onOpenVisualEditor?: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -70,6 +71,7 @@ export default function PreviewToolbar({
   onViewportChange,
   onToggleConsole,
   onOpenBrowser,
+  onOpenVisualEditor,
 }: PreviewToolbarProps) {
   const isRunning = state.status !== 'idle' && state.status !== 'error';
   const isReady = state.status === 'ready';
@@ -157,6 +159,18 @@ export default function PreviewToolbar({
             </span>
           )}
         </button>
+
+        {/* Visual Editor */}
+        {onOpenVisualEditor && (
+          <button
+            onClick={onOpenVisualEditor}
+            disabled={!isReady}
+            className="flex items-center justify-center w-7 h-7 rounded-button text-text-tertiary hover:text-accent hover:bg-accent/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            title="Open Visual Editor"
+          >
+            <EyeIcon />
+          </button>
+        )}
 
         {/* Open in browser */}
         <button

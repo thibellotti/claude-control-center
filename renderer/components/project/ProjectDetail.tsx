@@ -13,7 +13,9 @@ import {
   PRIcon,
   ClockIcon,
   EditIcon,
+  EyeIcon,
 } from '../icons';
+import { useProjectContext } from '../../hooks/useProjectContext';
 import StatCard from '../shared/StatCard';
 
 // ---------------------------------------------------------------------------
@@ -155,6 +157,7 @@ function taskStatusOrder(status: TaskItem['status']): number {
 // ---------------------------------------------------------------------------
 
 export default function ProjectDetail({ project, onOpenInClaude, onBack }: ProjectDetailProps) {
+  const { onOpenVisualEditor } = useProjectContext();
   const { github, sessionTimelines, loading: extraLoading } = useProjectDetailData(project.path);
 
   const activeTasks = project.tasks.filter((t) => t.status !== 'deleted');
@@ -220,6 +223,15 @@ export default function ProjectDetail({ project, onOpenInClaude, onBack }: Proje
               >
                 Autopilot
               </button>
+              {onOpenVisualEditor && (
+                <button
+                  onClick={() => onOpenVisualEditor(project.path, `http://localhost:3000`)}
+                  className="flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium bg-accent/10 text-accent hover:bg-accent/20 transition-colors"
+                >
+                  <EyeIcon size={12} />
+                  Visual Editor
+                </button>
+              )}
               <button
                 onClick={() => window.api.openInEditor(project.path)}
                 className="flex items-center gap-1 px-2 py-1 rounded-button text-xs font-medium text-text-secondary bg-surface-2 border border-border-subtle hover:border-border-default transition-colors"

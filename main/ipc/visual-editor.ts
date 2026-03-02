@@ -33,7 +33,7 @@ function pushUpdate(channel: string, data: unknown) {
 
 export function registerVisualEditorHandlers() {
   // Pre-load overlay script
-  const overlayPath = path.join(__dirname, '..', '..', 'scripts', 'overlay.js');
+  const overlayPath = path.join(__dirname, '..', 'scripts', 'overlay.js');
   fs.readFile(overlayPath, 'utf-8')
     .then((content) => {
       overlayScript = content;
@@ -53,7 +53,7 @@ export function registerVisualEditorHandlers() {
     if (!overlayScript) {
       // Try loading again if not cached
       try {
-        const overlayPath = path.join(__dirname, '..', '..', 'scripts', 'overlay.js');
+        const overlayPath = path.join(__dirname, '..', 'scripts', 'overlay.js');
         overlayScript = await fs.readFile(overlayPath, 'utf-8');
       } catch (err) {
         log('error', 'visual-editor', 'Failed to read overlay script', err);
