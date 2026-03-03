@@ -25,6 +25,7 @@ import { ProjectProvider } from '../hooks/useProjectContext';
 // ---------------------------------------------------------------------------
 
 const MODE_STORAGE_KEY = 'project-claude-mode';
+const NOOP_GET_SESSION = (_path: string) => null as ReturnType<ReturnType<typeof useActiveSessions>['getSessionForProject']>;
 
 function getSavedMode(projectPath: string): 'claude' | 'claude --dangerously-skip-permissions' {
   try {
@@ -146,6 +147,17 @@ export default function Home() {
     [selectedClientId, clients],
   );
 
+  // Memoize activeProject to avoid creating a new object on every render
+  const activeProject = useMemo(() => {
+    if (!launchProject) return null;
+    return {
+      name: launchProject.path.split('/').pop() || '',
+      client: projects.find(p => p.path === launchProject.path)?.client || null,
+      path: launchProject.path,
+      mode: launchProject.mode,
+    };
+  }, [launchProject, projects]);
+
   const pageTitle =
     currentPage === 'dashboard'
       ? 'Dashboard'
@@ -165,6 +177,8 @@ export default function Home() {
       ? selectedClient?.name || 'Client'
       : selectedProject?.name || 'Project';
 
+  const stableGetSession = getSessionForProject || NOOP_GET_SESSION;
+
   const contextValue = useMemo(
     () => ({
       projects,
@@ -174,9 +188,9 @@ export default function Home() {
       onSelectClient: handleSelectClient,
       activeProjectPath: launchProject?.path || null,
       activeSessions: activeSessions || [],
-      getSessionForProject: getSessionForProject || (() => null),
+      getSessionForProject: stableGetSession,
     }),
-    [projects, selectedProjectPath, handleSelectProject, handleLaunchProject, handleSelectClient, launchProject, activeSessions, getSessionForProject]
+    [projects, selectedProjectPath, handleSelectProject, handleLaunchProject, handleSelectClient, launchProject, activeSessions, stableGetSession]
   );
 
   if (loading) {
@@ -198,12 +212,7 @@ export default function Home() {
         currentPage={currentPage as string}
         pageTitle={pageTitle}
         onOpenSearch={() => setOpen(true)}
-        activeProject={launchProject ? {
-          name: launchProject.path.split('/').pop() || '',
-          client: projects.find(p => p.path === launchProject.path)?.client || null,
-          path: launchProject.path,
-          mode: launchProject.mode,
-        } : null}
+        activeProject={activeProject}
         recentProjects={recentProjects}
         onSwitchProject={(path) => {
           const mode = getSavedMode(path);

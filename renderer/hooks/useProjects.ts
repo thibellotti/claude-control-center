@@ -29,12 +29,18 @@ export function useProjects(onRefresh?: (hints: string[]) => void) {
   const onRefreshRef = useRef(onRefresh);
   onRefreshRef.current = onRefresh;
 
+  const initialLoadDone = useRef(false);
+
   const fetchProjects = useCallback(async () => {
     try {
-      setLoading(true);
+      // Only show loading spinner on initial load, not on background refreshes
+      if (!initialLoadDone.current) {
+        setLoading(true);
+      }
       setError(null);
       const result = await window.api.getProjects();
       setProjects(result || []);
+      initialLoadDone.current = true;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load projects');
     } finally {
@@ -44,14 +50,11 @@ export function useProjects(onRefresh?: (hints: string[]) => void) {
 
   const refresh = useCallback(async () => {
     try {
-      setLoading(true);
       setError(null);
       const result = await window.api.refreshProjects();
       setProjects(result || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to refresh projects');
-    } finally {
-      setLoading(false);
     }
   }, []);
 
