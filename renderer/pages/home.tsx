@@ -1,25 +1,20 @@
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import type { Project } from '../../shared/types';
 import type { CommandResult } from '../hooks/useCommandPalette';
 import AppLayout from '../components/layout/AppLayout';
 import Dashboard from '../components/dashboard/Dashboard';
 import SettingsPage from '../components/settings/SettingsPage';
 import PromptLibrary from '../components/prompts/PromptLibrary';
-import WorkspaceBoard from '../components/workspace/WorkspaceBoard';
 import CommandPalette from '../components/search/CommandPalette';
-import UsageTracker from '../components/usage/UsageTracker';
-import OnboardingWizard from '../components/dirigir/OnboardingWizard';
 import ProjectDetail from '../components/project/ProjectDetail';
 import dynamic from 'next/dynamic';
 
 const OrchestratorPage = dynamic(() => import('../components/orchestrator/OrchestratorPage'), { ssr: false });
-const VisualEditorPage = dynamic(() => import('../components/visual-editor/VisualEditorPage'), { ssr: false });
 import { useProjects, useProjectDetail } from '../hooks/useProjects';
 import { useCommandPalette } from '../hooks/useCommandPalette';
 import { useToast } from '../hooks/useToast';
 import { useActiveSessions } from '../hooks/useSessions';
 import { ProjectProvider } from '../hooks/useProjectContext';
-import { useOnboarding } from '../hooks/useOnboarding';
 
 // ---------------------------------------------------------------------------
 // Mode persistence helpers
@@ -49,8 +44,6 @@ function saveMode(projectPath: string, mode: string): void {
 export default function Home() {
   const { addToast } = useToast();
   const lastToastTime = useRef(0);
-  const { completed: onboardingCompleted, isLoading: onboardingLoading, completeStep } = useOnboarding();
-
   // Only show toasts for settings changes; suppress routine task/team updates
   const handleRefresh = useCallback(
     (hints: string[]) => {
@@ -68,14 +61,20 @@ export default function Home() {
 
   const { projects, loading } = useProjects(handleRefresh);
   const { sessions: activeSessions, getSessionForProject } = useActiveSessions();
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts' | 'workspaces' | 'usage' | 'sessions' | 'visual-editor'>('dashboard');
-  const [visualEditorParams, setVisualEditorParams] = useState<{ projectPath: string; previewUrl: string } | null>(null);
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts' | 'sessions'>('dashboard');
   const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(null);
   const { project: selectedProject } = useProjectDetail(
     currentPage === 'project' ? selectedProjectPath : null
   );
 
   const [launchProject, setLaunchProject] = useState<{ path: string; mode: string } | null>(null);
+
+  // Auto-seed client workspaces from project.client values on first load
+  useEffect(() => {
+    if (projects.length > 0) {
+      window.api.seedClientsFromProjects(projects.map(p => ({ client: p.client })));
+    }
+  }, [projects]);
 
   const { open, setOpen, query, setQuery, results } = useCommandPalette(projects);
 
@@ -92,13 +91,8 @@ export default function Home() {
     setCurrentPage('sessions');
   }, []);
 
-  const handleOpenVisualEditor = useCallback((projectPath: string, previewUrl: string) => {
-    setVisualEditorParams({ projectPath, previewUrl });
-    setCurrentPage('visual-editor');
-  }, []);
-
   const handleNavigate = useCallback((page: string) => {
-    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'workspaces' || page === 'usage' || page === 'sessions') {
+    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'sessions') {
       setCurrentPage(page);
       setSelectedProjectPath(null);
       if (page !== 'sessions') {
@@ -128,14 +122,8 @@ export default function Home() {
       ? 'Settings'
       : currentPage === 'prompts'
       ? 'Prompt Library'
-      : currentPage === 'workspaces'
-      ? 'Workspaces'
-      : currentPage === 'usage'
-      ? 'Usage & Costs'
       : currentPage === 'sessions'
       ? 'Orchestrator'
-      : currentPage === 'visual-editor'
-      ? 'Visual Editor'
       : selectedProject?.name || 'Project';
 
   const contextValue = useMemo(
@@ -144,15 +132,14 @@ export default function Home() {
       selectedProjectPath,
       onSelectProject: handleSelectProject,
       onOpenProject: handleLaunchProject,
-      onOpenVisualEditor: handleOpenVisualEditor,
       activeProjectPath: launchProject?.path || null,
       activeSessions: activeSessions || [],
       getSessionForProject: getSessionForProject || (() => null),
     }),
-    [projects, selectedProjectPath, handleSelectProject, handleLaunchProject, handleOpenVisualEditor, launchProject, activeSessions, getSessionForProject]
+    [projects, selectedProjectPath, handleSelectProject, handleLaunchProject, launchProject, activeSessions, getSessionForProject]
   );
 
-  if (loading || onboardingLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-surface-0">
         <div className="flex items-center gap-2 text-text-tertiary text-sm">
@@ -163,19 +150,9 @@ export default function Home() {
     );
   }
 
-  if (!onboardingCompleted) {
-    return (
-      <OnboardingWizard
-        onComplete={() => completeStep('tourCompleted')}
-        onStepComplete={completeStep}
-      />
-    );
-  }
-
   return (
     <ProjectProvider value={contextValue}>
       <AppLayout
-        selectedProject={null}
         onNavigate={handleNavigate}
         onBack={() => handleNavigate('dashboard')}
         currentPage={currentPage as string}
@@ -201,22 +178,10 @@ export default function Home() {
           />
         )}
         {currentPage === 'dashboard' && <Dashboard />}
-        {currentPage === 'workspaces' && <WorkspaceBoard />}
         {currentPage === 'prompts' && <PromptLibrary />}
-        {currentPage === 'usage' && <UsageTracker />}
         {currentPage === 'sessions' && (
           <OrchestratorPage
             initialProject={launchProject ? { path: launchProject.path, mode: launchProject.mode as 'claude' | 'claude --dangerously-skip-permissions' } : undefined}
-          />
-        )}
-        {currentPage === 'visual-editor' && visualEditorParams && (
-          <VisualEditorPage
-            projectPath={visualEditorParams.projectPath}
-            previewUrl={visualEditorParams.previewUrl}
-            onExit={() => {
-              setVisualEditorParams(null);
-              setCurrentPage('dashboard');
-            }}
           />
         )}
         {currentPage === 'settings' && <SettingsPage />}

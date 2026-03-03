@@ -26,6 +26,7 @@ import { registerVisualEditorHandlers, cleanupVisualEditor } from './ipc/visual-
 import { registerPageHandlers } from './ipc/pages'
 import { registerTemplateHandlers } from './ipc/templates'
 import { registerAccountHandlers } from './ipc/account'
+import { registerClientHandlers } from './ipc/clients'
 import { startProjectWatcher } from './watchers/project-watcher'
 
 // Log unhandled promise rejections so they don't silently crash the main process
@@ -69,6 +70,7 @@ if (isProd) {
   registerTemplateHandlers()
   registerAccountHandlers()
   registerVisualEditorHandlers()
+  registerClientHandlers()
 
   const mainWindow = createWindow('main', {
     width: 1400,

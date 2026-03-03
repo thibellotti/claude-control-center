@@ -56,6 +56,12 @@ const api = {
   getSupabaseInfo: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_SUPABASE_INFO, projectPath),
   getGitHubInfo: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_GITHUB_INFO, projectPath),
 
+  // Client Workspaces
+  getClients: () => ipcRenderer.invoke(IPC_CHANNELS.GET_CLIENTS),
+  saveClient: (client: any) => ipcRenderer.invoke(IPC_CHANNELS.SAVE_CLIENT, client),
+  deleteClient: (clientId: string) => ipcRenderer.invoke(IPC_CHANNELS.DELETE_CLIENT, clientId),
+  seedClientsFromProjects: (projects: { client?: string | null }[]) => ipcRenderer.invoke(IPC_CHANNELS.SEED_CLIENTS_FROM_PROJECTS, projects),
+
   // Terminal (PTY)
   ptyCreate: (opts: { cwd?: string; command?: string }) => ipcRenderer.invoke(IPC_CHANNELS.PTY_CREATE, opts),
   ptyWrite: (id: string, data: string) => ipcRenderer.invoke(IPC_CHANNELS.PTY_WRITE, { id, data }),

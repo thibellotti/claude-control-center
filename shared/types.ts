@@ -506,6 +506,11 @@ export const IPC_CHANNELS = {
   SAVE_ACCOUNT: 'save-account',
   GET_PLAN_LIMITS: 'get-plan-limits',
   OPEN_BILLING_PORTAL: 'open-billing-portal',
+  // Client Workspaces
+  GET_CLIENTS: 'get-clients',
+  SAVE_CLIENT: 'save-client',
+  DELETE_CLIENT: 'delete-client',
+  SEED_CLIENTS_FROM_PROJECTS: 'seed-clients-from-projects',
   // Visual Editor
   VISUAL_EDITOR_INJECT: 'visual-editor:inject',
   VISUAL_EDITOR_INJECT_FRAME: 'visual-editor:inject-frame',
