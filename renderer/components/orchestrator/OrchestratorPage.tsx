@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useOrchestrator } from '../../hooks/useOrchestrator';
 import { useTerminalSessions } from '../../hooks/useTerminal';
 import { useProjectContext } from '../../hooks/useProjectContext';
+import { useProviders } from '../../hooks/useProviders';
 import OrchestratorToolbar from './OrchestratorToolbar';
 import OrchestratorGrid from './OrchestratorGrid';
 import OrchestratorDrawer from './OrchestratorDrawer';
@@ -21,6 +22,7 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
   const orchestrator = useOrchestrator();
   const { createSession, killSession } = useTerminalSessions();
   const { projects } = useProjectContext();
+  const { providers } = useProviders();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchResult, setSearchResult] = useState<SessionSearchResult | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -109,10 +111,24 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
   const modeBadge = useMemo(() => {
     const terminalCell = orchestrator.cells.find((c) => c.config.type === 'terminal');
     if (!terminalCell || terminalCell.config.type !== 'terminal') return null;
-    if (terminalCell.config.command?.includes('--dangerously-skip-permissions')) return 'Autopilot';
-    if (terminalCell.config.command?.startsWith('claude')) return 'Claude';
+    const cmd = terminalCell.config.command || '';
+
+    // Check if the command matches any enabled provider
+    for (const provider of providers) {
+      if (!provider.enabled) continue;
+      const exec = provider.executablePath || provider.executable;
+      if (cmd.startsWith(exec)) {
+        // Check for autopilot args
+        const isAutopilot = provider.autopilotArgs.some((arg) => cmd.includes(arg));
+        return isAutopilot ? `${provider.name} Autopilot` : provider.name;
+      }
+    }
+
+    // Fallback for legacy commands
+    if (cmd.includes('--dangerously-skip-permissions')) return 'Autopilot';
+    if (cmd.startsWith('claude')) return 'Claude';
     return 'Shell';
-  }, [orchestrator.cells]);
+  }, [orchestrator.cells, providers]);
 
   // Derive project path and tasks for drawer
   const projectPath = useMemo(() => {
@@ -130,17 +146,35 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
     async (command?: string) => {
       const cwd = getDefaultProjectPath();
       const sessionId = await createSession(cwd !== '~' ? cwd : undefined, command);
-      const isAutopilot = command?.includes('--dangerously-skip-permissions');
-      const isClaude = command?.startsWith('claude');
+
+      // Derive label from provider if command matches a known provider executable
+      let label = 'Shell';
+      if (command) {
+        for (const provider of providers) {
+          if (!provider.enabled) continue;
+          const exec = provider.executablePath || provider.executable;
+          if (command.startsWith(exec)) {
+            const isAutopilot = provider.autopilotArgs.some((arg) => command.includes(arg));
+            label = isAutopilot ? `${provider.name} Autopilot` : provider.name;
+            break;
+          }
+        }
+        // Legacy fallback
+        if (label === 'Shell') {
+          if (command.includes('--dangerously-skip-permissions')) label = 'Claude Autopilot';
+          else if (command.startsWith('claude')) label = 'Claude';
+        }
+      }
+
       orchestrator.addCell({
         type: 'terminal',
         sessionId,
-        label: isAutopilot ? 'Claude Autopilot' : isClaude ? 'Claude' : 'Shell',
+        label,
         cwd,
         command,
       });
     },
-    [createSession, orchestrator.addCell, getDefaultProjectPath]
+    [createSession, orchestrator.addCell, getDefaultProjectPath, providers]
   );
 
   const handleAddPreview = useCallback((url?: string) => {
@@ -182,6 +216,16 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
     });
   }, [orchestrator.addCell, getDefaultProjectPath]);
 
+  const handleAddKanban = useCallback(() => {
+    const pp = getDefaultProjectPath();
+    if (pp === '~') return;
+    orchestrator.addCell({
+      type: 'kanban',
+      projectPath: pp,
+      label: 'Kanban',
+    });
+  }, [orchestrator.addCell, getDefaultProjectPath]);
+
   const handleCloseCell = useCallback(
     async (id: string) => {
       const cell = orchestrator.cells.find((c) => c.id === id);
@@ -204,6 +248,7 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
         onAddPreview={handleAddPreview}
         onAddDiff={handleAddDiff}
         onAddWorktreeAgent={handleAddWorktreeAgent}
+        onAddKanban={handleAddKanban}
         drawerOpen={drawerOpen}
         onToggleDrawer={() => setDrawerOpen((prev) => !prev)}
         onSearchResultSelect={(result) => {

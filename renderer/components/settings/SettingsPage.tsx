@@ -2,7 +2,9 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { useSettings } from '../../hooks/useSettings';
 import { useTheme } from '../../hooks/useTheme';
 import { useMcpServers } from '../../hooks/useMcpServers';
+import { useProviders } from '../../hooks/useProviders';
 import type { McpServerConfig } from '../../../shared/types';
+import type { ProviderConfig, ProviderId } from '../../../shared/provider-types';
 
 /* ─── Helpers ─────────────────────────────────────────────────────────────── */
 
@@ -24,6 +26,7 @@ function isSensitive(key: string): boolean {
 /** Section IDs for anchor navigation */
 const SECTIONS = [
   { id: 'appearance', label: 'Appearance' },
+  { id: 'providers', label: 'Providers' },
   { id: 'permissions', label: 'Permissions' },
   { id: 'environment', label: 'Environment' },
   { id: 'plugins', label: 'Plugins' },
@@ -103,6 +106,16 @@ function IconPlugins() {
   );
 }
 
+function IconProviders() {
+  return (
+    <div className="w-4 h-4 relative shrink-0">
+      <div className="absolute top-0 left-0 w-[7px] h-[7px] rounded-sm border-2 border-text-tertiary" />
+      <div className="absolute top-0 right-0 w-[7px] h-[7px] rounded-sm border-2 border-text-tertiary" />
+      <div className="absolute bottom-0 left-[4px] w-[7px] h-[7px] rounded-sm border-2 border-text-tertiary" />
+    </div>
+  );
+}
+
 function IconMcpServers() {
   return (
     <div className="w-4 h-4 relative shrink-0">
@@ -126,6 +139,7 @@ function IconInfo() {
 
 const SECTION_ICONS: Record<SectionId, React.ReactNode> = {
   appearance: <IconAppearance />,
+  providers: <IconProviders />,
   permissions: <IconPermissions />,
   environment: <IconEnvironment />,
   plugins: <IconPlugins />,
@@ -593,6 +607,170 @@ function PluginsSection({
   );
 }
 
+/* ─── Providers Section ───────────────────────────────────────────────────── */
+
+function ProvidersSection() {
+  const { providers, defaultProviderId, saveProvider, setDefault, detectAll, setApiKey } = useProviders();
+  const [detecting, setDetecting] = useState(false);
+  const [apiKeyInputs, setApiKeyInputs] = useState<Record<string, string>>({});
+  const [apiKeySaved, setApiKeySaved] = useState<Record<string, boolean>>({});
+
+  const handleDetect = useCallback(async () => {
+    setDetecting(true);
+    await detectAll();
+    setDetecting(false);
+  }, [detectAll]);
+
+  const handleToggleEnabled = useCallback(async (provider: ProviderConfig) => {
+    await saveProvider({ ...provider, enabled: !provider.enabled });
+  }, [saveProvider]);
+
+  const handleSaveApiKey = useCallback(async (id: ProviderId) => {
+    const key = apiKeyInputs[id];
+    if (!key?.trim()) return;
+    const ok = await setApiKey(id, key.trim());
+    if (ok) {
+      setApiKeySaved((prev) => ({ ...prev, [id]: true }));
+      setApiKeyInputs((prev) => ({ ...prev, [id]: '' }));
+      setTimeout(() => setApiKeySaved((prev) => ({ ...prev, [id]: false })), 2000);
+    }
+  }, [apiKeyInputs, setApiKey]);
+
+  return (
+    <section>
+      <SectionHeader id="providers" title="Providers" count={providers.filter((p) => p.enabled).length} />
+
+      {/* Detect All button */}
+      <div className="mb-4">
+        <button
+          onClick={handleDetect}
+          disabled={detecting}
+          className="px-3 py-1.5 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover disabled:opacity-40 transition-colors"
+        >
+          {detecting ? 'Detecting...' : 'Detect All CLIs'}
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        {providers.map((provider) => {
+          const isDefault = defaultProviderId === provider.id;
+          return (
+            <div
+              key={provider.id}
+              className={`rounded-card border bg-surface-1 transition-colors ${
+                provider.enabled ? 'border-border-subtle' : 'border-border-subtle opacity-60'
+              }`}
+            >
+              {/* Header row */}
+              <div className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-surface-3">
+                    <span className="text-xs font-bold text-text-tertiary uppercase">
+                      {provider.name.charAt(0)}
+                    </span>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-text-primary">
+                        {provider.name}
+                      </span>
+                      {provider.isInstalled && (
+                        <span className="px-1.5 py-0.5 rounded text-micro font-medium bg-status-active/10 text-status-active">
+                          Installed
+                        </span>
+                      )}
+                      {!provider.isInstalled && (
+                        <span className="px-1.5 py-0.5 rounded text-micro font-medium bg-surface-3 text-text-tertiary">
+                          Not found
+                        </span>
+                      )}
+                      {isDefault && (
+                        <span className="px-1.5 py-0.5 rounded text-micro font-medium bg-accent/10 text-accent">
+                          Default
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs font-mono text-text-tertiary block mt-0.5">
+                      {provider.executable}
+                      {provider.models.length > 0 && ` — ${provider.models.length} models`}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {!isDefault && provider.enabled && (
+                    <button
+                      onClick={() => setDefault(provider.id)}
+                      className="px-2 py-1 rounded-button text-micro font-medium text-text-tertiary hover:text-text-secondary hover:bg-surface-2 transition-colors"
+                    >
+                      Set Default
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleToggleEnabled(provider)}
+                    className={`px-2 py-1 rounded-button text-micro font-medium transition-colors ${
+                      provider.enabled
+                        ? 'text-status-active hover:bg-status-active/10'
+                        : 'text-text-tertiary hover:text-text-secondary hover:bg-surface-2'
+                    }`}
+                  >
+                    {provider.enabled ? 'Enabled' : 'Disabled'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Expanded details when enabled */}
+              {provider.enabled && (
+                <div className="px-4 pb-3 space-y-3 border-t border-border-subtle pt-3">
+                  {/* Models */}
+                  <div>
+                    <span className="text-micro font-medium text-text-tertiary block mb-1">Models</span>
+                    <div className="flex flex-wrap gap-1">
+                      {provider.models.map((model) => (
+                        <span
+                          key={model.id}
+                          className={`px-2 py-1 rounded text-xs font-mono ${
+                            model.isDefault
+                              ? 'bg-accent/10 text-accent'
+                              : 'bg-surface-3 text-text-secondary'
+                          }`}
+                        >
+                          {model.name}
+                          {model.isDefault && ' (default)'}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* API Key */}
+                  <div>
+                    <span className="text-micro font-medium text-text-tertiary block mb-1">API Key</span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="password"
+                        value={apiKeyInputs[provider.id] || ''}
+                        onChange={(e) => setApiKeyInputs((prev) => ({ ...prev, [provider.id]: e.target.value }))}
+                        placeholder="Enter API key..."
+                        className="flex-1 px-3 py-1.5 rounded-button bg-surface-0 border border-border-subtle text-xs font-mono text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent"
+                      />
+                      <button
+                        onClick={() => handleSaveApiKey(provider.id)}
+                        disabled={!apiKeyInputs[provider.id]?.trim()}
+                        className="px-3 py-1.5 rounded-button text-xs font-medium bg-surface-3 text-text-secondary hover:text-text-primary disabled:opacity-40 transition-colors"
+                      >
+                        {apiKeySaved[provider.id] ? 'Saved' : 'Save'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 /* ─── MCP Servers Section ─────────────────────────────────────────────────── */
 
 function McpServersSection() {
@@ -975,6 +1153,7 @@ export default function SettingsPage() {
       {/* Sections */}
       <div className="px-6 pb-12 space-y-10">
         <AppearanceSection />
+        <ProvidersSection />
         <PermissionsSection permissions={permissions} />
         <EnvironmentSection envEntries={envEntries as [string, string][]} />
         <PluginsSection

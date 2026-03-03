@@ -3,6 +3,7 @@ import type { Project, TaskItem } from '../../../shared/types';
 import { useProjectDetailData } from '../../hooks/useProjectDetailData';
 import GitBadge from '../shared/GitBadge';
 import HealthBadge from '../shared/HealthBadge';
+import ProjectIntelPanel from './ProjectIntelPanel';
 import MarkdownView from '../shared/MarkdownView';
 import {
   ChevronDownIcon,
@@ -197,10 +198,15 @@ export default function ProjectOverviewContent({ project }: ProjectOverviewConte
         />
       </div>
 
-      {/* Health */}
+      {/* Health (legacy badge) */}
       {project.health && (
         <HealthBadge health={project.health} />
       )}
+
+      {/* Project Intelligence */}
+      <CollapsibleSection title="Intelligence" defaultOpen>
+        <ProjectIntelPanel projectPath={project.path} />
+      </CollapsibleSection>
 
       {/* Plan */}
       {project.plan && (

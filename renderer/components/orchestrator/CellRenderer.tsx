@@ -10,6 +10,7 @@ const TaskBoardCell = dynamic(() => import('./cells/TaskBoardCell'), { ssr: fals
 const PreviewCell = dynamic(() => import('./cells/PreviewCell'), { ssr: false });
 const DiffCell = dynamic(() => import('./cells/DiffCell'), { ssr: false });
 const AgentWorktreeCell = dynamic(() => import('./cells/AgentWorktreeCell'), { ssr: false });
+const KanbanCell = dynamic(() => import('./cells/KanbanCell'), { ssr: false });
 
 interface CellRendererProps {
   cell: OrchestratorCell;
@@ -33,6 +34,8 @@ export default function CellRenderer({ cell, isActive, onClose, onFocus }: CellR
         return <DiffCell config={cell.config} />;
       case 'agent-worktree':
         return <AgentWorktreeCell config={cell.config} />;
+      case 'kanban':
+        return <KanbanCell config={cell.config} />;
     }
   }
 

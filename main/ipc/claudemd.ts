@@ -1,7 +1,9 @@
 import { ipcMain } from 'electron';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import { IPC_CHANNELS } from '../../shared/types';
+import type { TaskItem } from '../../shared/types';
 import { log } from '../helpers/logger';
 import { isPathSafe } from '../helpers/path-safety';
 import { logSecurityEvent } from '../helpers/security-logger';
@@ -143,6 +145,104 @@ export function registerClaudeMdHandlers() {
     async (_, filePath: string, content: string): Promise<void> => {
       validateClaudeMdPath(filePath);
       await fs.writeFile(filePath, content, 'utf-8');
+    }
+  );
+
+  // Extract TODOs from CLAUDE.md for Kanban board
+  ipcMain.handle(
+    IPC_CHANNELS.EXTRACT_TODOS,
+    async (_, { projectPath }: { projectPath: string }): Promise<TaskItem[]> => {
+      const resolved = path.resolve(projectPath);
+      if (!isPathSafe(resolved)) {
+        throw new Error('Access denied: path is outside the home directory');
+      }
+
+      const candidates = [
+        path.join(resolved, 'CLAUDE.md'),
+        path.join(resolved, '.claude', 'CLAUDE.md'),
+      ];
+
+      let content = '';
+      for (const candidate of candidates) {
+        if (await pathExists(candidate)) {
+          try {
+            content = await fs.readFile(candidate, 'utf-8');
+            break;
+          } catch (err) {
+            log('warn', 'claudemd', `Failed to read ${candidate}`, err);
+          }
+        }
+      }
+
+      if (!content) return [];
+
+      const tasks: TaskItem[] = [];
+      const lines = content.split('\n');
+      let inTodoSection = false;
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+
+        // Detect headers containing todo/task/plan keywords
+        if (/^#{1,6}\s+/i.test(trimmed)) {
+          inTodoSection = /task|todo|plan/i.test(trimmed);
+        }
+
+        // Checkbox pattern: - [ ] or - [x]
+        const checkboxMatch = trimmed.match(/^-\s+\[([ xX])\]\s+(.+)/);
+        if (checkboxMatch) {
+          const completed = checkboxMatch[1].toLowerCase() === 'x';
+          tasks.push({
+            id: uuidv4(),
+            subject: checkboxMatch[2],
+            description: '',
+            activeForm: '',
+            owner: '',
+            status: completed ? 'completed' : 'pending',
+            blocks: [],
+            blockedBy: [],
+            metadata: { source: 'claudemd' },
+          });
+          continue;
+        }
+
+        // TODO:/FIXME:/HACK: patterns
+        const tagMatch = trimmed.match(/^(?:[-*]?\s*)?(TODO|FIXME|HACK):\s*(.+)/i);
+        if (tagMatch) {
+          tasks.push({
+            id: uuidv4(),
+            subject: tagMatch[2],
+            description: `[${tagMatch[1].toUpperCase()}]`,
+            activeForm: '',
+            owner: '',
+            status: 'pending',
+            blocks: [],
+            blockedBy: [],
+            metadata: { source: 'claudemd', tag: tagMatch[1].toUpperCase() },
+          });
+          continue;
+        }
+
+        // Bullet items under todo/task/plan headers
+        if (inTodoSection && /^[-*]\s+/.test(trimmed)) {
+          const text = trimmed.replace(/^[-*]\s+/, '');
+          if (text.length > 2) {
+            tasks.push({
+              id: uuidv4(),
+              subject: text,
+              description: '',
+              activeForm: '',
+              owner: '',
+              status: 'pending',
+              blocks: [],
+              blockedBy: [],
+              metadata: { source: 'claudemd' },
+            });
+          }
+        }
+      }
+
+      return tasks;
     }
   );
 }

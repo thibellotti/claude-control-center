@@ -35,6 +35,9 @@ import { registerMcpServerHandlers } from './ipc/mcp-servers'
 import { registerSessionHistoryHandlers } from './ipc/session-history'
 import { registerDiffViewerHandlers } from './ipc/diff-viewer'
 import { registerWorktreeHandlers, cleanupWorktrees } from './ipc/worktrees'
+import { registerProviderHandlers } from './ipc/providers'
+import { registerSessionIntelHandlers } from './ipc/session-intel'
+import { registerProjectIntelHandlers } from './ipc/project-intel'
 import { startProjectWatcher } from './watchers/project-watcher'
 
 // Log unhandled promise rejections so they don't silently crash the main process
@@ -87,6 +90,9 @@ if (isProd) {
   registerSessionHistoryHandlers()
   registerDiffViewerHandlers()
   registerWorktreeHandlers()
+  registerProviderHandlers()
+  registerSessionIntelHandlers()
+  registerProjectIntelHandlers()
 
   const mainWindow = createWindow('main', {
     width: 1400,

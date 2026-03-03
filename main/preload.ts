@@ -11,6 +11,7 @@ import type {
 } from '../shared/types';
 import type { ClientWorkspace } from '../shared/client-types';
 import type { Agent } from '../shared/agent-types';
+import type { ProviderConfig, ProviderId } from '../shared/provider-types';
 import { IPC_CHANNELS } from '../shared/types';
 
 const api = {
@@ -65,6 +66,7 @@ const api = {
   scanClaudeMd: (projects: { path: string; name: string; client?: string | null }[]) => ipcRenderer.invoke(IPC_CHANNELS.SCAN_CLAUDEMD, projects),
   readClaudeMd: (filePath: string) => ipcRenderer.invoke(IPC_CHANNELS.READ_CLAUDEMD, filePath),
   writeClaudeMd: (filePath: string, content: string) => ipcRenderer.invoke(IPC_CHANNELS.WRITE_CLAUDEMD, filePath, content),
+  extractTodos: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.EXTRACT_TODOS, { projectPath }),
 
   // Client Workspaces
   getClients: () => ipcRenderer.invoke(IPC_CHANNELS.GET_CLIENTS),
@@ -239,6 +241,29 @@ const api = {
     ipcRenderer.on(IPC_CHANNELS.WORKTREE_PTY_EXIT, handler);
     return () => { ipcRenderer.removeListener(IPC_CHANNELS.WORKTREE_PTY_EXIT, handler); };
   },
+
+  // Providers
+  getProviders: () => ipcRenderer.invoke(IPC_CHANNELS.PROVIDER_GET_ALL),
+  saveProvider: (config: ProviderConfig) => ipcRenderer.invoke(IPC_CHANNELS.PROVIDER_SAVE, config),
+  deleteProvider: (id: ProviderId) => ipcRenderer.invoke(IPC_CHANNELS.PROVIDER_DELETE, id),
+  setDefaultProvider: (id: ProviderId) => ipcRenderer.invoke(IPC_CHANNELS.PROVIDER_SET_DEFAULT, id),
+  detectProviders: () => ipcRenderer.invoke(IPC_CHANNELS.PROVIDER_DETECT),
+  setProviderApiKey: (id: ProviderId, key: string) => ipcRenderer.invoke(IPC_CHANNELS.PROVIDER_SET_API_KEY, id, key),
+  getProviderApiKey: (id: ProviderId) => ipcRenderer.invoke(IPC_CHANNELS.PROVIDER_GET_API_KEY, id),
+
+  // Session Intelligence
+  analyzeSessionIntel: (projectPath: string) =>
+    ipcRenderer.invoke(IPC_CHANNELS.SESSION_INTEL_ANALYZE, { projectPath }),
+  getSessionDetail: (sessionId: string, projectPath: string) =>
+    ipcRenderer.invoke(IPC_CHANNELS.SESSION_INTEL_SESSION_DETAIL, { sessionId, projectPath }),
+
+  // Project Intelligence
+  getProjectIntel: (projectPath: string) =>
+    ipcRenderer.invoke(IPC_CHANNELS.PROJECT_INTEL_GET, projectPath),
+  auditDeps: (projectPath: string) =>
+    ipcRenderer.invoke(IPC_CHANNELS.PROJECT_INTEL_AUDIT_DEPS, projectPath),
+  detectProjectType: (projectPath: string) =>
+    ipcRenderer.invoke(IPC_CHANNELS.PROJECT_INTEL_DETECT_TYPE, projectPath),
 };
 
 contextBridge.exposeInMainWorld('api', api);

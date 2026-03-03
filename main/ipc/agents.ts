@@ -6,9 +6,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { IPC_CHANNELS } from '../../shared/types';
 import type { Agent, AgentRun } from '../../shared/agent-types';
 import { DEFAULT_AGENTS } from '../../shared/agent-types';
+import type { ProviderId } from '../../shared/provider-types';
 import { log } from '../helpers/logger';
 import { logSecurityEvent } from '../helpers/security-logger';
 import { cleanEnv } from './terminal';
+import { getProvider, getDefaultProvider } from './providers';
 import { isPathSafe } from '../helpers/path-safety';
 import { saveSessionOutput } from './session-history';
 
@@ -191,15 +193,38 @@ export function registerAgentHandlers() {
 
       log('info', 'agents', `Starting agent run ${runId} (${agent.name}) in ${opts.projectPath}`);
 
+      // Resolve provider from agent config
+      const providerId = (agent.providerId || 'claude') as ProviderId;
+      let provider;
+      try {
+        provider = getProvider(providerId);
+      } catch {
+        provider = getDefaultProvider();
+      }
+
+      // Build spawn args from provider printArgs template
+      const spawnArgs = provider.printArgs.map((arg) =>
+        arg
+          .replace('{systemPrompt}', agent.systemPrompt)
+          .replace('{task}', task)
+      );
+
+      // Add model flag if the provider supports it and agent specifies a model
+      if (provider.modelFlag && agent.modelId) {
+        spawnArgs.push(provider.modelFlag, agent.modelId);
+      }
+
+      const executable = provider.executablePath || provider.executable;
+
       const proc = pty.spawn(
-        'claude',
-        ['--print', '--system-prompt', agent.systemPrompt, '-p', task],
+        executable,
+        spawnArgs,
         {
           name: 'xterm-256color',
           cols: 120,
           rows: 30,
           cwd: opts.projectPath,
-          env: { ...cleanEnv(), TERM: 'xterm-256color' },
+          env: { ...cleanEnv(providerId), TERM: 'xterm-256color', ...provider.envOverrides },
         }
       );
 

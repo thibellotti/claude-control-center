@@ -3,6 +3,7 @@ import type { Project } from '../../../shared/types';
 import StatusBadge from '../shared/StatusBadge';
 import GitBadge from '../shared/GitBadge';
 import HealthBadge from '../shared/HealthBadge';
+import { useProjectIntel } from '../../hooks/useProjectIntel';
 import { ClaudeIcon, PRIcon } from '../icons';
 
 interface ProjectCardProps {
@@ -64,6 +65,8 @@ export default memo(function ProjectCard({
 }: ProjectCardProps) {
   const stack = detectStack(project);
   const activeTasks = project.tasks.filter((t) => t.status === 'in_progress' || t.status === 'pending').length;
+  const { intel } = useProjectIntel(project.path);
+  const healthScore = intel?.healthScore?.overall ?? null;
 
   return (
     <div
@@ -79,6 +82,16 @@ export default memo(function ProjectCard({
       aria-label={project.name}
       className="group relative min-w-0 bg-surface-1 border border-border-subtle rounded-card p-4 cursor-pointer hover:border-border-default transition-all duration-150"
     >
+      {/* Health dot */}
+      {healthScore !== null && (
+        <span
+          className="absolute top-3 right-3 w-2 h-2 rounded-full"
+          style={{
+            backgroundColor: healthScore >= 70 ? '#22c55e' : healthScore >= 40 ? '#eab308' : '#ef4444',
+          }}
+          title={`Health: ${healthScore}/100`}
+        />
+      )}
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-2 min-w-0">
         <div className="min-w-0 flex-1">

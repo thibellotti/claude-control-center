@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import type { Agent } from '../../../shared/agent-types';
+import type { ProviderId } from '../../../shared/provider-types';
+import { useProviders } from '../../hooks/useProviders';
 
 interface AgentEditorProps {
   agent: Agent | null; // null = creating new
@@ -14,9 +16,17 @@ export default function AgentEditor({ agent, onSave, onDelete, onClose }: AgentE
   const [systemPrompt, setSystemPrompt] = useState('');
   const [defaultTask, setDefaultTask] = useState('');
   const [timeoutSeconds, setTimeoutSeconds] = useState(900);
+  const [providerId, setProviderId] = useState<ProviderId>('claude');
+  const [modelId, setModelId] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  const { providers } = useProviders();
   const nameRef = useRef<HTMLInputElement>(null);
+
+  // Filter to only enabled+installed providers
+  // Get models for the currently selected provider
+  const selectedProvider = providers.find((p) => p.id === providerId);
+  const availableModels = selectedProvider?.models || [];
 
   useEffect(() => {
     if (agent) {
@@ -25,12 +35,16 @@ export default function AgentEditor({ agent, onSave, onDelete, onClose }: AgentE
       setSystemPrompt(agent.systemPrompt);
       setDefaultTask(agent.defaultTask || '');
       setTimeoutSeconds(agent.timeoutSeconds);
+      setProviderId((agent.providerId as ProviderId) || 'claude');
+      setModelId(agent.modelId || '');
     } else {
       setName('');
       setIcon('');
       setSystemPrompt('');
       setDefaultTask('');
       setTimeoutSeconds(900);
+      setProviderId('claude');
+      setModelId('');
     }
   }, [agent]);
 
@@ -48,7 +62,9 @@ export default function AgentEditor({ agent, onSave, onDelete, onClose }: AgentE
       name: name.trim(),
       icon: icon.trim() || '🤖',
       systemPrompt: systemPrompt.trim(),
-      model: agent?.model || 'claude',
+      model: providerId || agent?.model || 'claude',
+      providerId,
+      modelId: modelId || undefined,
       defaultTask: defaultTask.trim() || undefined,
       timeoutSeconds,
       createdAt: agent?.createdAt || now,
@@ -57,7 +73,7 @@ export default function AgentEditor({ agent, onSave, onDelete, onClose }: AgentE
 
     onSave(saved);
     onClose();
-  }, [name, icon, systemPrompt, defaultTask, timeoutSeconds, agent, onSave, onClose]);
+  }, [name, icon, systemPrompt, defaultTask, timeoutSeconds, providerId, modelId, agent, onSave, onClose]);
 
   const handleDelete = useCallback(() => {
     if (agent && onDelete) {
@@ -164,6 +180,52 @@ export default function AgentEditor({ agent, onSave, onDelete, onClose }: AgentE
               placeholder="Pre-filled task when running this agent..."
               className="w-full px-3 py-2 rounded-md bg-surface-2 border border-border-subtle text-sm text-text-primary placeholder-text-tertiary focus:outline-none focus:border-accent transition-colors"
             />
+          </div>
+
+          {/* Provider & Model */}
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="block text-xs font-medium uppercase tracking-wider text-text-tertiary mb-2">
+                Provider
+              </label>
+              <select
+                value={providerId}
+                onChange={(e) => {
+                  const newId = e.target.value as ProviderId;
+                  setProviderId(newId);
+                  setModelId(''); // reset model when provider changes
+                }}
+                className="w-full px-3 py-2 rounded-md bg-surface-2 border border-border-subtle text-sm text-text-primary focus:outline-none focus:border-accent transition-colors"
+              >
+                {/* Always show all providers but mark unavailable ones */}
+                {providers.length > 0 ? (
+                  providers.map((p) => (
+                    <option key={p.id} value={p.id} disabled={!p.enabled}>
+                      {p.name}{!p.isInstalled ? ' (not installed)' : ''}{!p.enabled ? ' (disabled)' : ''}
+                    </option>
+                  ))
+                ) : (
+                  <option value="claude">Claude Code</option>
+                )}
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-medium uppercase tracking-wider text-text-tertiary mb-2">
+                Model
+              </label>
+              <select
+                value={modelId}
+                onChange={(e) => setModelId(e.target.value)}
+                className="w-full px-3 py-2 rounded-md bg-surface-2 border border-border-subtle text-sm text-text-primary focus:outline-none focus:border-accent transition-colors"
+              >
+                <option value="">Default</option>
+                {availableModels.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}{m.isDefault ? ' (default)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Timeout */}

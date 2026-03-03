@@ -1,8 +1,19 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { IPC_CHANNELS } from '../../shared/types';
+import type { ProviderId } from '../../shared/provider-types';
 import { isPathSafe } from '../helpers/path-safety';
 import { saveSessionOutput } from './session-history';
 import { basename } from 'path';
+
+// Lazy import to avoid circular dependency at module load time
+let _getProvider: typeof import('./providers').getProvider | null = null;
+function getProviderLazy() {
+  if (!_getProvider) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    _getProvider = require('./providers').getProvider;
+  }
+  return _getProvider!;
+}
 
 // node-pty must be required (not imported) because it's a native module
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -20,25 +31,52 @@ const sessions = new Map<string, PtySession>();
 const sessionOutputBuffers = new Map<string, string[]>();
 let nextId = 1;
 
-/** Return a copy of process.env without sensitive or session vars */
-export function cleanEnv(): NodeJS.ProcessEnv {
+// Prefixes that are always stripped regardless of provider
+const ALWAYS_STRIP_PREFIXES = ['AWS_ACCESS_KEY', 'AWS_SECRET_ACCESS', 'STRIPE_'];
+const ALWAYS_STRIP_KEYS = ['CLAUDECODE', 'CLAUDE_CODE_SESSION', 'GITHUB_TOKEN', 'SUPABASE_SERVICE_ROLE', 'NETLIFY_AUTH_TOKEN', 'VERCEL_TOKEN'];
+
+// All known provider env prefixes
+const ALL_PROVIDER_PREFIXES = ['ANTHROPIC_', 'OPENAI_', 'GOOGLE_', 'GEMINI_'];
+
+/**
+ * Return a copy of process.env without sensitive or session vars.
+ * If providerId is given, keep that provider's required env prefixes
+ * and strip only the other providers' prefixes.
+ */
+export function cleanEnv(providerId?: ProviderId): NodeJS.ProcessEnv {
   const env = { ...process.env };
   const deleteIfPrefix = (prefix: string) => {
     for (const key of Object.keys(env)) {
       if (key.startsWith(prefix)) delete env[key];
     }
   };
-  delete env.CLAUDECODE;
-  delete env.CLAUDE_CODE_SESSION;
-  deleteIfPrefix('ANTHROPIC_');
-  deleteIfPrefix('OPENAI_');
-  delete env.GITHUB_TOKEN;
-  deleteIfPrefix('AWS_ACCESS_KEY');
-  deleteIfPrefix('AWS_SECRET_ACCESS');
-  deleteIfPrefix('STRIPE_');
-  delete env.SUPABASE_SERVICE_ROLE;
-  delete env.NETLIFY_AUTH_TOKEN;
-  delete env.VERCEL_TOKEN;
+
+  // Always strip session and generic sensitive vars
+  for (const key of ALWAYS_STRIP_KEYS) {
+    delete env[key];
+  }
+  for (const prefix of ALWAYS_STRIP_PREFIXES) {
+    deleteIfPrefix(prefix);
+  }
+
+  // Determine which provider prefixes to keep
+  let keepPrefixes: string[] = [];
+  if (providerId) {
+    try {
+      const provider = getProviderLazy()(providerId);
+      keepPrefixes = provider.requiredEnvPrefixes;
+    } catch {
+      // Provider not found — strip everything
+    }
+  }
+
+  // Strip provider env prefixes not needed by the active provider
+  for (const prefix of ALL_PROVIDER_PREFIXES) {
+    if (!keepPrefixes.includes(prefix)) {
+      deleteIfPrefix(prefix);
+    }
+  }
+
   return env;
 }
 

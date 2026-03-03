@@ -6,10 +6,12 @@ import { v4 as uuidv4 } from 'uuid';
 import simpleGit from 'simple-git';
 import { IPC_CHANNELS } from '../../shared/types';
 import type { WorktreeSession } from '../../shared/worktree-types';
+import type { ProviderId } from '../../shared/provider-types';
 import { log } from '../helpers/logger';
 import { isPathSafe } from '../helpers/path-safety';
 import { logSecurityEvent } from '../helpers/security-logger';
 import { cleanEnv } from './terminal';
+import { getProvider } from './providers';
 import { saveSessionOutput } from './session-history';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -229,7 +231,7 @@ export function registerWorktreeHandlers() {
   // WORKTREE_SPAWN_AGENT
   ipcMain.handle(
     IPC_CHANNELS.WORKTREE_SPAWN_AGENT,
-    async (_, opts: { worktreeSessionId: string; command?: string }) => {
+    async (_, opts: { worktreeSessionId: string; command?: string; providerId?: ProviderId }) => {
       await dataReady;
 
       const session = sessions.find((s) => s.id === opts.worktreeSessionId);
@@ -237,6 +239,10 @@ export function registerWorktreeHandlers() {
 
       const shell = process.env.SHELL || '/bin/zsh';
       const ptyId = `worktree-pty-${session.id}`;
+      const providerId = opts.providerId;
+
+      // Build env with provider-aware cleaning
+      const envOverrides = providerId ? (() => { try { return getProvider(providerId).envOverrides; } catch { return {}; } })() : {};
 
       const proc = pty.spawn(shell, [], {
         name: 'xterm-256color',
@@ -244,9 +250,10 @@ export function registerWorktreeHandlers() {
         rows: 30,
         cwd: session.worktreePath,
         env: {
-          ...cleanEnv(),
+          ...cleanEnv(providerId),
           TERM: 'xterm-256color',
           COLORTERM: 'truecolor',
+          ...envOverrides,
         },
       });
 
@@ -307,8 +314,15 @@ export function registerWorktreeHandlers() {
         log('info', 'worktrees', `Worktree agent exited (${session.branchName}, exit ${exitCode})`);
       });
 
-      // Send default command after short delay
-      const command = opts.command || 'claude';
+      // Send default command after short delay — use provider executable if available
+      let command = opts.command;
+      if (!command) {
+        if (providerId) {
+          try { command = getProvider(providerId).executablePath || getProvider(providerId).executable; } catch { command = 'claude'; }
+        } else {
+          command = 'claude';
+        }
+      }
       setTimeout(() => {
         const p = activePtys.get(session.id);
         if (p) {

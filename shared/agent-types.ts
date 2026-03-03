@@ -3,7 +3,9 @@ export interface Agent {
   name: string;
   icon: string;                    // emoji
   systemPrompt: string;
-  model: string;                   // 'claude' (default)
+  model: string;                   // 'claude' (default) — legacy field
+  providerId?: string;             // provider id (e.g. 'claude', 'codex', 'gemini')
+  modelId?: string;                // specific model id (e.g. 'claude-sonnet-4-6')
   defaultTask?: string;
   timeoutSeconds: number;          // default 900 (15 min)
   createdAt: number;

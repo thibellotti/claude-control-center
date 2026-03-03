@@ -1,6 +1,6 @@
 import React from 'react';
 import type { OrchestratorCell } from '../../../shared/types';
-import { CloseIcon, TerminalIcon, FeedIcon, LayersIcon, EyeIcon, DiffIcon, BranchIcon } from '../icons';
+import { CloseIcon, TerminalIcon, FeedIcon, LayersIcon, EyeIcon, DiffIcon, BranchIcon, KanbanIcon } from '../icons';
 
 interface CellHeaderProps {
   cell: OrchestratorCell;
@@ -16,6 +16,7 @@ const typeIcons: Record<string, React.ReactNode> = {
   preview: <EyeIcon size={12} />,
   diff: <DiffIcon size={12} />,
   'agent-worktree': <BranchIcon size={12} />,
+  kanban: <KanbanIcon size={12} />,
 };
 
 const typeLabels: Record<string, string> = {
@@ -25,6 +26,7 @@ const typeLabels: Record<string, string> = {
   preview: 'Preview',
   diff: 'Diff',
   'agent-worktree': 'Worktree',
+  kanban: 'Kanban',
 };
 
 export default function CellHeader({ cell, isActive, onClose, onFocus }: CellHeaderProps) {

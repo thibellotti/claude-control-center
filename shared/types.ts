@@ -498,7 +498,9 @@ export interface DiffResult {
 
 export type LayoutPreset = 'focus' | 'split' | 'quad' | 'main-side';
 
-export type CellType = 'terminal' | 'feed' | 'taskboard' | 'preview' | 'diff' | 'agent-worktree';
+export type CellType = 'terminal' | 'feed' | 'taskboard' | 'preview' | 'diff' | 'agent-worktree' | 'kanban';
+
+export type KanbanColumnId = 'backlog' | 'in_progress' | 'review' | 'done';
 
 export interface CellConfigTerminal {
   type: 'terminal';
@@ -543,7 +545,14 @@ export interface CellConfigAgentWorktree {
   projectPath: string;
 }
 
-export type OrchestratorCellConfig = CellConfigTerminal | CellConfigFeed | CellConfigTaskBoard | CellConfigPreview | CellConfigDiff | CellConfigAgentWorktree;
+export interface CellConfigKanban {
+  type: 'kanban';
+  projectPath: string;
+  label: string;
+  teamName?: string;
+}
+
+export type OrchestratorCellConfig = CellConfigTerminal | CellConfigFeed | CellConfigTaskBoard | CellConfigPreview | CellConfigDiff | CellConfigAgentWorktree | CellConfigKanban;
 
 export interface OrchestratorCell {
   id: string;
@@ -553,6 +562,49 @@ export interface OrchestratorCell {
 export interface OrchestratorWorkspace {
   cells: OrchestratorCell[];
   layout: LayoutPreset;
+}
+
+// -- Project Intelligence --
+
+export interface ProjectHealthScore {
+  overall: number; // 0-100
+  breakdown: {
+    gitCleanliness: number;   // 0-25
+    activityRecency: number;  // 0-25
+    dependencyHealth: number; // 0-25
+    configQuality: number;    // 0-25
+  };
+  details: string[];
+}
+
+export interface DependencyAuditResult {
+  critical: number;
+  high: number;
+  moderate: number;
+  low: number;
+  total: number;
+  vulnerabilities: Array<{
+    name: string;
+    severity: string;
+    title: string;
+    path: string;
+  }>;
+  lastAuditTime: number;
+}
+
+export interface ProjectCostSummary {
+  last7Days: number;
+  last30Days: number;
+  allTime: number;
+  trend: 'increasing' | 'decreasing' | 'stable';
+}
+
+export interface ProjectIntelligence {
+  healthScore: ProjectHealthScore;
+  costSummary: ProjectCostSummary;
+  dependencyAudit: DependencyAuditResult | null;
+  suggestedAgents: string[];
+  projectType: string | null;
 }
 
 export const IPC_CHANNELS = {
@@ -685,4 +737,21 @@ export const IPC_CHANNELS = {
   WORKTREE_SPAWN_AGENT: 'worktree-spawn-agent',
   WORKTREE_PTY_DATA: 'worktree-pty-data',
   WORKTREE_PTY_EXIT: 'worktree-pty-exit',
+  // Providers
+  PROVIDER_GET_ALL: 'provider:get-all',
+  PROVIDER_SAVE: 'provider:save',
+  PROVIDER_DELETE: 'provider:delete',
+  PROVIDER_SET_DEFAULT: 'provider:set-default',
+  PROVIDER_DETECT: 'provider:detect',
+  PROVIDER_SET_API_KEY: 'provider:set-api-key',
+  PROVIDER_GET_API_KEY: 'provider:get-api-key',
+  // Kanban
+  EXTRACT_TODOS: 'claudemd:extract-todos',
+  // Session Intelligence
+  SESSION_INTEL_ANALYZE: 'session-intel:analyze',
+  SESSION_INTEL_SESSION_DETAIL: 'session-intel:session-detail',
+  // Project Intelligence
+  PROJECT_INTEL_GET: 'project-intel:get',
+  PROJECT_INTEL_AUDIT_DEPS: 'project-intel:audit-deps',
+  PROJECT_INTEL_DETECT_TYPE: 'project-intel:detect-type',
 } as const;

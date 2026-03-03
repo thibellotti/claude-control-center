@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { PlusIcon, TerminalIcon, EyeIcon, ClaudeIcon, SearchIcon, CloseIcon, DiffIcon, BranchIcon } from '../icons';
+import { PlusIcon, TerminalIcon, EyeIcon, ClaudeIcon, SearchIcon, CloseIcon, DiffIcon, BranchIcon, KanbanIcon } from '../icons';
 import { useSessionSearch } from '../../hooks/useSessionSearch';
+import { useProviders } from '../../hooks/useProviders';
 import type { SessionSearchResult } from '../../../shared/types';
 
 interface OrchestratorToolbarProps {
@@ -10,6 +11,7 @@ interface OrchestratorToolbarProps {
   onAddPreview: (url?: string) => void;
   onAddDiff: () => void;
   onAddWorktreeAgent: () => void;
+  onAddKanban: () => void;
   drawerOpen: boolean;
   onToggleDrawer: () => void;
   onSearchResultSelect?: (result: SessionSearchResult) => void;
@@ -32,6 +34,7 @@ export default function OrchestratorToolbar({
   onAddPreview,
   onAddDiff,
   onAddWorktreeAgent,
+  onAddKanban,
   drawerOpen,
   onToggleDrawer,
   onSearchResultSelect,
@@ -42,6 +45,8 @@ export default function OrchestratorToolbar({
   const [searchExpanded, setSearchExpanded] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { results, searching, query, search, clear } = useSessionSearch();
+  const { providers } = useProviders();
+  const enabledProviders = providers.filter((p) => p.enabled);
 
   useEffect(() => {
     if (searchExpanded && searchInputRef.current) {
@@ -172,20 +177,53 @@ export default function OrchestratorToolbar({
                   <TerminalIcon size={14} />
                   Shell Terminal
                 </button>
-                <button
-                  onClick={() => { onAddTerminal('claude'); setShowAddMenu(false); }}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-3 transition-colors"
-                >
-                  <ClaudeIcon size={14} />
-                  Claude Session
-                </button>
-                <button
-                  onClick={() => { onAddTerminal('claude --dangerously-skip-permissions'); setShowAddMenu(false); }}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-3 transition-colors"
-                >
-                  <ClaudeIcon size={14} />
-                  <span>Claude <span className="text-feedback-warning">Autopilot</span></span>
-                </button>
+                {enabledProviders.map((provider) => (
+                  <React.Fragment key={provider.id}>
+                    <button
+                      onClick={() => {
+                        const exec = provider.executablePath || provider.executable;
+                        onAddTerminal(exec);
+                        setShowAddMenu(false);
+                      }}
+                      className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-3 transition-colors"
+                    >
+                      <ClaudeIcon size={14} />
+                      {provider.name} Session
+                    </button>
+                    {provider.autopilotArgs.length > 0 && (
+                      <button
+                        onClick={() => {
+                          const exec = provider.executablePath || provider.executable;
+                          const autopilotCmd = `${exec} ${provider.autopilotArgs.join(' ')}`;
+                          onAddTerminal(autopilotCmd);
+                          setShowAddMenu(false);
+                        }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-3 transition-colors"
+                      >
+                        <ClaudeIcon size={14} />
+                        <span>{provider.name} <span className="text-feedback-warning">Autopilot</span></span>
+                      </button>
+                    )}
+                  </React.Fragment>
+                ))}
+                {enabledProviders.length === 0 && (
+                  <>
+                    <button
+                      onClick={() => { onAddTerminal('claude'); setShowAddMenu(false); }}
+                      className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-3 transition-colors"
+                    >
+                      <ClaudeIcon size={14} />
+                      Claude Session
+                    </button>
+                    <button
+                      onClick={() => { onAddTerminal('claude --dangerously-skip-permissions'); setShowAddMenu(false); }}
+                      className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-3 transition-colors"
+                    >
+                      <ClaudeIcon size={14} />
+                      <span>Claude <span className="text-feedback-warning">Autopilot</span></span>
+                    </button>
+                  </>
+                )}
                 <div className="border-t border-border-subtle my-1" />
                 <button
                   onClick={() => { onAddPreview(); setShowAddMenu(false); }}
@@ -216,6 +254,13 @@ export default function OrchestratorToolbar({
                 >
                   <BranchIcon size={14} />
                   Spawn Worktree Agent
+                </button>
+                <button
+                  onClick={() => { onAddKanban(); setShowAddMenu(false); }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-3 transition-colors"
+                >
+                  <KanbanIcon size={14} />
+                  Kanban Board
                 </button>
               </div>
             </>

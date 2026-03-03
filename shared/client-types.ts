@@ -19,3 +19,10 @@ export interface ClientWorkspace {
   createdAt: number;
   updatedAt: number;
 }
+
+export interface ClientAggregates {
+  totalSpent: number;
+  avgHealth: number;
+  projectCount: number;
+  activeProjects: number;
+}

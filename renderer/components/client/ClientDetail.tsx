@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { ClientWorkspace, BrandAssets } from '../../../shared/client-types';
+import type { ProjectIntelligence } from '../../../shared/types';
 import { useClients } from '../../hooks/useClients';
 import { useProjectContext } from '../../hooks/useProjectContext';
 import Tabs from '../shared/Tabs';
@@ -27,6 +28,96 @@ const CLIENT_TABS = [
 interface ClientDetailProps {
   workspace: ClientWorkspace;
   onBack: () => void;
+}
+
+// ---------------------------------------------------------------------------
+// ClientAggregatesBar — fetches intel for each project and shows summary
+// ---------------------------------------------------------------------------
+
+function ClientAggregatesBar({ projectPaths }: { projectPaths: string[] }) {
+  const [aggregates, setAggregates] = useState<{
+    totalSpent: number;
+    avgHealth: number;
+    projectCount: number;
+    activeProjects: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (projectPaths.length === 0) {
+      setAggregates(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    Promise.allSettled(
+      projectPaths.map((p) => window.api.getProjectIntel(p))
+    ).then((results) => {
+      if (cancelled) return;
+
+      const intels: ProjectIntelligence[] = [];
+      for (const r of results) {
+        if (r.status === 'fulfilled' && r.value) intels.push(r.value);
+      }
+
+      if (intels.length === 0) {
+        setAggregates(null);
+        return;
+      }
+
+      const totalSpent = intels.reduce((sum, i) => sum + i.costSummary.allTime, 0);
+      const avgHealth = Math.round(
+        intels.reduce((sum, i) => sum + i.healthScore.overall, 0) / intels.length
+      );
+      const activeProjects = intels.filter((i) => i.healthScore.breakdown.activityRecency >= 15).length;
+
+      setAggregates({
+        totalSpent,
+        avgHealth,
+        projectCount: intels.length,
+        activeProjects,
+      });
+    });
+
+    return () => { cancelled = true; };
+  }, [projectPaths]);
+
+  if (!aggregates) return null;
+
+  const healthColor = aggregates.avgHealth >= 70
+    ? 'text-[#22c55e]'
+    : aggregates.avgHealth >= 40
+    ? 'text-[#eab308]'
+    : 'text-[#ef4444]';
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="bg-surface-1 border border-border-subtle rounded-card px-4 py-3">
+        <p className="text-text-tertiary text-xs mb-1">Total Spent</p>
+        <p className="text-text-primary text-lg font-semibold font-mono">
+          ${aggregates.totalSpent.toFixed(2)}
+        </p>
+      </div>
+      <div className="bg-surface-1 border border-border-subtle rounded-card px-4 py-3">
+        <p className="text-text-tertiary text-xs mb-1">Avg Health</p>
+        <p className={`text-lg font-semibold font-mono ${healthColor}`}>
+          {aggregates.avgHealth}
+        </p>
+      </div>
+      <div className="bg-surface-1 border border-border-subtle rounded-card px-4 py-3">
+        <p className="text-text-tertiary text-xs mb-1">Projects</p>
+        <p className="text-text-primary text-lg font-semibold font-mono">
+          {aggregates.projectCount}
+        </p>
+      </div>
+      <div className="bg-surface-1 border border-border-subtle rounded-card px-4 py-3">
+        <p className="text-text-tertiary text-xs mb-1">Active Projects</p>
+        <p className="text-text-primary text-lg font-semibold font-mono">
+          {aggregates.activeProjects}
+        </p>
+      </div>
+    </div>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -79,6 +170,12 @@ export default function ClientDetail({ workspace, onBack }: ClientDetailProps) {
   // Memoize the project list passed to ClientAnalytics to avoid new array refs each render
   const analyticsProjects = useMemo(
     () => clientProjects.map((p) => ({ path: p.path, name: p.name, client: p.client })),
+    [clientProjects],
+  );
+
+  // Project paths for aggregates bar
+  const clientProjectPaths = useMemo(
+    () => clientProjects.map((p) => p.path),
     [clientProjects],
   );
 
@@ -397,10 +494,13 @@ export default function ClientDetail({ workspace, onBack }: ClientDetailProps) {
         )}
 
         {activeTab === 'analytics' && (
-          <ClientAnalytics
-            clientName={workspace.name}
-            projects={analyticsProjects}
-          />
+          <>
+            <ClientAggregatesBar projectPaths={clientProjectPaths} />
+            <ClientAnalytics
+              clientName={workspace.name}
+              projects={analyticsProjects}
+            />
+          </>
         )}
       </div>
     </div>

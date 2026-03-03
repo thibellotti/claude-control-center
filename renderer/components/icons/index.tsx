@@ -779,3 +779,18 @@ export function AnalyticsIcon(props: IconProps = {}) {
     </svg>
   );
 }
+
+export function KanbanIcon(props: IconProps = {}) {
+  const { size, className } = p(props);
+  return (
+    <svg width={size} height={size} viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <rect x="1" y="1" width="12" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
+      <line x1="5" y1="1" x2="5" y2="13" stroke="currentColor" strokeWidth="1" />
+      <line x1="9.5" y1="1" x2="9.5" y2="13" stroke="currentColor" strokeWidth="1" />
+      <rect x="2" y="3" width="2" height="2.5" rx="0.5" fill="currentColor" opacity="0.5" />
+      <rect x="2" y="7" width="2" height="2" rx="0.5" fill="currentColor" opacity="0.3" />
+      <rect x="6" y="3" width="2.5" height="2" rx="0.5" fill="currentColor" opacity="0.5" />
+      <rect x="10.5" y="3" width="2" height="1.5" rx="0.5" fill="currentColor" opacity="0.5" />
+    </svg>
+  );
+}
