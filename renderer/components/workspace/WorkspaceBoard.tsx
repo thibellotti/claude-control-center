@@ -140,7 +140,7 @@ export default function WorkspaceBoard() {
         </div>
         <button
           onClick={handleNewWorkspace}
-          className="flex items-center gap-2 px-3 py-1 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+          className="flex items-center gap-2 px-3 py-1 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
         >
           <PlusIcon />
           <span>New Workspace</span>

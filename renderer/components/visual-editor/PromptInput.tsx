@@ -76,7 +76,7 @@ export default function PromptInput({ selectedElement, isApplying, onExecuteActi
       <button
         onClick={handleSubmit}
         disabled={isApplying || !prompt.trim()}
-        className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-button text-sm font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isApplying ? (
           <>

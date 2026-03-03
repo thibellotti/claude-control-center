@@ -65,13 +65,67 @@ export function registerVisualEditorHandlers() {
     return { script: overlayScript };
   });
 
+  // Inject overlay directly into the iframe's WebFrame using Electron's WebFrameMain API.
+  // This bypasses the cross-origin restriction that blocks contentDocument access from
+  // the renderer (parent origin differs from the iframe's localhost dev server origin).
+  ipcMain.handle(IPC_CHANNELS.VISUAL_EDITOR_INJECT_FRAME, async (_, frameUrl: string) => {
+    if (!overlayScript) {
+      try {
+        const op = path.join(__dirname, '..', 'scripts', 'overlay.js');
+        overlayScript = await fs.readFile(op, 'utf-8');
+      } catch (err) {
+        log('error', 'visual-editor', 'Failed to read overlay script for frame injection', err);
+        return { error: 'Overlay script not found' };
+      }
+    }
+
+    const win = getMainWindow();
+    if (!win) return { error: 'No main window' };
+
+    // Walk all subframes of the main frame to find one whose URL matches the preview iframe.
+    // WebFrameMain.frames only returns direct children; we use a BFS to find nested frames too.
+    function findFrame(root: Electron.WebFrameMain, targetUrl: string): Electron.WebFrameMain | null {
+      const queue: Electron.WebFrameMain[] = [root];
+      while (queue.length > 0) {
+        const frame = queue.shift()!;
+        // Match by origin (scheme+host+port) so we don't need an exact path match.
+        try {
+          const frameOrigin = new URL(frame.url).origin;
+          const targetOrigin = new URL(targetUrl).origin;
+          if (frameOrigin === targetOrigin) return frame;
+        } catch {
+          // Ignore frames with unparseable URLs (e.g., about:blank)
+        }
+        for (const child of frame.frames) {
+          queue.push(child);
+        }
+      }
+      return null;
+    }
+
+    const targetFrame = findFrame(win.webContents.mainFrame, frameUrl);
+    if (!targetFrame) {
+      log('warn', 'visual-editor', `Could not find iframe frame for URL: ${frameUrl}`);
+      return { error: `No frame found matching origin of: ${frameUrl}` };
+    }
+
+    try {
+      await targetFrame.executeJavaScript(overlayScript);
+      log('info', 'visual-editor', `Overlay injected via WebFrameMain for: ${frameUrl}`);
+      return { success: true };
+    } catch (err) {
+      log('error', 'visual-editor', 'WebFrameMain executeJavaScript failed', err);
+      return { error: (err as Error).message || 'Frame injection failed' };
+    }
+  });
+
   // Remove overlay from preview iframe
   ipcMain.handle(IPC_CHANNELS.VISUAL_EDITOR_REMOVE, async () => {
     log('info', 'visual-editor', 'Removing overlay');
     return { cleanup: 'window.__formaOverlayCleanup && window.__formaOverlayCleanup()' };
   });
 
-  // Create a git stash checkpoint
+  // Create a git commit checkpoint (saves current state as a named savepoint)
   ipcMain.handle(IPC_CHANNELS.VISUAL_EDITOR_CHECKPOINT, async (_, projectPath: string, checkpointId: string) => {
     if (!isPathSafe(projectPath)) {
       logSecurityEvent('path-traversal', 'high', 'Visual editor checkpoint blocked for unsafe path', { projectPath });
@@ -80,11 +134,12 @@ export function registerVisualEditorHandlers() {
 
     log('info', 'visual-editor', `Creating checkpoint ${checkpointId} for ${projectPath}`);
     const git = simpleGit({ baseDir: projectPath, timeout: { block: 10000 } });
-    const result = await git.stash(['push', '-m', `forma-checkpoint-${checkpointId}`, '--include-untracked']);
-    return { stashRef: result, checkpointId };
+    await git.add('-A');
+    const result = await git.commit(`forma-checkpoint-${checkpointId}`, { '--allow-empty': null });
+    return { commitRef: result.commit, checkpointId };
   });
 
-  // Undo: pop the most recent stash
+  // Undo: discard all uncommitted changes back to the last checkpoint commit
   ipcMain.handle(IPC_CHANNELS.VISUAL_EDITOR_UNDO, async (_, projectPath: string) => {
     if (!isPathSafe(projectPath)) {
       logSecurityEvent('path-traversal', 'high', 'Visual editor undo blocked for unsafe path', { projectPath });
@@ -94,10 +149,13 @@ export function registerVisualEditorHandlers() {
     log('info', 'visual-editor', `Undoing last change for ${projectPath}`);
     const git = simpleGit({ baseDir: projectPath, timeout: { block: 10000 } });
     try {
-      await git.stash(['pop']);
+      // Restore tracked files to HEAD (the checkpoint commit)
+      await git.checkout(['--', '.']);
+      // Remove any untracked files/dirs added by Claude
+      await git.clean('f', ['-d']);
       return { success: true };
     } catch (err) {
-      log('error', 'visual-editor', 'Stash pop failed', err);
+      log('error', 'visual-editor', 'Undo failed', err);
       return { success: false, error: (err as Error).message || 'Undo failed' };
     }
   });
@@ -113,7 +171,7 @@ export function registerVisualEditorHandlers() {
     const prompt = buildVisualEditPrompt(action);
 
     return new Promise((resolve) => {
-      const proc = pty.spawn('claude', ['--print', prompt], {
+      const proc = pty.spawn('claude', ['-p', prompt, '--allowedTools', 'Edit,Write,Read'], {
         name: 'xterm-256color',
         cols: 120,
         rows: 30,
@@ -140,7 +198,7 @@ export function registerVisualEditorHandlers() {
     });
   });
 
-  // Execute a visual edit: checkpoint + build prompt + run claude --print
+  // Execute a visual edit: checkpoint commit + build prompt + run claude -p with tool use
   ipcMain.handle(IPC_CHANNELS.VISUAL_EDITOR_EXECUTE, async (_, opts: {
     projectPath: string;
     action: VisualAction;
@@ -154,20 +212,21 @@ export function registerVisualEditorHandlers() {
     const { projectPath, action, checkpointId } = opts;
     log('info', 'visual-editor', `Executing visual edit ${action.id} (checkpoint: ${checkpointId})`);
 
-    // 1. Create checkpoint
+    // 1. Commit current state as checkpoint savepoint so undo can revert to it
     try {
       const git = simpleGit({ baseDir: projectPath, timeout: { block: 10000 } });
-      await git.stash(['push', '-m', `forma-checkpoint-${checkpointId}`, '--include-untracked']);
+      await git.add('-A');
+      await git.commit(`forma-checkpoint-${checkpointId}`, { '--allow-empty': null });
     } catch (err) {
-      log('warn', 'visual-editor', 'Checkpoint stash failed (may have no changes)', err);
+      log('warn', 'visual-editor', 'Checkpoint commit failed', err);
     }
 
     // 2. Build enriched prompt
     const prompt = buildVisualEditPrompt(action);
 
-    // 3. Spawn claude --print
+    // 3. Spawn claude -p so it applies file changes via tool use (not --print which only prints)
     return new Promise((resolve) => {
-      const proc = pty.spawn('claude', ['--print', prompt], {
+      const proc = pty.spawn('claude', ['-p', prompt, '--allowedTools', 'Edit,Write,Read'], {
         name: 'xterm-256color',
         cols: 120,
         rows: 30,

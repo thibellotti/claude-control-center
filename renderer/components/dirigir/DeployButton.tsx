@@ -200,7 +200,7 @@ const DeployButton = React.memo(function DeployButton({
       <div className="w-full px-3 py-2">
         <button
           disabled
-          className="w-full flex items-center justify-center gap-2 py-2 rounded-button text-xs font-medium bg-accent text-white opacity-60 cursor-not-allowed transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-2 rounded-button text-xs font-medium bg-accent text-accent-foreground opacity-60 cursor-not-allowed transition-colors"
         >
           <SpinnerIcon />
           Detecting...
@@ -215,7 +215,7 @@ const DeployButton = React.memo(function DeployButton({
       <div className="w-full px-3 py-2">
         <button
           disabled
-          className="w-full flex items-center justify-center gap-2 py-2 rounded-button text-xs font-medium bg-accent text-white opacity-40 cursor-not-allowed transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-2 rounded-button text-xs font-medium bg-accent text-accent-foreground opacity-40 cursor-not-allowed transition-colors"
         >
           <DeployArrowIcon />
           No deploy provider detected
@@ -308,7 +308,7 @@ const DeployButton = React.memo(function DeployButton({
       <div className="w-full px-3 py-2">
         <button
           disabled
-          className="w-full flex items-center justify-center gap-2 py-2 rounded-button text-xs font-medium bg-accent text-white opacity-80 cursor-not-allowed transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-2 rounded-button text-xs font-medium bg-accent text-accent-foreground opacity-80 cursor-not-allowed transition-colors"
         >
           <SpinnerIcon />
           Deploying...
@@ -322,7 +322,7 @@ const DeployButton = React.memo(function DeployButton({
     <div className="w-full px-3 py-2">
       <button
         onClick={handleDeploy}
-        className="w-full flex items-center justify-center gap-2 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+        className="w-full flex items-center justify-center gap-2 py-2 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
       >
         {ProviderIcon && <ProviderIcon />}
         <DeployArrowIcon />

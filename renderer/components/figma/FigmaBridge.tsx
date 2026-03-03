@@ -90,7 +90,7 @@ export default function FigmaBridge({ projectId }: FigmaBridgeProps) {
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+            className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
           >
             <PlusIcon />
             Link Figma Frame
@@ -113,7 +113,7 @@ export default function FigmaBridge({ projectId }: FigmaBridgeProps) {
               placeholder="Paste Figma URL..."
               className={`w-full px-3 py-2 rounded-md bg-surface-0 border text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-1 transition-colors ${
                 urlError
-                  ? 'border-red-500/50 focus:ring-red-500/30'
+                  ? 'border-border-strong focus:ring-border-default'
                   : 'border-border-subtle focus:border-accent focus:ring-accent/30'
               }`}
               autoFocus
@@ -135,7 +135,7 @@ export default function FigmaBridge({ projectId }: FigmaBridgeProps) {
             <button
               type="submit"
               disabled={isSaving}
-              className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50"
+              className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors disabled:opacity-50"
             >
               {isSaving ? 'Adding...' : 'Add'}
             </button>

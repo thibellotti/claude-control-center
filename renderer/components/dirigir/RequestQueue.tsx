@@ -93,7 +93,7 @@ const RequestCard = React.memo(function RequestCard({
         <div className="flex items-center gap-2 mt-2">
           <button
             onClick={() => onApprove(request.id)}
-            className="flex items-center gap-1 px-2 py-1 rounded-button text-micro font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+            className="flex items-center gap-1 px-2 py-1 rounded-button text-micro font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
           >
             <CheckIcon size={10} />
             Approve

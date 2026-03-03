@@ -25,6 +25,7 @@ files:
     filter:
       - package.json
       - app
+      - scripts
       - node_modules
       - '!app/**/*.map'
       - '!**/*.map'

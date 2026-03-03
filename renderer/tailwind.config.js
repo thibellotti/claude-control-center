@@ -29,6 +29,7 @@ const config = {
           DEFAULT: 'var(--accent)',
           hover: 'var(--accent-hover)',
           muted: 'var(--accent-muted)',
+          foreground: 'var(--accent-foreground)',
         },
         status: {
           active: 'var(--status-active)',

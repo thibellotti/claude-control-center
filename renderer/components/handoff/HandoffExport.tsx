@@ -71,7 +71,7 @@ export default function HandoffExport({ projectPath }: HandoffExportProps) {
           </p>
           <button
             onClick={generate}
-            className="flex items-center gap-1 px-4 py-2 rounded-md text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+            className="flex items-center gap-1 px-4 py-2 rounded-md text-sm font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
           >
             Generate Handoff
           </button>
@@ -105,7 +105,7 @@ export default function HandoffExport({ projectPath }: HandoffExportProps) {
           <button
             onClick={() => exportHandoff('markdown')}
             disabled={isExporting}
-            className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors disabled:opacity-50"
           >
             <DownloadIcon />
             {isExporting ? 'Saving...' : 'Save as HANDOFF.md'}

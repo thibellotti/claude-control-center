@@ -47,7 +47,7 @@ export default function Toolbar({
   onExit,
 }: ToolbarProps) {
   return (
-    <div className="flex items-center justify-between px-4 py-2 bg-surface-1 border-b border-border-subtle shrink-0">
+    <div className="drag-region flex items-center justify-between px-4 py-2 pl-[72px] bg-surface-1 border-b border-border-subtle shrink-0">
       {/* Left: Back button */}
       <div className="flex items-center gap-2">
         <button

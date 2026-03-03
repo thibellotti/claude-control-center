@@ -132,7 +132,7 @@ export default function ComponentGallery({ projectPath }: ComponentGalleryProps)
             onClick={() => setSelectedDirectory(null)}
             className={`px-2 py-1 rounded-full text-xs font-medium transition-colors whitespace-nowrap ${
               selectedDirectory === null
-                ? 'bg-accent text-white'
+                ? 'bg-accent text-accent-foreground'
                 : 'bg-surface-2 text-text-tertiary hover:text-text-secondary'
             }`}
           >
@@ -146,7 +146,7 @@ export default function ComponentGallery({ projectPath }: ComponentGalleryProps)
               }
               className={`px-2 py-1 rounded-full text-xs font-medium transition-colors whitespace-nowrap ${
                 selectedDirectory === dir
-                  ? 'bg-accent text-white'
+                  ? 'bg-accent text-accent-foreground'
                   : 'bg-surface-2 text-text-tertiary hover:text-text-secondary'
               }`}
             >

@@ -166,7 +166,7 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
                 </button>
                 <button
                   onClick={() => { setShowingProduction(false); start(); }}
-                  className="flex items-center gap-1 px-2 py-1 rounded-button text-micro font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+                  className="flex items-center gap-1 px-2 py-1 rounded-button text-micro font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
                 >
                   Start Dev Server
                 </button>
@@ -197,7 +197,7 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
             <div className="flex items-center gap-3">
               <button
                 onClick={start}
-                className="flex items-center gap-2 px-4 py-2 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-button text-sm font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
               >
                 Start Preview
               </button>
@@ -278,7 +278,7 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
             </div>
             <button
               onClick={start}
-              className="flex items-center gap-2 px-4 py-2 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+              className="flex items-center gap-2 px-4 py-2 rounded-button text-sm font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
             >
               Retry
             </button>

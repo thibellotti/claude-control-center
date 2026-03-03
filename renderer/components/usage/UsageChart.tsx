@@ -148,8 +148,8 @@ export default function UsageChart({ data, mode }: UsageChartProps) {
                     className={`w-full rounded-t-[3px] transition-all duration-150 ${
                       isTodayBar
                         ? isHovered
-                          ? 'bg-accent shadow-[0_0_8px_rgba(var(--accent-rgb,99,102,241),0.4)]'
-                          : 'bg-accent shadow-[0_0_6px_rgba(var(--accent-rgb,99,102,241),0.25)]'
+                          ? 'bg-accent shadow-[0_0_8px_rgba(163,163,163,0.4)]'
+                          : 'bg-accent shadow-[0_0_6px_rgba(163,163,163,0.25)]'
                         : isHovered
                           ? 'bg-accent'
                           : 'bg-accent/60'

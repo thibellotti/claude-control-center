@@ -89,7 +89,7 @@ export default function TokenStudio({ projectPath }: TokenStudioProps) {
           disabled={!isDirty || isSaving}
           className={`flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium transition-colors ${
             isDirty
-              ? 'bg-accent text-white hover:bg-accent-hover'
+              ? 'bg-accent text-accent-foreground hover:bg-accent-hover'
               : 'bg-surface-2 text-text-tertiary cursor-not-allowed'
           }`}
         >

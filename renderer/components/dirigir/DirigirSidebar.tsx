@@ -129,7 +129,7 @@ const DirigirSidebar = React.memo(function DirigirSidebar({
         {/* Deploy button */}
         <button
           onClick={() => onNavigate('deploy')}
-          className="w-9 h-9 rounded-card bg-accent text-white flex items-center justify-center hover:bg-accent-hover transition-colors"
+          className="w-9 h-9 rounded-card bg-accent text-accent-foreground flex items-center justify-center hover:bg-accent-hover transition-colors"
           aria-label="Deploy"
           title="Deploy"
         >

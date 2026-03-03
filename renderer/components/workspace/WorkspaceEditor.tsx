@@ -9,12 +9,12 @@ interface WorkspaceEditorProps {
 }
 
 const PRESET_COLORS = [
-  { name: 'Blue', hex: '#3B82F6' },
-  { name: 'Green', hex: '#22C55E' },
-  { name: 'Purple', hex: '#A855F7' },
-  { name: 'Orange', hex: '#F97316' },
-  { name: 'Pink', hex: '#EC4899' },
-  { name: 'Teal', hex: '#14B8A6' },
+  { name: 'Charcoal', hex: '#404040' },
+  { name: 'Graphite', hex: '#525252' },
+  { name: 'Slate',    hex: '#737373' },
+  { name: 'Silver',   hex: '#A3A3A3' },
+  { name: 'Ash',      hex: '#D4D4D4' },
+  { name: 'Cloud',    hex: '#E5E5E5' },
 ];
 
 export default function WorkspaceEditor({
@@ -207,7 +207,7 @@ export default function WorkspaceEditor({
             <button
               onClick={handleSave}
               disabled={!canSave}
-              className="px-4 py-1 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-1 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               {isEditing ? 'Save Changes' : 'Create'}
             </button>

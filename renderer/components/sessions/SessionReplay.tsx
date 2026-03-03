@@ -111,7 +111,7 @@ function FilterBar({
           onClick={() => onChange(f.id)}
           className={`px-3 py-1 rounded-button text-xs font-medium transition-colors ${
             filter === f.id
-              ? 'bg-accent text-white'
+              ? 'bg-accent text-accent-foreground'
               : 'bg-surface-2 text-text-tertiary hover:text-text-secondary'
           }`}
         >

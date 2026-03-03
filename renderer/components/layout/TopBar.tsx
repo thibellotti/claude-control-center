@@ -61,7 +61,7 @@ export default function TopBar({
   );
 
   return (
-    <header className="drag-region flex items-center justify-between h-[52px] px-6 border-b border-border-subtle bg-surface-1 shrink-0">
+    <header className="drag-region flex items-center justify-between h-[52px] px-6 pl-[72px] border-b border-border-subtle bg-surface-1 shrink-0">
       {activeProject ? (
         <div className="flex items-center gap-3">
           <button

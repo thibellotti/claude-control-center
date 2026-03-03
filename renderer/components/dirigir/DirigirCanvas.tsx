@@ -75,7 +75,7 @@ export default function DirigirCanvas({ project, onBack }: DirigirCanvasProps) {
           onClick={() => setAnnotateMode((p) => !p)}
           className={`mr-3 px-2 py-1 rounded-button text-xs transition-colors ${
             annotateMode
-              ? 'bg-accent text-white'
+              ? 'bg-accent text-accent-foreground'
               : 'text-text-tertiary hover:text-text-primary hover:bg-surface-2'
           }`}
         >

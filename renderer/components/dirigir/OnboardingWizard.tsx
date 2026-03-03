@@ -33,7 +33,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
       <div className="mt-auto w-full pt-8">
         <button
           onClick={onNext}
-          className="w-full py-2 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+          className="w-full py-2 rounded-button text-sm font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
         >
           Continue
         </button>
@@ -87,7 +87,7 @@ function ApiKeyStep({
         <button
           onClick={handleContinue}
           disabled={!isValid}
-          className="w-full py-2 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full py-2 rounded-button text-sm font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           Continue
         </button>
@@ -194,7 +194,7 @@ function QuickTourStep({ onFinish }: { onFinish: () => void }) {
             key={item.number}
             className="bg-surface-1 border border-border-subtle rounded-card p-4 flex items-start gap-4"
           >
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-white text-xs font-semibold flex items-center justify-center">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent text-accent-foreground text-xs font-semibold flex items-center justify-center">
               {item.number}
             </span>
             <div>
@@ -207,7 +207,7 @@ function QuickTourStep({ onFinish }: { onFinish: () => void }) {
       <div className="mt-auto w-full pt-8">
         <button
           onClick={onFinish}
-          className="w-full py-2 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+          className="w-full py-2 rounded-button text-sm font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
         >
           Start Building
         </button>

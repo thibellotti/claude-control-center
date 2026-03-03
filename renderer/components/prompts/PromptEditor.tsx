@@ -220,7 +220,7 @@ export default function PromptEditor({
             <button
               onClick={handleSave}
               disabled={!canSave}
-              className="px-4 py-1 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-1 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               {isEditing ? 'Save Changes' : 'Create'}
             </button>

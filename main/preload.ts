@@ -134,6 +134,9 @@ const api = {
 
   // Visual Editor
   visualEditorInject: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.VISUAL_EDITOR_INJECT, projectPath),
+  // Injects the overlay script into the iframe's WebFrame via Electron's native API,
+  // bypassing cross-origin restrictions that block renderer-side contentDocument access.
+  visualEditorInjectFrame: (frameUrl: string) => ipcRenderer.invoke(IPC_CHANNELS.VISUAL_EDITOR_INJECT_FRAME, frameUrl),
   visualEditorRemove: () => ipcRenderer.invoke(IPC_CHANNELS.VISUAL_EDITOR_REMOVE),
   visualEditorExecute: (opts: { projectPath: string; action: VisualAction; checkpointId: string }) =>
     ipcRenderer.invoke(IPC_CHANNELS.VISUAL_EDITOR_EXECUTE, opts),

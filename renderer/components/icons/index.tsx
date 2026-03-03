@@ -713,13 +713,13 @@ export function SupabaseIcon(props: IconProps = {}) {
   const { size, className } = p(props);
   return (
     <svg width={size} height={size} viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <path d="M10.2 16.8c-.4.5-1.2.2-1.2-.5V10h6.3c.9 0 1.4 1 .8 1.7L10.2 16.8z" fill="#3ECF8E" />
+      <path d="M10.2 16.8c-.4.5-1.2.2-1.2-.5V10h6.3c.9 0 1.4 1 .8 1.7L10.2 16.8z" fill="#A3A3A3" />
       <path d="M10.2 16.8c-.4.5-1.2.2-1.2-.5V10h6.3c.9 0 1.4 1 .8 1.7L10.2 16.8z" fill="url(#sb_a)" fillOpacity=".2" />
-      <path d="M7.8 1.2C8.2.7 9 1 9 1.7V8H2.7c-.9 0-1.4-1-.8-1.7L7.8 1.2z" fill="#3ECF8E" />
+      <path d="M7.8 1.2C8.2.7 9 1 9 1.7V8H2.7c-.9 0-1.4-1-.8-1.7L7.8 1.2z" fill="#A3A3A3" />
       <defs>
         <linearGradient id="sb_a" x1="9" y1="10" x2="13" y2="18" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#249361" />
-          <stop offset="1" stopColor="#3ECF8E" stopOpacity="0" />
+          <stop stopColor="#737373" />
+          <stop offset="1" stopColor="#A3A3A3" stopOpacity="0" />
         </linearGradient>
       </defs>
     </svg>

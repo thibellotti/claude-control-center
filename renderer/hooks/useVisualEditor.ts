@@ -19,9 +19,8 @@ export function useVisualEditor(projectPath: string, _previewUrl: string | null)
   const [viewport, setViewportState] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [feedEntries, setFeedEntries] = useState<TranslatedFeedEntry[]>([]);
 
-  // Refs for overlay script injection
-  const overlayInjected = useRef(false);
-  const overlayScriptRef = useRef<string | null>(null);
+  // State for overlay script
+  const [overlayScript, setOverlayScript] = useState<string | null>(null);
 
   // Snapshot refs for use inside callbacks that must not re-create on every state change
   const undoIndexRef = useRef(undoIndex);
@@ -46,7 +45,7 @@ export function useVisualEditor(projectPath: string, _previewUrl: string | null)
         setLastError(result.error as string);
         return;
       }
-      overlayScriptRef.current = (result as { script: string }).script;
+      setOverlayScript((result as { script: string }).script);
       setActive(true);
       setLastError(null);
     } catch (err) {
@@ -65,8 +64,7 @@ export function useVisualEditor(projectPath: string, _previewUrl: string | null)
     setIsApplying(false);
     setLastError(null);
     setFeedEntries([]);
-    overlayInjected.current = false;
-    overlayScriptRef.current = null;
+    setOverlayScript(null);
   }, []);
 
   // -----------------------------------------------------------------------
@@ -210,7 +208,7 @@ export function useVisualEditor(projectPath: string, _previewUrl: string | null)
     lastError,
     viewport,
     feedEntries,
-    overlayScript: overlayScriptRef.current,
+    overlayScript,
 
     // Methods
     activate,

@@ -17,38 +17,42 @@ export default function Canvas({ previewUrl, viewport, overlayScript, onOverlayM
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const injectedRef = useRef(false);
 
-  // Inject overlay script once iframe loads
-  const handleLoad = useCallback(() => {
-    if (!iframeRef.current || !overlayScript || injectedRef.current) return;
-
+  // Inject overlay via Electron's WebFrameMain API (main process).
+  // This is the only reliable method because the parent window and the iframe
+  // have different origins (different ports in dev, app:// vs http:// in prod),
+  // which means renderer-side contentDocument access always throws a SecurityError.
+  const injectViaMainProcess = useCallback(async (frameUrl: string) => {
     try {
-      const iframeWindow = iframeRef.current.contentWindow;
-      if (iframeWindow) {
-        // Use postMessage as primary injection method
-        iframeWindow.postMessage({ type: 'forma:inject-overlay', script: overlayScript }, '*');
-
-        // For localhost iframes, we can access contentDocument directly
-        try {
-          const doc = iframeRef.current.contentDocument;
-          if (doc) {
-            const scriptEl = doc.createElement('script');
-            scriptEl.textContent = overlayScript;
-            doc.body.appendChild(scriptEl);
-            injectedRef.current = true;
-          }
-        } catch {
-          // Cross-origin — fallback handled by postMessage
-        }
+      const result = await window.api.visualEditorInjectFrame(frameUrl);
+      if ('error' in result && result.error) {
+        console.warn('[Canvas] Frame injection failed:', result.error);
+        return false;
       }
+      return true;
     } catch (err) {
-      console.warn('Failed to inject overlay:', err);
+      console.warn('[Canvas] visualEditorInjectFrame IPC error:', err);
+      return false;
     }
-  }, [overlayScript]);
+  }, []);
 
-  // Listen for postMessage from iframe
+  // Called when the iframe finishes loading its page.
+  // Reset injectedRef on every load so SPA navigations always re-inject.
+  const handleLoad = useCallback(async () => {
+    if (!iframeRef.current || !overlayScript) return;
+    injectedRef.current = false; // Reset on each iframe load
+
+    // Derive the loaded URL from the iframe src (the actual src at load time).
+    // We use previewUrl as the target origin for the frame lookup.
+    const frameUrl = iframeRef.current.src || previewUrl;
+    const ok = await injectViaMainProcess(frameUrl);
+    if (ok) {
+      injectedRef.current = true;
+    }
+  }, [overlayScript, previewUrl, injectViaMainProcess]);
+
+  // Listen for postMessage from iframe overlay script
   useEffect(() => {
     function handler(event: MessageEvent) {
-      // Only process messages from our iframe
       if (!event.data || typeof event.data.type !== 'string') return;
       if (!event.data.type.startsWith('forma:')) return;
       onOverlayMessage(event);
@@ -58,10 +62,16 @@ export default function Canvas({ previewUrl, viewport, overlayScript, onOverlayM
     return () => window.removeEventListener('message', handler);
   }, [onOverlayMessage]);
 
-  // Reset injection flag when overlay script changes
+  // When overlayScript becomes available (after activate() resolves), retry injection.
+  // Also re-inject on iframe navigation (injectedRef reset lets handleLoad proceed).
   useEffect(() => {
     injectedRef.current = false;
-  }, [overlayScript]);
+    if (overlayScript && iframeRef.current) {
+      // If the iframe has already loaded its page (src was set before activate() resolved),
+      // onLoad won't fire again — call handleLoad directly.
+      handleLoad();
+    }
+  }, [overlayScript, handleLoad]);
 
   const viewportWidth = VIEWPORT_WIDTHS[viewport];
   const isFullWidth = viewport === 'desktop';
@@ -83,10 +93,10 @@ export default function Canvas({ previewUrl, viewport, overlayScript, onOverlayM
           className="w-full h-full border-0"
           style={{ backgroundColor: 'white' }}
           title="Visual Editor Preview"
-          // allow scripts so the overlay injection works; allow-same-origin lets
-          // us access contentDocument for localhost previews. '*' is used in
-          // postMessage because this targets localhost dev servers only — no
-          // sensitive data is passed and the message type is namespaced ('forma:').
+          // allow-scripts: required so the injected overlay.js can run.
+          // allow-same-origin: required so the overlay can read DOM and call postMessage.
+          // The injection itself is done from the main process via WebFrameMain,
+          // not from this renderer, so cross-origin contentDocument is never attempted.
           sandbox="allow-scripts allow-same-origin allow-forms"
         />
       </div>

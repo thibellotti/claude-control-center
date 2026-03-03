@@ -58,7 +58,7 @@ function ThumbnailCard({
       <div
         className={`absolute top-2 left-2 z-10 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
           isSelected
-            ? 'border-accent bg-accent text-white'
+            ? 'border-accent bg-accent text-accent-foreground'
             : 'border-border-default bg-surface-0/80 text-transparent group-hover:border-border-strong'
         }`}
       >
@@ -231,7 +231,7 @@ export default function VisualDiff({ projectId }: VisualDiffProps) {
                   onClick={() => setViewportIndex(i)}
                   className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
                     viewportIndex === i
-                      ? 'bg-accent text-white'
+                      ? 'bg-accent text-accent-foreground'
                       : 'bg-surface-2 text-text-tertiary hover:text-text-secondary'
                   }`}
                 >
@@ -246,7 +246,7 @@ export default function VisualDiff({ projectId }: VisualDiffProps) {
             <button
               onClick={handleCapture}
               disabled={isCapturing || !url.trim()}
-              className="flex items-center gap-1 px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1 px-4 py-2 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isCapturing ? (
                 <>

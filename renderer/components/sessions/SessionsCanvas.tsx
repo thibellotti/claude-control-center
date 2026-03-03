@@ -237,7 +237,7 @@ function EmptyState({ onAddShell, onAddClaude }: { onAddShell: () => void; onAdd
           </button>
           <button
             onClick={onAddClaude}
-            className="flex items-center gap-1 px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+            className="flex items-center gap-1 px-4 py-2 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
           >
             <ClaudeIcon size={14} />
             Claude Session
@@ -333,7 +333,7 @@ export default function SessionsCanvas() {
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
-            className="flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+            className="flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
           >
             <PlusIcon size={12} />
             New

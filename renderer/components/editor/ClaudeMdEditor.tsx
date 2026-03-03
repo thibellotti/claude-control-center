@@ -115,7 +115,7 @@ export default function ClaudeMdEditor({ filePath, onSave }: ClaudeMdEditorProps
         </div>
         <button
           onClick={createFile}
-          className="flex items-center gap-1 px-4 py-2 rounded-button text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+          className="flex items-center gap-1 px-4 py-2 rounded-button text-sm font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
         >
           <PlusIcon />
           Create CLAUDE.md
@@ -171,7 +171,7 @@ export default function ClaudeMdEditor({ filePath, onSave }: ClaudeMdEditorProps
             disabled={!isDirty || isSaving}
             className={`flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium transition-colors ${
               isDirty
-                ? 'bg-accent text-white hover:bg-accent-hover'
+                ? 'bg-accent text-accent-foreground hover:bg-accent-hover'
                 : 'bg-surface-2 text-text-tertiary cursor-not-allowed'
             }`}
           >

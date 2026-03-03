@@ -184,7 +184,7 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => handleAddTerminal('claude')}
-                className="flex items-center gap-1 px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+                className="flex items-center gap-1 px-4 py-2 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
               >
                 <ClaudeIcon size={14} />
                 Claude

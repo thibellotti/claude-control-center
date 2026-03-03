@@ -98,7 +98,7 @@ export default function Home() {
   }, []);
 
   const handleNavigate = useCallback((page: string) => {
-    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'workspaces' || page === 'usage' || page === 'sessions' || page === 'visual-editor') {
+    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'workspaces' || page === 'usage' || page === 'sessions') {
       setCurrentPage(page);
       setSelectedProjectPath(null);
       if (page !== 'sessions') {

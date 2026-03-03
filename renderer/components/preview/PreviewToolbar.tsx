@@ -154,7 +154,7 @@ export default function PreviewToolbar({
         >
           <ConsoleIcon />
           {consoleCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] flex items-center justify-center px-1 rounded-full bg-accent text-[9px] font-bold text-white leading-none">
+            <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] flex items-center justify-center px-1 rounded-full bg-accent text-[9px] font-bold text-accent-foreground leading-none">
               {consoleCount > 99 ? '99+' : consoleCount}
             </span>
           )}

@@ -121,7 +121,7 @@ const RequestBar = React.memo(function RequestBar({
               <button
                 onClick={handleSubmit}
                 disabled={!prompt.trim() || isProcessing}
-                className="flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover disabled:opacity-50 transition-colors"
+                className="flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover disabled:opacity-50 transition-colors"
               >
                 Go
               </button>

@@ -346,6 +346,7 @@ export interface SelectedElement {
   reactFiber: boolean;
   sourceFile?: string;
   sourceLine?: number;
+  hierarchy?: Array<{ tag: string; id?: string; className?: string }>;
 }
 
 export type VisualActionType = 'prop-change' | 'style-change' | 'reorder' | 'prompt';
@@ -507,6 +508,7 @@ export const IPC_CHANNELS = {
   OPEN_BILLING_PORTAL: 'open-billing-portal',
   // Visual Editor
   VISUAL_EDITOR_INJECT: 'visual-editor:inject',
+  VISUAL_EDITOR_INJECT_FRAME: 'visual-editor:inject-frame',
   VISUAL_EDITOR_REMOVE: 'visual-editor:remove',
   VISUAL_EDITOR_EXECUTE: 'visual-editor:execute',
   VISUAL_EDITOR_UNDO: 'visual-editor:undo',

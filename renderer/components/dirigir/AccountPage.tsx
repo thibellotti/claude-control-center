@@ -129,7 +129,7 @@ const PlanCard = React.memo<PlanCardProps>(function PlanCard({ plan, isActive, o
       ) : (
         <button
           onClick={onUpgrade}
-          className="px-3 py-1 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+          className="px-3 py-1 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
         >
           Upgrade
         </button>
@@ -237,7 +237,7 @@ const AccountPage = React.memo(function AccountPage() {
               <button
                 onClick={handleSaveKey}
                 disabled={isSavingKey}
-                className="px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50"
+                className="px-4 py-2 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors disabled:opacity-50"
               >
                 {isSavingKey ? 'Saving...' : 'Save'}
               </button>
@@ -313,7 +313,7 @@ const AccountPage = React.memo(function AccountPage() {
           <button
             onClick={handleSaveInfo}
             disabled={isSavingInfo}
-            className="px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors disabled:opacity-50"
           >
             {isSavingInfo ? 'Saving...' : 'Save'}
           </button>

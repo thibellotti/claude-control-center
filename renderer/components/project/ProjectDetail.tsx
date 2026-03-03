@@ -212,7 +212,7 @@ export default function ProjectDetail({ project, onOpenInClaude, onBack }: Proje
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => onOpenInClaude('claude')}
-                className="flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent/90 transition-colors"
+                className="flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-colors"
               >
                 <ClaudeIcon size={12} />
                 Open in Claude
@@ -225,7 +225,7 @@ export default function ProjectDetail({ project, onOpenInClaude, onBack }: Proje
               </button>
               {onOpenVisualEditor && (
                 <button
-                  onClick={() => onOpenVisualEditor(project.path, `http://localhost:3000`)}
+                  onClick={() => onOpenVisualEditor(project.path, 'auto')}
                   className="flex items-center gap-1 px-3 py-1 rounded-button text-xs font-medium bg-accent/10 text-accent hover:bg-accent/20 transition-colors"
                 >
                   <EyeIcon size={12} />

@@ -148,7 +148,7 @@ export default function DeployPanel({ projectPath }: DeployPanelProps) {
           <button
             onClick={deploy}
             disabled={isDeploying}
-            className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isDeploying ? (
               <>

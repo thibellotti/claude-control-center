@@ -201,7 +201,7 @@ const THEME_OPTIONS: ThemeOption[] = [
       sidebar: '#e8e8e8',
       line1: '#c0c0c0',
       line2: '#d4d4d4',
-      accent: '#6366f1',
+      accent: '#737373',
     },
   },
   {
@@ -212,7 +212,7 @@ const THEME_OPTIONS: ThemeOption[] = [
       sidebar: '#252525',
       line1: '#444444',
       line2: '#383838',
-      accent: '#818cf8',
+      accent: '#A3A3A3',
     },
   },
   {
@@ -223,7 +223,7 @@ const THEME_OPTIONS: ThemeOption[] = [
       sidebar: 'linear-gradient(135deg, #e8e8e8 50%, #252525 50%)',
       line1: '#888888',
       line2: '#777777',
-      accent: '#818cf8',
+      accent: '#A3A3A3',
     },
   },
 ];

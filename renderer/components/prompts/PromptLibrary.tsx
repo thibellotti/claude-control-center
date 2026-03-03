@@ -78,7 +78,7 @@ export default function PromptLibrary() {
         </div>
         <button
           onClick={handleNewPrompt}
-          className="flex items-center gap-2 px-4 py-2 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
         >
           <PlusIcon />
           New Prompt
@@ -125,7 +125,7 @@ export default function PromptLibrary() {
                 onClick={() => setSelectedCategory(cat)}
                 className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                   isActive
-                    ? 'bg-accent text-white'
+                    ? 'bg-accent text-accent-foreground'
                     : 'bg-surface-2 text-text-tertiary hover:text-text-secondary hover:bg-surface-3'
                 }`}
               >

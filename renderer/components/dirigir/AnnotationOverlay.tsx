@@ -76,7 +76,7 @@ function AnnotationBubble({
         onClick={handleBubbleClick}
         className={`
           flex items-center justify-center w-5 h-5 rounded-full
-          text-micro font-medium text-white cursor-pointer
+          text-micro font-medium text-accent-foreground cursor-pointer
           transition-transform duration-150 select-none
           ${isSelected ? 'bg-accent-hover scale-110' : 'bg-accent hover:scale-110'}
         `}
@@ -198,7 +198,7 @@ const AnnotationOverlay = React.memo(function AnnotationOverlay({
       {filledCount > 0 && (
         <button
           onClick={handleSubmitAll}
-          className="fixed top-4 right-4 z-50 px-3 py-1 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent-hover transition-colors cursor-pointer shadow-md"
+          className="fixed top-4 right-4 z-50 px-3 py-1 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors cursor-pointer shadow-md"
         >
           Submit {filledCount} annotation{filledCount !== 1 ? 's' : ''}
         </button>

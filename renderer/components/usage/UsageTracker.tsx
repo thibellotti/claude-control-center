@@ -29,19 +29,19 @@ const DATE_RANGES = [
 
 function CostIcon() {
   return (
-    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-      <span className="text-emerald-400 text-sm font-semibold">$</span>
+    <div className="w-8 h-8 rounded-lg bg-neutral-500/10 flex items-center justify-center shrink-0">
+      <span className="text-text-tertiary text-sm font-semibold">$</span>
     </div>
   );
 }
 
 function TokensIcon() {
   return (
-    <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+    <div className="w-8 h-8 rounded-lg bg-neutral-500/10 flex items-center justify-center shrink-0">
       <div className="flex gap-[2px]">
-        <div className="w-[3px] h-3 bg-blue-400/80 rounded-full" />
-        <div className="w-[3px] h-2 bg-blue-400/50 rounded-full mt-1" />
-        <div className="w-[3px] h-3.5 bg-blue-400/80 rounded-full -mt-1" />
+        <div className="w-[3px] h-3 bg-neutral-400/80 rounded-full" />
+        <div className="w-[3px] h-2 bg-neutral-400/50 rounded-full mt-1" />
+        <div className="w-[3px] h-3.5 bg-neutral-400/80 rounded-full -mt-1" />
       </div>
     </div>
   );
@@ -49,11 +49,11 @@ function TokensIcon() {
 
 function SessionsIcon() {
   return (
-    <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+    <div className="w-8 h-8 rounded-lg bg-neutral-500/10 flex items-center justify-center shrink-0">
       <div className="flex flex-col gap-[2px]">
-        <div className="w-4 h-[2px] bg-purple-400/80 rounded-full" />
-        <div className="w-3 h-[2px] bg-purple-400/50 rounded-full" />
-        <div className="w-3.5 h-[2px] bg-purple-400/70 rounded-full" />
+        <div className="w-4 h-[2px] bg-neutral-400/80 rounded-full" />
+        <div className="w-3 h-[2px] bg-neutral-400/50 rounded-full" />
+        <div className="w-3.5 h-[2px] bg-neutral-400/70 rounded-full" />
       </div>
     </div>
   );
@@ -61,9 +61,9 @@ function SessionsIcon() {
 
 function AvgIcon() {
   return (
-    <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
-      <div className="w-3.5 h-3.5 border-[1.5px] border-amber-400/70 rounded-full flex items-center justify-center">
-        <div className="w-[2px] h-[2px] bg-amber-400 rounded-full" />
+    <div className="w-8 h-8 rounded-lg bg-neutral-500/10 flex items-center justify-center shrink-0">
+      <div className="w-3.5 h-3.5 border-[1.5px] border-neutral-400/70 rounded-full flex items-center justify-center">
+        <div className="w-[2px] h-[2px] bg-neutral-400 rounded-full" />
       </div>
     </div>
   );
@@ -163,7 +163,7 @@ export default function UsageTracker() {
             onClick={() => setDateRange(range.value)}
             className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
               dateRange === range.value
-                ? 'bg-accent text-white'
+                ? 'bg-accent text-accent-foreground'
                 : 'bg-surface-2 text-text-secondary hover:bg-surface-3 hover:text-text-primary'
             }`}
           >
@@ -211,7 +211,7 @@ export default function UsageTracker() {
                 <div className="mt-1 flex items-center gap-1">
                   <span
                     className={`text-micro font-medium ${
-                      costTrend > 0 ? 'text-red-400' : costTrend < 0 ? 'text-emerald-400' : 'text-text-tertiary'
+                      costTrend > 0 ? 'text-text-tertiary' : costTrend < 0 ? 'text-text-secondary' : 'text-text-tertiary'
                     }`}
                   >
                     {costTrend > 0 ? '+' : ''}
