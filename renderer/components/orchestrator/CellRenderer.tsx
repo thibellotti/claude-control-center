@@ -8,6 +8,8 @@ const TerminalCell = dynamic(() => import('./cells/TerminalCell'), { ssr: false 
 const FeedCell = dynamic(() => import('./cells/FeedCell'), { ssr: false });
 const TaskBoardCell = dynamic(() => import('./cells/TaskBoardCell'), { ssr: false });
 const PreviewCell = dynamic(() => import('./cells/PreviewCell'), { ssr: false });
+const DiffCell = dynamic(() => import('./cells/DiffCell'), { ssr: false });
+const AgentWorktreeCell = dynamic(() => import('./cells/AgentWorktreeCell'), { ssr: false });
 
 interface CellRendererProps {
   cell: OrchestratorCell;
@@ -27,6 +29,10 @@ export default function CellRenderer({ cell, isActive, onClose, onFocus }: CellR
         return <TaskBoardCell config={cell.config} />;
       case 'preview':
         return <PreviewCell config={cell.config} />;
+      case 'diff':
+        return <DiffCell config={cell.config} />;
+      case 'agent-worktree':
+        return <AgentWorktreeCell config={cell.config} />;
     }
   }
 

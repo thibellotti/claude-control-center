@@ -1,6 +1,6 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { promises as fs } from 'fs';
-import { join } from 'path';
+import { join, basename } from 'path';
 import { homedir } from 'os';
 import { v4 as uuidv4 } from 'uuid';
 import { IPC_CHANNELS } from '../../shared/types';
@@ -10,6 +10,7 @@ import { log } from '../helpers/logger';
 import { logSecurityEvent } from '../helpers/security-logger';
 import { cleanEnv } from './terminal';
 import { isPathSafe } from '../helpers/path-safety';
+import { saveSessionOutput } from './session-history';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pty = require('node-pty');
@@ -27,6 +28,9 @@ const activeProcesses = new Map<string, ReturnType<typeof import('node-pty').spa
 
 // Timeout timers keyed by run id
 const timeoutTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+// Output buffers for session history
+const agentOutputBuffers = new Map<string, string[]>();
 
 async function ensureDir() {
   await fs.mkdir(FORMA_DIR, { recursive: true });
@@ -201,6 +205,7 @@ export function registerAgentHandlers() {
 
       run.pid = proc.pid;
       activeProcesses.set(runId, proc);
+      agentOutputBuffers.set(runId, []);
 
       // Stream output (cap stored output at 5MB to prevent memory bloat)
       const MAX_OUTPUT_BYTES = 5 * 1024 * 1024; // 5MB
@@ -210,6 +215,9 @@ export function registerAgentHandlers() {
         }
         // Always send to renderer for live streaming regardless of cap
         pushUpdate(IPC_CHANNELS.AGENT_OUTPUT, { runId, data });
+        // Buffer for session history
+        const buf = agentOutputBuffers.get(runId);
+        if (buf) buf.push(data);
       });
 
       // On exit
@@ -234,6 +242,19 @@ export function registerAgentHandlers() {
           'agents',
           `Agent run ${runId} finished with status ${run.status} (exit ${exitCode})`
         );
+
+        // Save accumulated output to session history
+        const buf = agentOutputBuffers.get(runId);
+        if (buf && buf.length > 0) {
+          saveSessionOutput({
+            sessionId: `agent-${runId}`,
+            projectPath: opts.projectPath,
+            projectName: basename(opts.projectPath),
+            command: `agent: ${agent.name} — ${task}`,
+            output: buf.join(''),
+          });
+        }
+        agentOutputBuffers.delete(runId);
 
         pushUpdate(IPC_CHANNELS.AGENT_EXIT, { runId, status: run.status });
         await saveRuns();
@@ -297,4 +318,5 @@ export function cleanupAgents() {
     clearTimeout(timer);
     timeoutTimers.delete(id);
   }
+  agentOutputBuffers.clear();
 }

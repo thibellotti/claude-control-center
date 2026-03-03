@@ -144,7 +144,7 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
       {/* Main content area */}
       <div className="flex-1 bg-surface-0 overflow-hidden relative">
         {/* ── Idle state: show production deploy or empty ────────────── */}
-        {state.status === 'idle' && showingProduction && productionUrl && (
+        {(state.status === 'idle' || state.status === 'error') && showingProduction && productionUrl && (
           <div className="absolute inset-0 flex flex-col">
             {/* Production banner */}
             <div className="flex items-center justify-between px-3 py-1 bg-surface-1 border-b border-border-subtle shrink-0">
@@ -273,12 +273,22 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
                 <p className="text-xs text-feedback-error mt-1">{state.error}</p>
               )}
             </div>
-            <button
-              onClick={start}
-              className="flex items-center gap-2 px-4 py-2 rounded-button text-sm font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
-            >
-              Retry
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={start}
+                className="flex items-center gap-2 px-4 py-2 rounded-button text-sm font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
+              >
+                Retry
+              </button>
+              {productionUrl && (
+                <button
+                  onClick={() => setShowingProduction(true)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-button text-sm font-medium bg-surface-2 border border-border-subtle text-text-secondary hover:text-text-primary transition-colors"
+                >
+                  View Production
+                </button>
+              )}
+            </div>
             {/* Show output lines for debugging */}
             {state.output.length > 0 && (
               <div className="w-full max-w-lg mt-2 px-4">

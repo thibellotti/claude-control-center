@@ -1,10 +1,11 @@
 import { ipcMain } from 'electron';
 import { promisify } from 'util';
-import { IPC_CHANNELS, GitHubRepoInfo, GitHubCommitInfo, GitHubPRInfo } from '../../shared/types';
+import { execFile, exec } from 'child_process';
+import { IPC_CHANNELS, GitHubRepoInfo, GitHubCommitInfo, GitHubPRInfo, PRDetail, PRCheck, CreatePROptions } from '../../shared/types';
 import { isPathSafe } from '../helpers/path-safety';
-import { exec } from 'child_process';
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 /**
  * Parse owner/repo from a GitHub remote URL.
@@ -104,6 +105,94 @@ export function registerGitHubHandlers() {
         commits,
         pullRequests,
       };
+    }
+  );
+
+  // GET_PR_DETAIL — fetch detailed info for a single PR
+  ipcMain.handle(
+    IPC_CHANNELS.GET_PR_DETAIL,
+    async (_event, opts: { projectPath: string; prNumber: number }): Promise<PRDetail | null> => {
+      if (!isPathSafe(opts.projectPath)) return null;
+      try {
+        const { stdout } = await execFileAsync('gh', [
+          'pr', 'view', String(opts.prNumber),
+          '--json', 'number,title,body,state,author,headRefName,baseRefName,url,createdAt,updatedAt,additions,deletions,changedFiles,reviewDecision,statusCheckRollup',
+        ], { cwd: opts.projectPath });
+
+        const raw = JSON.parse(stdout.trim());
+        const checks: PRCheck[] = Array.isArray(raw.statusCheckRollup)
+          ? raw.statusCheckRollup.map((c: { name: string; status: string; conclusion: string | null }) => ({
+              name: c.name || '',
+              status: (c.status || 'queued') as PRCheck['status'],
+              conclusion: (c.conclusion || null) as PRCheck['conclusion'],
+            }))
+          : [];
+
+        return {
+          number: raw.number,
+          title: raw.title || '',
+          body: raw.body || '',
+          state: raw.state === 'MERGED' ? 'merged' : raw.state === 'CLOSED' ? 'closed' : 'open',
+          author: raw.author?.login || 'unknown',
+          branch: raw.headRefName || '',
+          baseBranch: raw.baseRefName || '',
+          url: raw.url || '',
+          createdAt: raw.createdAt || '',
+          updatedAt: raw.updatedAt || '',
+          additions: raw.additions ?? 0,
+          deletions: raw.deletions ?? 0,
+          changedFiles: raw.changedFiles ?? 0,
+          reviewDecision: raw.reviewDecision || undefined,
+          checks,
+        };
+      } catch {
+        return null;
+      }
+    }
+  );
+
+  // CREATE_PR — create a new pull request from current branch
+  ipcMain.handle(
+    IPC_CHANNELS.CREATE_PR,
+    async (_event, opts: CreatePROptions): Promise<{ url: string } | { error: string }> => {
+      if (!isPathSafe(opts.projectPath)) return { error: 'Invalid project path' };
+      try {
+        const args = ['pr', 'create', '--title', opts.title, '--body', opts.body];
+        if (opts.baseBranch) {
+          args.push('--base', opts.baseBranch);
+        }
+        if (opts.draft) {
+          args.push('--draft');
+        }
+        const { stdout } = await execFileAsync('gh', args, { cwd: opts.projectPath });
+        return { url: stdout.trim() };
+      } catch (err) {
+        return { error: (err as Error).message || 'Failed to create PR' };
+      }
+    }
+  );
+
+  // GET_PR_CHECKS — fetch CI check statuses for a PR
+  ipcMain.handle(
+    IPC_CHANNELS.GET_PR_CHECKS,
+    async (_event, opts: { projectPath: string; prNumber: number }): Promise<PRCheck[]> => {
+      if (!isPathSafe(opts.projectPath)) return [];
+      try {
+        const { stdout } = await execFileAsync('gh', [
+          'pr', 'checks', String(opts.prNumber),
+          '--json', 'name,state,conclusion',
+        ], { cwd: opts.projectPath });
+
+        const parsed = JSON.parse(stdout.trim());
+        if (!Array.isArray(parsed)) return [];
+        return parsed.map((c: { name: string; state: string; conclusion: string | null }) => ({
+          name: c.name || '',
+          status: (c.state || 'queued') as PRCheck['status'],
+          conclusion: (c.conclusion || null) as PRCheck['conclusion'],
+        }));
+      } catch {
+        return [];
+      }
     }
   );
 }

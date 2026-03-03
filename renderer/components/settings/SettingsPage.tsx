@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useSettings } from '../../hooks/useSettings';
 import { useTheme } from '../../hooks/useTheme';
+import { useMcpServers } from '../../hooks/useMcpServers';
+import type { McpServerConfig } from '../../../shared/types';
 
 /* ─── Helpers ─────────────────────────────────────────────────────────────── */
 
@@ -25,6 +27,7 @@ const SECTIONS = [
   { id: 'permissions', label: 'Permissions' },
   { id: 'environment', label: 'Environment' },
   { id: 'plugins', label: 'Plugins' },
+  { id: 'mcp-servers', label: 'MCP Servers' },
   { id: 'info', label: 'Info' },
 ] as const;
 
@@ -100,6 +103,17 @@ function IconPlugins() {
   );
 }
 
+function IconMcpServers() {
+  return (
+    <div className="w-4 h-4 relative shrink-0">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[6px] h-[6px] rounded-full border-2 border-text-tertiary" />
+      <div className="absolute bottom-0 left-0 w-[5px] h-[5px] rounded-full border-2 border-text-tertiary" />
+      <div className="absolute bottom-0 right-0 w-[5px] h-[5px] rounded-full border-2 border-text-tertiary" />
+      <div className="absolute top-[6px] left-1/2 -translate-x-1/2 w-[2px] h-[5px] bg-text-tertiary" />
+    </div>
+  );
+}
+
 function IconInfo() {
   return (
     <div className="w-4 h-4 relative shrink-0">
@@ -115,6 +129,7 @@ const SECTION_ICONS: Record<SectionId, React.ReactNode> = {
   permissions: <IconPermissions />,
   environment: <IconEnvironment />,
   plugins: <IconPlugins />,
+  'mcp-servers': <IconMcpServers />,
   info: <IconInfo />,
 };
 
@@ -578,6 +593,254 @@ function PluginsSection({
   );
 }
 
+/* ─── MCP Servers Section ─────────────────────────────────────────────────── */
+
+function McpServersSection() {
+  const { servers, addServer, removeServer, testServer } = useMcpServers();
+  const [showForm, setShowForm] = useState(false);
+  const [formName, setFormName] = useState('');
+  const [formCommand, setFormCommand] = useState('');
+  const [formArgs, setFormArgs] = useState('');
+  const [formEnv, setFormEnv] = useState('');
+  const [formScope, setFormScope] = useState<'global' | 'project'>('global');
+  const [testResults, setTestResults] = useState<Record<string, { status: 'ok' | 'error' | 'testing'; message?: string }>>({});
+
+  const handleAdd = useCallback(async () => {
+    if (!formName.trim() || !formCommand.trim()) return;
+
+    const config: McpServerConfig = {
+      command: formCommand.trim(),
+    };
+
+    const args = formArgs.trim();
+    if (args) {
+      config.args = args.split(/\s+/);
+    }
+
+    const env = formEnv.trim();
+    if (env) {
+      const envObj: Record<string, string> = {};
+      for (const line of env.split('\n')) {
+        const eqIdx = line.indexOf('=');
+        if (eqIdx > 0) {
+          envObj[line.slice(0, eqIdx).trim()] = line.slice(eqIdx + 1).trim();
+        }
+      }
+      config.env = envObj;
+    }
+
+    await addServer(formName.trim(), config, formScope);
+    setFormName('');
+    setFormCommand('');
+    setFormArgs('');
+    setFormEnv('');
+    setShowForm(false);
+  }, [formName, formCommand, formArgs, formEnv, formScope, addServer]);
+
+  const handleTest = useCallback(async (name: string, command: string, args?: string[]) => {
+    setTestResults((prev) => ({ ...prev, [name]: { status: 'testing' } }));
+    const result = await testServer(command, args);
+    setTestResults((prev) => ({ ...prev, [name]: result }));
+  }, [testServer]);
+
+  return (
+    <section>
+      <SectionHeader id="mcp-servers" title="MCP Servers" count={servers.length} />
+      <div className="space-y-2">
+        {servers.length > 0 ? (
+          servers.map((server) => {
+            const test = testResults[server.name];
+            return (
+              <div
+                key={`${server.scope}-${server.name}`}
+                className="flex items-center justify-between gap-3 px-4 py-3 rounded-card border border-border-subtle bg-surface-1 min-w-0"
+              >
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-surface-3">
+                    <span className="text-xs font-bold text-text-tertiary uppercase">
+                      {server.name.charAt(0)}
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-mono text-text-secondary truncate">
+                        {server.name}
+                      </span>
+                      <span className={`px-1.5 py-0.5 rounded text-micro font-medium ${
+                        server.scope === 'global'
+                          ? 'bg-accent/10 text-accent'
+                          : 'bg-status-active/10 text-status-active'
+                      }`}>
+                        {server.scope}
+                      </span>
+                    </div>
+                    <span className="text-xs font-mono text-text-tertiary truncate block mt-0.5">
+                      {server.config.command}
+                      {server.config.args?.length ? ` ${server.config.args.join(' ')}` : ''}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {/* Test result indicator */}
+                  {test && (
+                    <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${
+                      test.status === 'testing'
+                        ? 'bg-surface-3'
+                        : test.status === 'ok'
+                          ? 'bg-status-active/10'
+                          : 'bg-red-500/10'
+                    }`}>
+                      <span className={`w-2 h-2 rounded-full ${
+                        test.status === 'testing'
+                          ? 'bg-text-tertiary animate-pulse'
+                          : test.status === 'ok'
+                            ? 'bg-status-active'
+                            : 'bg-red-500'
+                      }`} />
+                      <span className={`text-micro font-medium ${
+                        test.status === 'testing'
+                          ? 'text-text-tertiary'
+                          : test.status === 'ok'
+                            ? 'text-status-active'
+                            : 'text-red-500'
+                      }`}>
+                        {test.status === 'testing' ? 'Testing...' : test.status === 'ok' ? 'OK' : 'Error'}
+                      </span>
+                    </div>
+                  )}
+                  {/* Test button */}
+                  <button
+                    onClick={() => handleTest(server.name, server.config.command, server.config.args)}
+                    className="px-2 py-1 rounded-button text-micro font-medium text-text-tertiary hover:text-text-secondary hover:bg-surface-2 transition-colors"
+                  >
+                    Test
+                  </button>
+                  {/* Remove button */}
+                  <button
+                    onClick={() => removeServer(server.name, server.scope)}
+                    className="px-2 py-1 rounded-button text-micro font-medium text-red-500/70 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="bg-surface-1 border border-border-subtle rounded-card p-4">
+            <p className="text-xs text-text-tertiary">No MCP servers configured.</p>
+          </div>
+        )}
+
+        {/* Add Server Form */}
+        {showForm ? (
+          <div className="bg-surface-1 border border-border-subtle rounded-card p-4 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-micro font-medium text-text-tertiary block mb-1">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                  placeholder="my-server"
+                  className="w-full px-3 py-1.5 rounded-button bg-surface-0 border border-border-subtle text-xs font-mono text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent"
+                />
+              </div>
+              <div>
+                <label className="text-micro font-medium text-text-tertiary block mb-1">
+                  Command
+                </label>
+                <input
+                  type="text"
+                  value={formCommand}
+                  onChange={(e) => setFormCommand(e.target.value)}
+                  placeholder="npx"
+                  className="w-full px-3 py-1.5 rounded-button bg-surface-0 border border-border-subtle text-xs font-mono text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-micro font-medium text-text-tertiary block mb-1">
+                Args (space-separated)
+              </label>
+              <input
+                type="text"
+                value={formArgs}
+                onChange={(e) => setFormArgs(e.target.value)}
+                placeholder="-y @modelcontextprotocol/server-filesystem"
+                className="w-full px-3 py-1.5 rounded-button bg-surface-0 border border-border-subtle text-xs font-mono text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent"
+              />
+            </div>
+            <div>
+              <label className="text-micro font-medium text-text-tertiary block mb-1">
+                Env (KEY=VALUE, one per line)
+              </label>
+              <textarea
+                value={formEnv}
+                onChange={(e) => setFormEnv(e.target.value)}
+                placeholder="API_KEY=xxx"
+                rows={2}
+                className="w-full px-3 py-1.5 rounded-button bg-surface-0 border border-border-subtle text-xs font-mono text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent resize-none"
+              />
+            </div>
+            <div>
+              <label className="text-micro font-medium text-text-tertiary block mb-1">
+                Scope
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setFormScope('global')}
+                  className={`px-3 py-1 rounded-button text-xs font-medium transition-colors ${
+                    formScope === 'global'
+                      ? 'bg-accent/10 text-accent border border-accent/30'
+                      : 'text-text-tertiary border border-border-subtle hover:text-text-secondary'
+                  }`}
+                >
+                  Global
+                </button>
+                <button
+                  onClick={() => setFormScope('project')}
+                  className={`px-3 py-1 rounded-button text-xs font-medium transition-colors ${
+                    formScope === 'project'
+                      ? 'bg-status-active/10 text-status-active border border-status-active/30'
+                      : 'text-text-tertiary border border-border-subtle hover:text-text-secondary'
+                  }`}
+                >
+                  Project
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                onClick={handleAdd}
+                disabled={!formName.trim() || !formCommand.trim()}
+                className="px-3 py-1.5 rounded-button text-xs font-medium bg-accent text-white hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Add Server
+              </button>
+              <button
+                onClick={() => setShowForm(false)}
+                className="px-3 py-1.5 rounded-button text-xs font-medium text-text-tertiary hover:text-text-secondary transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowForm(true)}
+            className="w-full px-4 py-3 rounded-card border border-dashed border-border-subtle text-xs font-medium text-text-tertiary hover:text-text-secondary hover:border-border-default transition-colors"
+          >
+            + Add MCP Server
+          </button>
+        )}
+      </div>
+    </section>
+  );
+}
+
 /* ─── Info Section ────────────────────────────────────────────────────────── */
 
 function InfoSection() {
@@ -717,6 +980,7 @@ export default function SettingsPage() {
         <PluginsSection
           pluginEntries={pluginEntries as [string, boolean][]}
         />
+        <McpServersSection />
         <InfoSection />
       </div>
     </div>

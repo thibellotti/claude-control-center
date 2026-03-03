@@ -419,6 +419,16 @@ export function ChatIcon(props: IconProps = {}) {
 // Git / VCS
 // ---------------------------------------------------------------------------
 
+export function DiffIcon(props: IconProps = {}) {
+  const { size, className } = p(props);
+  return (
+    <svg width={size} height={size} viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <path d="M4 3h6M4 7h6M4 11h6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M2 3h0M2 7h0M2 11h0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function BranchIcon(props: IconProps = {}) {
   const { size, className } = p(props);
   return (

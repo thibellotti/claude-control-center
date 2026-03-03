@@ -30,6 +30,11 @@ import { registerClientHandlers } from './ipc/clients'
 import { registerClaudeMdHandlers } from './ipc/claudemd'
 import { registerAgentHandlers, cleanupAgents } from './ipc/agents'
 import { registerAnalyticsHandlers } from './ipc/analytics'
+import { registerCheckpointHandlers } from './ipc/checkpoints'
+import { registerMcpServerHandlers } from './ipc/mcp-servers'
+import { registerSessionHistoryHandlers } from './ipc/session-history'
+import { registerDiffViewerHandlers } from './ipc/diff-viewer'
+import { registerWorktreeHandlers, cleanupWorktrees } from './ipc/worktrees'
 import { startProjectWatcher } from './watchers/project-watcher'
 
 // Log unhandled promise rejections so they don't silently crash the main process
@@ -77,6 +82,11 @@ if (isProd) {
   registerClaudeMdHandlers()
   registerAgentHandlers()
   registerAnalyticsHandlers()
+  registerCheckpointHandlers()
+  registerMcpServerHandlers()
+  registerSessionHistoryHandlers()
+  registerDiffViewerHandlers()
+  registerWorktreeHandlers()
 
   const mainWindow = createWindow('main', {
     width: 1400,
@@ -92,6 +102,7 @@ if (isProd) {
       contextIsolation: true,
       sandbox: true,
       webSecurity: true,
+      webviewTag: true,
     },
   })
 
@@ -107,6 +118,7 @@ if (isProd) {
     cleanupRequests()
     cleanupVisualEditor()
     cleanupAgents()
+    cleanupWorktrees()
   })
 
   try {

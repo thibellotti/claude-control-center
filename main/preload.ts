@@ -57,6 +57,9 @@ const api = {
   getUsageStats: (days: number) => ipcRenderer.invoke(IPC_CHANNELS.GET_USAGE_STATS, days),
   getSupabaseInfo: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_SUPABASE_INFO, projectPath),
   getGitHubInfo: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_GITHUB_INFO, projectPath),
+  getPRDetail: (opts: { projectPath: string; prNumber: number }) => ipcRenderer.invoke(IPC_CHANNELS.GET_PR_DETAIL, opts),
+  createPR: (opts: { projectPath: string; title: string; body: string; baseBranch?: string; draft?: boolean }) => ipcRenderer.invoke(IPC_CHANNELS.CREATE_PR, opts),
+  getPRChecks: (opts: { projectPath: string; prNumber: number }) => ipcRenderer.invoke(IPC_CHANNELS.GET_PR_CHECKS, opts),
 
   // CLAUDE.md Manager
   scanClaudeMd: (projects: { path: string; name: string; client?: string | null }[]) => ipcRenderer.invoke(IPC_CHANNELS.SCAN_CLAUDEMD, projects),
@@ -179,6 +182,63 @@ const api = {
   visualEditorRedo: (projectPath: string, action: VisualAction) => ipcRenderer.invoke(IPC_CHANNELS.VISUAL_EDITOR_REDO, projectPath, action),
   visualEditorCheckpoint: (projectPath: string, checkpointId: string) =>
     ipcRenderer.invoke(IPC_CHANNELS.VISUAL_EDITOR_CHECKPOINT, projectPath, checkpointId),
+
+  // Session Checkpoints
+  createCheckpoint: (opts: { projectPath: string; name: string; description?: string }) =>
+    ipcRenderer.invoke(IPC_CHANNELS.CREATE_CHECKPOINT, opts),
+  getCheckpoints: (projectPath: string) =>
+    ipcRenderer.invoke(IPC_CHANNELS.GET_CHECKPOINTS, { projectPath }),
+  restoreCheckpoint: (opts: { projectPath: string; checkpointId: string }) =>
+    ipcRenderer.invoke(IPC_CHANNELS.RESTORE_CHECKPOINT, opts),
+  deleteCheckpoint: (opts: { projectPath: string; checkpointId: string }) =>
+    ipcRenderer.invoke(IPC_CHANNELS.DELETE_CHECKPOINT, opts),
+
+  // MCP Servers
+  getMcpServers: (projectPath?: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_MCP_SERVERS, projectPath),
+  addMcpServer: (opts: { name: string; config: { command: string; args?: string[]; env?: Record<string, string>; cwd?: string }; scope: string; projectPath?: string }) =>
+    ipcRenderer.invoke(IPC_CHANNELS.ADD_MCP_SERVER, opts),
+  removeMcpServer: (opts: { name: string; scope: string; projectPath?: string }) =>
+    ipcRenderer.invoke(IPC_CHANNELS.REMOVE_MCP_SERVER, opts),
+  testMcpServer: (opts: { command: string; args?: string[] }) =>
+    ipcRenderer.invoke(IPC_CHANNELS.TEST_MCP_SERVER, opts),
+
+  // Diff Viewer
+  getGitDiff: (opts: { projectPath: string; fromRef?: string; toRef?: string }) =>
+    ipcRenderer.invoke(IPC_CHANNELS.GET_GIT_DIFF, opts),
+  getGitStatusLive: (projectPath: string) =>
+    ipcRenderer.invoke(IPC_CHANNELS.GET_GIT_STATUS_LIVE, projectPath),
+
+  // Session History Search
+  saveSessionOutput: (opts: { sessionId: string; projectPath: string; projectName: string; command?: string; output: string }) =>
+    ipcRenderer.invoke(IPC_CHANNELS.SAVE_SESSION_OUTPUT, opts),
+  searchSessions: (opts: { query: string; isRegex?: boolean; projectPath?: string }) =>
+    ipcRenderer.invoke(IPC_CHANNELS.SEARCH_SESSIONS, opts),
+  getSessionHistory: (opts?: { projectPath?: string; limit?: number }) =>
+    ipcRenderer.invoke(IPC_CHANNELS.GET_SESSION_HISTORY, opts),
+
+  // Worktree Agents
+  worktreeCreate: (opts: { projectPath: string; branchName?: string }) =>
+    ipcRenderer.invoke(IPC_CHANNELS.WORKTREE_CREATE, opts),
+  worktreeList: (opts?: { projectPath?: string }) =>
+    ipcRenderer.invoke(IPC_CHANNELS.WORKTREE_LIST, opts),
+  worktreeDiff: (worktreeSessionId: string) =>
+    ipcRenderer.invoke(IPC_CHANNELS.WORKTREE_DIFF, { worktreeSessionId }),
+  worktreeMerge: (worktreeSessionId: string) =>
+    ipcRenderer.invoke(IPC_CHANNELS.WORKTREE_MERGE, { worktreeSessionId }),
+  worktreeRemove: (worktreeSessionId: string) =>
+    ipcRenderer.invoke(IPC_CHANNELS.WORKTREE_REMOVE, { worktreeSessionId }),
+  worktreeSpawnAgent: (opts: { worktreeSessionId: string; command?: string }) =>
+    ipcRenderer.invoke(IPC_CHANNELS.WORKTREE_SPAWN_AGENT, opts),
+  onWorktreePtyData: (callback: (data: { worktreeSessionId: string; data: string }) => void) => {
+    const handler = (_: unknown, payload: { worktreeSessionId: string; data: string }) => callback(payload);
+    ipcRenderer.on(IPC_CHANNELS.WORKTREE_PTY_DATA, handler);
+    return () => { ipcRenderer.removeListener(IPC_CHANNELS.WORKTREE_PTY_DATA, handler); };
+  },
+  onWorktreePtyExit: (callback: (data: { worktreeSessionId: string; exitCode: number }) => void) => {
+    const handler = (_: unknown, payload: { worktreeSessionId: string; exitCode: number }) => callback(payload);
+    ipcRenderer.on(IPC_CHANNELS.WORKTREE_PTY_EXIT, handler);
+    return () => { ipcRenderer.removeListener(IPC_CHANNELS.WORKTREE_PTY_EXIT, handler); };
+  },
 };
 
 contextBridge.exposeInMainWorld('api', api);

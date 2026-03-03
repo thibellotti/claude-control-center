@@ -297,6 +297,40 @@ export interface GitHubRepoInfo {
   pullRequests: GitHubPRInfo[];
 }
 
+// GitHub PR Integration
+
+export interface PRDetail {
+  number: number;
+  title: string;
+  body: string;
+  state: 'open' | 'closed' | 'merged';
+  author: string;
+  branch: string;
+  baseBranch: string;
+  url: string;
+  createdAt: string;
+  updatedAt: string;
+  additions: number;
+  deletions: number;
+  changedFiles: number;
+  reviewDecision?: string;
+  checks: PRCheck[];
+}
+
+export interface PRCheck {
+  name: string;
+  status: 'queued' | 'in_progress' | 'completed';
+  conclusion: 'success' | 'failure' | 'neutral' | 'cancelled' | 'skipped' | 'timed_out' | null;
+}
+
+export interface CreatePROptions {
+  projectPath: string;
+  title: string;
+  body: string;
+  baseBranch?: string;
+  draft?: boolean;
+}
+
 // -- Forma Request System --
 
 export type RequestStatus = 'draft' | 'queued' | 'in_progress' | 'review' | 'approved' | 'rejected';
@@ -388,11 +422,83 @@ export interface VisualEditorState {
   viewport: 'desktop' | 'tablet' | 'mobile';
 }
 
+// -- Session Checkpoints --
+
+export interface SessionCheckpoint {
+  id: string;
+  name: string;
+  projectPath: string;
+  branch: string;
+  stashRef: string;
+  commitHash: string;
+  createdAt: number;
+  description?: string;
+}
+
+// -- Session History Search --
+
+export interface SessionHistoryEntry {
+  sessionId: string;
+  projectPath: string;
+  projectName: string;
+  command?: string;
+  startTime: number;
+  endTime?: number;
+  outputFile: string;
+}
+
+export interface SessionSearchResult {
+  sessionId: string;
+  projectName: string;
+  command?: string;
+  timestamp: number;
+  matches: Array<{
+    lineNumber: number;
+    content: string;
+    context: string[];
+  }>;
+  totalMatches: number;
+}
+
+// -- MCP Server Management --
+
+export interface McpServerConfig {
+  command: string;
+  args?: string[];
+  env?: Record<string, string>;
+  cwd?: string;
+}
+
+export interface McpServerEntry {
+  name: string;
+  config: McpServerConfig;
+  scope: 'global' | 'project';
+  projectPath?: string;
+  status?: 'unknown' | 'ok' | 'error';
+}
+
+// -- Visual Diff Viewer --
+
+export interface FileDiffEntry {
+  filePath: string;
+  status: 'added' | 'modified' | 'deleted' | 'renamed';
+  additions: number;
+  deletions: number;
+}
+
+export interface DiffResult {
+  projectPath: string;
+  files: FileDiffEntry[];
+  totalAdditions: number;
+  totalDeletions: number;
+  fullDiff: string;
+}
+
 // -- Orchestrator --
 
 export type LayoutPreset = 'focus' | 'split' | 'quad' | 'main-side';
 
-export type CellType = 'terminal' | 'feed' | 'taskboard' | 'preview';
+export type CellType = 'terminal' | 'feed' | 'taskboard' | 'preview' | 'diff' | 'agent-worktree';
 
 export interface CellConfigTerminal {
   type: 'terminal';
@@ -421,7 +527,23 @@ export interface CellConfigPreview {
   projectPath?: string;
 }
 
-export type OrchestratorCellConfig = CellConfigTerminal | CellConfigFeed | CellConfigTaskBoard | CellConfigPreview;
+export interface CellConfigDiff {
+  type: 'diff';
+  projectPath: string;
+  label: string;
+  mode: 'live' | 'review';
+  fromRef?: string;
+  toRef?: string;
+}
+
+export interface CellConfigAgentWorktree {
+  type: 'agent-worktree';
+  worktreeSessionId: string;
+  label: string;
+  projectPath: string;
+}
+
+export type OrchestratorCellConfig = CellConfigTerminal | CellConfigFeed | CellConfigTaskBoard | CellConfigPreview | CellConfigDiff | CellConfigAgentWorktree;
 
 export interface OrchestratorCell {
   id: string;
@@ -490,6 +612,9 @@ export const IPC_CHANNELS = {
   GET_VERCEL_DEPLOYMENTS: 'get-vercel-deployments',
   GET_VERCEL_PROJECT_INFO: 'get-vercel-project-info',
   GET_GITHUB_INFO: 'get-github-info',
+  GET_PR_DETAIL: 'get-pr-detail',
+  CREATE_PR: 'create-pr',
+  GET_PR_CHECKS: 'get-pr-checks',
   // Request System
   CREATE_REQUEST: 'create-request',
   GET_REQUESTS: 'get-requests',
@@ -534,4 +659,30 @@ export const IPC_CHANNELS = {
   VISUAL_EDITOR_UNDO: 'visual-editor:undo',
   VISUAL_EDITOR_REDO: 'visual-editor:redo',
   VISUAL_EDITOR_CHECKPOINT: 'visual-editor:checkpoint',
+  // Session Checkpoints
+  CREATE_CHECKPOINT: 'create-checkpoint',
+  GET_CHECKPOINTS: 'get-checkpoints',
+  RESTORE_CHECKPOINT: 'restore-checkpoint',
+  DELETE_CHECKPOINT: 'delete-checkpoint',
+  // MCP Servers
+  GET_MCP_SERVERS: 'get-mcp-servers',
+  ADD_MCP_SERVER: 'add-mcp-server',
+  REMOVE_MCP_SERVER: 'remove-mcp-server',
+  TEST_MCP_SERVER: 'test-mcp-server',
+  // Session History Search
+  SAVE_SESSION_OUTPUT: 'save-session-output',
+  SEARCH_SESSIONS: 'search-sessions',
+  GET_SESSION_HISTORY: 'get-session-history',
+  // Diff Viewer
+  GET_GIT_DIFF: 'get-git-diff',
+  GET_GIT_STATUS_LIVE: 'get-git-status-live',
+  // Worktree Agents
+  WORKTREE_CREATE: 'worktree-create',
+  WORKTREE_LIST: 'worktree-list',
+  WORKTREE_DIFF: 'worktree-diff',
+  WORKTREE_MERGE: 'worktree-merge',
+  WORKTREE_REMOVE: 'worktree-remove',
+  WORKTREE_SPAWN_AGENT: 'worktree-spawn-agent',
+  WORKTREE_PTY_DATA: 'worktree-pty-data',
+  WORKTREE_PTY_EXIT: 'worktree-pty-exit',
 } as const;

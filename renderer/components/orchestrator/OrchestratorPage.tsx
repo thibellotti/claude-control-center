@@ -6,7 +6,7 @@ import OrchestratorToolbar from './OrchestratorToolbar';
 import OrchestratorGrid from './OrchestratorGrid';
 import OrchestratorDrawer from './OrchestratorDrawer';
 import { TerminalIcon, ClaudeIcon } from '../icons';
-import type { TaskItem } from '../../../shared/types';
+import type { TaskItem, SessionSearchResult } from '../../../shared/types';
 
 const DEFAULT_PREVIEW_URL = 'http://localhost:3000';
 
@@ -22,6 +22,8 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
   const { createSession, killSession } = useTerminalSessions();
   const { projects } = useProjectContext();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [searchResult, setSearchResult] = useState<SessionSearchResult | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Restore workspace on mount — skip if initialProject will create fresh cells.
   // orchestrator is a stable singleton; intentionally omitted from deps.
@@ -141,13 +143,42 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
     [createSession, orchestrator.addCell, getDefaultProjectPath]
   );
 
-  const handleAddPreview = useCallback(() => {
+  const handleAddPreview = useCallback((url?: string) => {
     const pp = getDefaultProjectPath();
+    const targetUrl = url || DEFAULT_PREVIEW_URL;
+    const isExternal = (() => {
+      try { const u = new URL(targetUrl); return u.hostname !== 'localhost' && u.hostname !== '127.0.0.1'; }
+      catch { return false; }
+    })();
     orchestrator.addCell({
       type: 'preview',
-      url: DEFAULT_PREVIEW_URL,
-      label: 'Preview',
-      projectPath: pp !== '~' ? pp : undefined,
+      url: targetUrl,
+      label: isExternal ? targetUrl.replace(/^https?:\/\//, '').split('/')[0] : 'Preview',
+      projectPath: isExternal ? undefined : (pp !== '~' ? pp : undefined),
+    });
+  }, [orchestrator.addCell, getDefaultProjectPath]);
+
+  const handleAddDiff = useCallback(() => {
+    const pp = getDefaultProjectPath();
+    if (pp === '~') return;
+    orchestrator.addCell({
+      type: 'diff',
+      projectPath: pp,
+      label: 'Diff',
+      mode: 'live',
+    });
+  }, [orchestrator.addCell, getDefaultProjectPath]);
+
+  const handleAddWorktreeAgent = useCallback(async () => {
+    const pp = getDefaultProjectPath();
+    if (pp === '~') return;
+    const session = await window.api.worktreeCreate({ projectPath: pp });
+    await window.api.worktreeSpawnAgent({ worktreeSessionId: session.id });
+    orchestrator.addCell({
+      type: 'agent-worktree',
+      worktreeSessionId: session.id,
+      label: session.branchName,
+      projectPath: pp,
     });
   }, [orchestrator.addCell, getDefaultProjectPath]);
 
@@ -171,8 +202,15 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
         modeBadge={modeBadge}
         onAddTerminal={handleAddTerminal}
         onAddPreview={handleAddPreview}
+        onAddDiff={handleAddDiff}
+        onAddWorktreeAgent={handleAddWorktreeAgent}
         drawerOpen={drawerOpen}
         onToggleDrawer={() => setDrawerOpen((prev) => !prev)}
+        onSearchResultSelect={(result) => {
+          setSearchResult(result);
+          setSearchQuery(result.matches[0]?.content || '');
+          setDrawerOpen(true);
+        }}
       />
 
       {isEmpty ? (
@@ -216,6 +254,9 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
             open={drawerOpen}
             projectPath={projectPath}
             tasks={projectTasks}
+            searchResult={searchResult}
+            searchQuery={searchQuery}
+            onClearSearch={() => { setSearchResult(null); setSearchQuery(''); }}
           />
         </div>
       )}

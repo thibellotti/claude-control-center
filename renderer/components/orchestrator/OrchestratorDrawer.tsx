@@ -1,16 +1,21 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLiveFeed } from '../../hooks/useTerminal';
-import type { TaskItem } from '../../../shared/types';
+import type { TaskItem, SessionSearchResult } from '../../../shared/types';
 import TaskList from '../project/TaskList';
-import { FeedIcon, LayersIcon } from '../icons';
+import CheckpointTimeline from '../project/CheckpointTimeline';
+import SearchResultsPanel from '../search/SearchResultsPanel';
+import { FeedIcon, LayersIcon, ClockIcon, SearchIcon } from '../icons';
 
 interface OrchestratorDrawerProps {
   open: boolean;
   projectPath: string | null;
   tasks: TaskItem[];
+  searchResult?: SessionSearchResult | null;
+  searchQuery?: string;
+  onClearSearch?: () => void;
 }
 
-type DrawerTab = 'feed' | 'tasks';
+type DrawerTab = 'feed' | 'tasks' | 'checkpoints' | 'search';
 
 function FeedContent({ projectPath }: { projectPath: string | null }) {
   const liveFeed = useLiveFeed();
@@ -84,8 +89,15 @@ function TasksContent({ tasks }: { tasks: TaskItem[] }) {
   );
 }
 
-export default function OrchestratorDrawer({ open, projectPath, tasks }: OrchestratorDrawerProps) {
+export default function OrchestratorDrawer({ open, projectPath, tasks, searchResult, searchQuery, onClearSearch }: OrchestratorDrawerProps) {
   const [activeTab, setActiveTab] = useState<DrawerTab>('feed');
+
+  // Auto-switch to search tab when a search result is set
+  useEffect(() => {
+    if (searchResult) {
+      setActiveTab('search');
+    }
+  }, [searchResult]);
 
   return (
     <div
@@ -119,14 +131,53 @@ export default function OrchestratorDrawer({ open, projectPath, tasks }: Orchest
               <LayersIcon size={12} />
               Tasks
             </button>
+            <button
+              onClick={() => setActiveTab('checkpoints')}
+              className={`flex items-center gap-1 flex-1 px-3 py-2 text-xs font-medium transition-colors ${
+                activeTab === 'checkpoints'
+                  ? 'bg-surface-1 text-text-primary border-b-2 border-accent'
+                  : 'text-text-tertiary hover:text-text-secondary'
+              }`}
+            >
+              <ClockIcon size={12} />
+              Checkpoints
+            </button>
+            {searchResult && (
+              <button
+                onClick={() => setActiveTab('search')}
+                className={`flex items-center gap-1 flex-1 px-3 py-2 text-xs font-medium transition-colors ${
+                  activeTab === 'search'
+                    ? 'bg-surface-1 text-text-primary border-b-2 border-accent'
+                    : 'text-text-tertiary hover:text-text-secondary'
+                }`}
+              >
+                <SearchIcon size={12} />
+                Search
+              </button>
+            )}
           </div>
 
           {/* Content */}
           <div className="flex-1 min-h-0">
             {activeTab === 'feed' ? (
               <FeedContent projectPath={projectPath} />
-            ) : (
+            ) : activeTab === 'tasks' ? (
               <TasksContent tasks={tasks} />
+            ) : activeTab === 'search' && searchResult ? (
+              <SearchResultsPanel
+                result={searchResult}
+                query={searchQuery || ''}
+                onClose={() => {
+                  onClearSearch?.();
+                  setActiveTab('feed');
+                }}
+              />
+            ) : projectPath ? (
+              <CheckpointTimeline projectPath={projectPath} />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-xs text-text-tertiary">Select a project to view checkpoints</p>
+              </div>
             )}
           </div>
         </div>

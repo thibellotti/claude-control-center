@@ -1,6 +1,8 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { IPC_CHANNELS } from '../../shared/types';
 import { isPathSafe } from '../helpers/path-safety';
+import { saveSessionOutput } from './session-history';
+import { basename } from 'path';
 
 // node-pty must be required (not imported) because it's a native module
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -11,9 +13,11 @@ interface PtySession {
   process: ReturnType<typeof pty.spawn>;
   cwd: string;
   createdAt: number;
+  command?: string;
 }
 
 const sessions = new Map<string, PtySession>();
+const sessionOutputBuffers = new Map<string, string[]>();
 let nextId = 1;
 
 /** Return a copy of process.env without sensitive or session vars */
@@ -79,17 +83,35 @@ export function registerTerminalHandlers() {
       process: proc,
       cwd,
       createdAt: Date.now(),
+      command: opts?.command,
     };
 
     sessions.set(id, session);
+    sessionOutputBuffers.set(id, []);
 
     // Stream pty output to renderer
     proc.onData((data: string) => {
       sendToRenderer(IPC_CHANNELS.PTY_DATA, { id, data });
+      // Buffer output for session history
+      const buf = sessionOutputBuffers.get(id);
+      if (buf) buf.push(data);
     });
 
     proc.onExit(({ exitCode, signal }: { exitCode: number; signal: number }) => {
       sendToRenderer(IPC_CHANNELS.PTY_EXIT, { id, exitCode, signal });
+
+      // Save accumulated output to session history
+      const buf = sessionOutputBuffers.get(id);
+      if (buf && buf.length > 0) {
+        saveSessionOutput({
+          sessionId: id,
+          projectPath: cwd,
+          projectName: basename(cwd),
+          command: opts?.command,
+          output: buf.join(''),
+        });
+      }
+      sessionOutputBuffers.delete(id);
       sessions.delete(id);
     });
 
@@ -132,6 +154,18 @@ export function registerTerminalHandlers() {
   ipcMain.handle(IPC_CHANNELS.PTY_KILL, async (_event, opts: { id: string }) => {
     const session = sessions.get(opts.id);
     if (session) {
+      // Save output before killing
+      const buf = sessionOutputBuffers.get(opts.id);
+      if (buf && buf.length > 0) {
+        saveSessionOutput({
+          sessionId: opts.id,
+          projectPath: session.cwd,
+          projectName: basename(session.cwd),
+          command: session.command,
+          output: buf.join(''),
+        });
+      }
+      sessionOutputBuffers.delete(opts.id);
       session.process.kill();
       sessions.delete(opts.id);
       return true;
@@ -159,4 +193,5 @@ export function cleanupTerminalSessions() {
     }
     sessions.delete(id);
   }
+  sessionOutputBuffers.clear();
 }

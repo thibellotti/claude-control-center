@@ -3,13 +3,14 @@ import type { Project } from '../../../shared/types';
 import StatusBadge from '../shared/StatusBadge';
 import GitBadge from '../shared/GitBadge';
 import HealthBadge from '../shared/HealthBadge';
-import { ClaudeIcon } from '../icons';
+import { ClaudeIcon, PRIcon } from '../icons';
 
 interface ProjectCardProps {
   project: Project;
   onClick: (project: Project) => void;
   onOpenProject?: (path: string, mode: 'claude' | 'claude --dangerously-skip-permissions') => void;
   isLive?: boolean;
+  openPRCount?: number;
 }
 
 // Stack detection mapping
@@ -59,6 +60,7 @@ export default memo(function ProjectCard({
   onClick,
   onOpenProject,
   isLive,
+  openPRCount,
 }: ProjectCardProps) {
   const stack = detectStack(project);
   const activeTasks = project.tasks.filter((t) => t.status === 'in_progress' || t.status === 'pending').length;
@@ -126,6 +128,12 @@ export default memo(function ProjectCard({
       <div className="flex items-center gap-3 text-xs text-text-tertiary">
         {activeTasks > 0 && (
           <span>{activeTasks} task{activeTasks !== 1 ? 's' : ''}</span>
+        )}
+        {typeof openPRCount === 'number' && openPRCount > 0 && (
+          <span className="inline-flex items-center gap-1">
+            <PRIcon size={10} />
+            {openPRCount}
+          </span>
         )}
         {project.plan && <span>Has plan</span>}
         {project.hasClaudeDir && <span>.claude</span>}
