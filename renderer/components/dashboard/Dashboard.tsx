@@ -105,12 +105,12 @@ export default function Dashboard() {
       0,
     );
     const dirty = projects.filter((p) => p.git && p.git.status === 'dirty').length;
-    const clients = new Set(projects.map((p) => p.client || UNCATEGORIZED));
+    const clientNames = new Set(projects.map((p) => p.client || UNCATEGORIZED));
     return {
       totalTasks: total,
       activeTasks: activeT,
       uncommitted: dirty,
-      clientCount: clients.size,
+      clientCount: clientNames.size,
     };
   }, [projects]);
 

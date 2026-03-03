@@ -3,6 +3,8 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { IPC_CHANNELS } from '../../shared/types';
 import { log } from '../helpers/logger';
+import { isPathSafe } from '../helpers/path-safety';
+import { logSecurityEvent } from '../helpers/security-logger';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -36,6 +38,31 @@ async function pathExists(p: string): Promise<boolean> {
     return true;
   } catch {
     return false;
+  }
+}
+
+/**
+ * Validate that a CLAUDE.md path is safe:
+ * 1. Must be within the user's home directory (prevents path traversal)
+ * 2. Must end with CLAUDE.md (prevents arbitrary file access)
+ */
+function validateClaudeMdPath(filePath: string): void {
+  const resolved = path.resolve(filePath);
+
+  if (!isPathSafe(resolved)) {
+    logSecurityEvent('path-traversal', 'high', 'CLAUDE.md access blocked: path outside home', {
+      filePath,
+      resolved,
+    });
+    throw new Error('Access denied: path is outside the home directory');
+  }
+
+  if (!resolved.endsWith('CLAUDE.md')) {
+    logSecurityEvent('path-traversal', 'medium', 'CLAUDE.md access blocked: not a CLAUDE.md file', {
+      filePath,
+      resolved,
+    });
+    throw new Error('Access denied: path must point to a CLAUDE.md file');
   }
 }
 
@@ -105,6 +132,7 @@ export function registerClaudeMdHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.READ_CLAUDEMD,
     async (_, filePath: string): Promise<string> => {
+      validateClaudeMdPath(filePath);
       return fs.readFile(filePath, 'utf-8');
     }
   );
@@ -113,6 +141,7 @@ export function registerClaudeMdHandlers() {
   ipcMain.handle(
     IPC_CHANNELS.WRITE_CLAUDEMD,
     async (_, filePath: string, content: string): Promise<void> => {
+      validateClaudeMdPath(filePath);
       await fs.writeFile(filePath, content, 'utf-8');
     }
   );

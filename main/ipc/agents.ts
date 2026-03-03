@@ -202,9 +202,13 @@ export function registerAgentHandlers() {
       run.pid = proc.pid;
       activeProcesses.set(runId, proc);
 
-      // Stream output
+      // Stream output (cap stored output at 5MB to prevent memory bloat)
+      const MAX_OUTPUT_BYTES = 5 * 1024 * 1024; // 5MB
       proc.onData((data: string) => {
-        run.output += data;
+        if (run.output.length < MAX_OUTPUT_BYTES) {
+          run.output += data;
+        }
+        // Always send to renderer for live streaming regardless of cap
         pushUpdate(IPC_CHANNELS.AGENT_OUTPUT, { runId, data });
       });
 

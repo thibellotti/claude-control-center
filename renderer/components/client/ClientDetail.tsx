@@ -76,6 +76,12 @@ export default function ClientDetail({ workspace, onBack }: ClientDetailProps) {
     [clientProjects, getSessionForProject],
   );
 
+  // Memoize the project list passed to ClientAnalytics to avoid new array refs each render
+  const analyticsProjects = useMemo(
+    () => clientProjects.map((p) => ({ path: p.path, name: p.name, client: p.client })),
+    [clientProjects],
+  );
+
   // Tab counts
   const tabsWithCounts = useMemo(
     () =>
@@ -393,11 +399,7 @@ export default function ClientDetail({ workspace, onBack }: ClientDetailProps) {
         {activeTab === 'analytics' && (
           <ClientAnalytics
             clientName={workspace.name}
-            projects={clientProjects.map((p) => ({
-              path: p.path,
-              name: p.name,
-              client: p.client,
-            }))}
+            projects={analyticsProjects}
           />
         )}
       </div>

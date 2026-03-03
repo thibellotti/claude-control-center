@@ -4,6 +4,7 @@ import { join } from 'path';
 import { homedir } from 'os';
 import { IPC_CHANNELS } from '../../shared/types';
 import { log } from '../helpers/logger';
+import type { DailyBucket, ProjectUsage, ClientUsage } from '../../shared/analytics-types';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -14,34 +15,6 @@ interface SessionUsage {
   outputTokens: number;
   model: string;
   timestamp: number;
-}
-
-interface DailyBucket {
-  date: string;
-  costUSD: number;
-  inputTokens: number;
-  outputTokens: number;
-  sessionCount: number;
-}
-
-interface ProjectUsage {
-  projectPath: string;
-  projectName: string;
-  clientName: string | null;
-  totalInputTokens: number;
-  totalOutputTokens: number;
-  totalCostUSD: number;
-  sessionCount: number;
-  dailyData: DailyBucket[];
-}
-
-interface ClientUsage {
-  clientName: string;
-  projects: ProjectUsage[];
-  totalCostUSD: number;
-  totalInputTokens: number;
-  totalOutputTokens: number;
-  totalSessions: number;
 }
 
 // ---------------------------------------------------------------------------

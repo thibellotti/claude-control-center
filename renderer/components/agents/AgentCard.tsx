@@ -43,7 +43,7 @@ export default memo(function AgentCard({ agent, runCount, onEdit, onRun }: Agent
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150">
         <button
           onClick={(e) => { e.stopPropagation(); onEdit(); }}
           className="flex items-center gap-1 px-2 py-1 rounded-button text-xs text-text-tertiary hover:text-text-primary hover:bg-surface-3 transition-colors"

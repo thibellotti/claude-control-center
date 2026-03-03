@@ -4,13 +4,16 @@ import type { ClientWorkspace } from '../../shared/client-types';
 export function useClients() {
   const [clients, setClients] = useState<ClientWorkspace[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
       const data = await window.api.getClients();
       setClients(data);
+      setError(null);
     } catch (err) {
       console.error('Failed to load clients:', err);
+      setError('Failed to load clients');
     } finally {
       setLoading(false);
     }
@@ -24,9 +27,11 @@ export function useClients() {
     try {
       const updated = await window.api.saveClient(client);
       setClients(updated);
+      setError(null);
       return updated;
     } catch (err) {
       console.error('Failed to save client:', err);
+      setError('Failed to save client');
       return null;
     }
   }, []);
@@ -35,12 +40,14 @@ export function useClients() {
     try {
       const updated = await window.api.deleteClient(clientId);
       setClients(updated);
+      setError(null);
       return updated;
     } catch (err) {
       console.error('Failed to delete client:', err);
+      setError('Failed to delete client');
       return null;
     }
   }, []);
 
-  return { clients, loading, saveClient, deleteClient, refresh };
+  return { clients, loading, error, saveClient, deleteClient, refresh };
 }

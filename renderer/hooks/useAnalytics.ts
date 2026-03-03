@@ -1,36 +1,8 @@
 import { useState, useCallback } from 'react';
+import type { ClientUsage } from '../../shared/analytics-types';
 
-// ---------------------------------------------------------------------------
-// Types (mirrored from main/ipc/analytics.ts for renderer use)
-// ---------------------------------------------------------------------------
-
-interface DailyBucket {
-  date: string;
-  costUSD: number;
-  inputTokens: number;
-  outputTokens: number;
-  sessionCount: number;
-}
-
-export interface ProjectUsage {
-  projectPath: string;
-  projectName: string;
-  clientName: string | null;
-  totalInputTokens: number;
-  totalOutputTokens: number;
-  totalCostUSD: number;
-  sessionCount: number;
-  dailyData: DailyBucket[];
-}
-
-export interface ClientUsage {
-  clientName: string;
-  projects: ProjectUsage[];
-  totalCostUSD: number;
-  totalInputTokens: number;
-  totalOutputTokens: number;
-  totalSessions: number;
-}
+// Re-export shared types for existing consumers
+export type { ProjectUsage, ClientUsage } from '../../shared/analytics-types';
 
 // ---------------------------------------------------------------------------
 // Hook
@@ -39,9 +11,10 @@ export interface ClientUsage {
 export function useAnalytics() {
   const [data, setData] = useState<ClientUsage[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState(30);
 
-  const fetch = useCallback(
+  const loadAnalytics = useCallback(
     async (
       projects: { path: string; name: string; client?: string | null }[],
       days?: number,
@@ -53,8 +26,10 @@ export function useAnalytics() {
           days: days || dateRange,
         });
         setData(result);
+        setError(null);
       } catch (err) {
         console.error('Failed to fetch analytics:', err);
+        setError('Failed to load analytics');
       } finally {
         setLoading(false);
       }
@@ -62,5 +37,5 @@ export function useAnalytics() {
     [dateRange],
   );
 
-  return { data, loading, dateRange, setDateRange, fetch };
+  return { data, loading, error, dateRange, setDateRange, loadAnalytics };
 }

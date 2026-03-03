@@ -76,8 +76,10 @@ export default function Home() {
   const [launchProject, setLaunchProject] = useState<{ path: string; mode: string } | null>(null);
 
   // Auto-seed client workspaces from project.client values on first load
+  const seededRef = useRef(false);
   useEffect(() => {
-    if (projects.length > 0) {
+    if (projects.length > 0 && !seededRef.current) {
+      seededRef.current = true;
       window.api.seedClientsFromProjects(projects.map(p => ({ client: p.client })));
     }
   }, [projects]);
@@ -126,6 +128,17 @@ export default function Home() {
       setOpen(false);
     },
     [setOpen]
+  );
+
+  // Memoize derived project lists to avoid creating new array references on every render
+  const recentProjects = useMemo(
+    () => projects.slice(0, 10).map(p => ({ name: p.name, path: p.path, client: p.client })),
+    [projects],
+  );
+
+  const claudeMdProjects = useMemo(
+    () => projects.map(p => ({ path: p.path, name: p.name, client: p.client })),
+    [projects],
   );
 
   const selectedClient = useMemo(
@@ -191,7 +204,7 @@ export default function Home() {
           path: launchProject.path,
           mode: launchProject.mode,
         } : null}
-        recentProjects={projects.slice(0, 10).map(p => ({ name: p.name, path: p.path, client: p.client }))}
+        recentProjects={recentProjects}
         onSwitchProject={(path) => {
           const mode = getSavedMode(path);
           handleLaunchProject(path, mode);
@@ -219,7 +232,7 @@ export default function Home() {
         )}
         {currentPage === 'instructions' && (
           <ClaudeMdManager
-            projects={projects.map(p => ({ path: p.path, name: p.name, client: p.client }))}
+            projects={claudeMdProjects}
           />
         )}
         {currentPage === 'agents' && <AgentLibrary />}

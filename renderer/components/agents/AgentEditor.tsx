@@ -35,7 +35,8 @@ export default function AgentEditor({ agent, onSave, onDelete, onClose }: AgentE
   }, [agent]);
 
   useEffect(() => {
-    setTimeout(() => nameRef.current?.focus(), 100);
+    const timer = setTimeout(() => nameRef.current?.focus(), 100);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleSave = useCallback(() => {
@@ -81,6 +82,9 @@ export default function AgentEditor({ agent, onSave, onDelete, onClose }: AgentE
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
       onClick={onClose}
       onKeyDown={handleKeyDown}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="agent-editor-title"
     >
       <div
         className="w-full max-w-lg mx-4 bg-surface-1 border border-border-subtle rounded-card shadow-2xl"
@@ -88,7 +92,7 @@ export default function AgentEditor({ agent, onSave, onDelete, onClose }: AgentE
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
-          <h2 className="text-sm font-semibold text-text-primary">
+          <h2 id="agent-editor-title" className="text-sm font-semibold text-text-primary">
             {isEditing ? 'Edit Agent' : 'Create Agent'}
           </h2>
           <button

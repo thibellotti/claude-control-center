@@ -199,6 +199,12 @@ export default function ClaudeMdManager({ projects }: ClaudeMdManagerProps) {
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
+                onKeyDown={(e) => {
+                  if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+                    e.preventDefault();
+                    saveContent();
+                  }
+                }}
                 className="w-full h-full bg-surface-1 border border-border-subtle rounded-lg p-4 text-sm font-mono text-text-primary resize-none focus:outline-none focus:border-accent/50 transition-colors placeholder:text-text-tertiary"
                 placeholder="# CLAUDE.md"
                 spellCheck={false}

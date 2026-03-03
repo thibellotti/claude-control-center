@@ -40,6 +40,9 @@ function RunDialog({ agent, projects, onConfirm, onClose }: RunDialogProps) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
       onClick={onClose}
       onKeyDown={handleKeyDown}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="run-dialog-title"
     >
       <div
         className="w-full max-w-md mx-4 bg-surface-1 border border-border-subtle rounded-card shadow-2xl"
@@ -49,7 +52,7 @@ function RunDialog({ agent, projects, onConfirm, onClose }: RunDialogProps) {
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
           <div className="flex items-center gap-2">
             <span className="text-base select-none">{agent.icon}</span>
-            <h2 className="text-sm font-semibold text-text-primary">
+            <h2 id="run-dialog-title" className="text-sm font-semibold text-text-primary">
               Run {agent.name}
             </h2>
           </div>

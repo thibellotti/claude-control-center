@@ -5,6 +5,7 @@ export function useAgents() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [runs, setRuns] = useState<AgentRun[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const activeOutputRef = useRef<Map<string, string>>(new Map());
 
   const refresh = useCallback(async () => {
@@ -15,8 +16,10 @@ export function useAgents() {
       ]);
       setAgents(agentData);
       setRuns(runData);
+      setError(null);
     } catch (err) {
       console.error('Failed to load agents:', err);
+      setError('Failed to load agents');
     } finally {
       setLoading(false);
     }
@@ -48,9 +51,11 @@ export function useAgents() {
     try {
       const updated = await window.api.saveAgent(agent);
       setAgents(updated);
+      setError(null);
       return updated;
     } catch (err) {
       console.error('Failed to save agent:', err);
+      setError('Failed to save agent');
       return null;
     }
   }, []);
@@ -59,9 +64,11 @@ export function useAgents() {
     try {
       const updated = await window.api.deleteAgent(agentId);
       setAgents(updated);
+      setError(null);
       return updated;
     } catch (err) {
       console.error('Failed to delete agent:', err);
+      setError('Failed to delete agent');
       return null;
     }
   }, []);
@@ -71,9 +78,11 @@ export function useAgents() {
       const run = await window.api.runAgent({ agentId, projectPath, task });
       activeOutputRef.current.set(run.id, '');
       setRuns(prev => [...prev, run]);
+      setError(null);
       return run;
     } catch (err) {
       console.error('Failed to run agent:', err);
+      setError('Failed to run agent');
       return null;
     }
   }, []);
@@ -84,10 +93,12 @@ export function useAgents() {
       setRuns(prev => prev.map(r =>
         r.id === runId ? { ...r, status: 'killed' as const, completedAt: Date.now() } : r
       ));
+      setError(null);
     } catch (err) {
       console.error('Failed to kill agent run:', err);
+      setError('Failed to kill agent run');
     }
   }, []);
 
-  return { agents, runs, loading, saveAgent, deleteAgent, runAgent, killRun, refresh };
+  return { agents, runs, loading, error, saveAgent, deleteAgent, runAgent, killRun, refresh };
 }

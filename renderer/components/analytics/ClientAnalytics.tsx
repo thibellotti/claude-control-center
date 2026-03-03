@@ -37,14 +37,14 @@ const DATE_RANGES = [
 // ---------------------------------------------------------------------------
 
 export default function ClientAnalytics({ clientName, projects }: ClientAnalyticsProps) {
-  const { data, loading, dateRange, setDateRange, fetch } = useAnalytics();
+  const { data, loading, dateRange, setDateRange, loadAnalytics } = useAnalytics();
 
   // Fetch on mount and when date range changes
   useEffect(() => {
     if (projects.length > 0) {
-      fetch(projects, dateRange);
+      loadAnalytics(projects, dateRange);
     }
-  }, [projects, dateRange, fetch]);
+  }, [projects, dateRange, loadAnalytics]);
 
   // Find the current client's data from the aggregated result
   const clientData = data.find((c) => c.clientName === clientName);
