@@ -29,6 +29,7 @@ import { registerAccountHandlers } from './ipc/account'
 import { registerClientHandlers } from './ipc/clients'
 import { registerClaudeMdHandlers } from './ipc/claudemd'
 import { registerAgentHandlers, cleanupAgents } from './ipc/agents'
+import { registerAnalyticsHandlers } from './ipc/analytics'
 import { startProjectWatcher } from './watchers/project-watcher'
 
 // Log unhandled promise rejections so they don't silently crash the main process
@@ -75,6 +76,7 @@ if (isProd) {
   registerClientHandlers()
   registerClaudeMdHandlers()
   registerAgentHandlers()
+  registerAnalyticsHandlers()
 
   const mainWindow = createWindow('main', {
     width: 1400,

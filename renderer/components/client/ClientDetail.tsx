@@ -7,8 +7,8 @@ import {
   ChevronLeftIcon,
   TrashIcon,
   SaveIcon,
-  BarChartIcon,
 } from '../icons';
+import ClientAnalytics from '../analytics/ClientAnalytics';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -391,13 +391,14 @@ export default function ClientDetail({ workspace, onBack }: ClientDetailProps) {
         )}
 
         {activeTab === 'analytics' && (
-          <div className="text-center py-16">
-            <BarChartIcon size={32} className="text-text-tertiary mx-auto mb-3" />
-            <p className="text-text-tertiary text-sm">Analytics will be available here.</p>
-            <p className="text-text-tertiary text-xs mt-1">
-              Token usage, session history, and cost breakdowns per client.
-            </p>
-          </div>
+          <ClientAnalytics
+            clientName={workspace.name}
+            projects={clientProjects.map((p) => ({
+              path: p.path,
+              name: p.name,
+              client: p.client,
+            }))}
+          />
         )}
       </div>
     </div>

@@ -69,6 +69,10 @@ const api = {
   deleteClient: (clientId: string) => ipcRenderer.invoke(IPC_CHANNELS.DELETE_CLIENT, clientId),
   seedClientsFromProjects: (projects: { client?: string | null }[]) => ipcRenderer.invoke(IPC_CHANNELS.SEED_CLIENTS_FROM_PROJECTS, projects),
 
+  // Analytics
+  getAnalytics: (opts: { projects: { path: string; name: string; client?: string | null }[]; days: number }) =>
+    ipcRenderer.invoke(IPC_CHANNELS.GET_ANALYTICS, opts),
+
   // CC Agents
   getAgents: () => ipcRenderer.invoke(IPC_CHANNELS.GET_AGENTS),
   saveAgent: (agent: Agent) => ipcRenderer.invoke(IPC_CHANNELS.SAVE_AGENT, agent),

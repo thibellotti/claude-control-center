@@ -524,6 +524,8 @@ export const IPC_CHANNELS = {
   GET_AGENT_RUNS: 'get-agent-runs',
   AGENT_OUTPUT: 'agent-output',
   AGENT_EXIT: 'agent-exit',
+  // Analytics
+  GET_ANALYTICS: 'get-analytics',
   // Visual Editor
   VISUAL_EDITOR_INJECT: 'visual-editor:inject',
   VISUAL_EDITOR_INJECT_FRAME: 'visual-editor:inject-frame',
