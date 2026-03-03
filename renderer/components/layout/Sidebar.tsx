@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useProjectContext } from '../../hooks/useProjectContext';
-import { DashboardIcon, SettingsIcon, PromptsIcon, WorkspacesIcon, UsageIcon, ChevronLeftIcon, ChevronRightIcon, ClaudeIcon, ChevronDownIcon } from '../icons';
+import { DashboardIcon, SettingsIcon, PromptsIcon, InstructionsIcon, ChevronLeftIcon, ChevronRightIcon, ClaudeIcon, ChevronDownIcon } from '../icons';
 
 interface SidebarProps {
   onNavigate: (page: string) => void;
@@ -11,7 +11,7 @@ export default function Sidebar({
   onNavigate,
   currentPage,
 }: SidebarProps) {
-  const { projects, selectedProjectPath, onSelectProject, onOpenProject, activeProjectPath } = useProjectContext();
+  const { projects, selectedProjectPath, onSelectProject, activeProjectPath } = useProjectContext();
   const [collapsed, setCollapsed] = useState(false);
   const [collapsedClients, setCollapsedClients] = useState<Set<string>>(new Set());
 
@@ -49,9 +49,8 @@ export default function Sidebar({
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon size={16} /> },
     { id: 'sessions', label: 'Orchestrator', icon: <ClaudeIcon size={16} /> },
-    { id: 'workspaces', label: 'Workspaces', icon: <WorkspacesIcon size={16} /> },
+    { id: 'instructions', label: 'Instructions', icon: <InstructionsIcon size={16} /> },
     { id: 'prompts', label: 'Prompts', icon: <PromptsIcon size={16} /> },
-    { id: 'usage', label: 'Usage', icon: <UsageIcon size={16} /> },
     { id: 'settings', label: 'Settings', icon: <SettingsIcon size={16} /> },
   ];
 
@@ -145,13 +144,7 @@ export default function Sidebar({
                   return (
                     <button
                       key={project.path}
-                      onClick={(e) => {
-                        if (e.metaKey || e.ctrlKey) {
-                          onOpenProject(project.path, 'claude --dangerously-skip-permissions');
-                        } else {
-                          onSelectProject(project);
-                        }
-                      }}
+                      onClick={() => onSelectProject(project)}
                       className={`flex items-center gap-2 w-full py-1 rounded-button text-sm transition-colors ${
                         collapsed ? 'px-3 justify-center' : 'pl-6 pr-3'
                       } ${

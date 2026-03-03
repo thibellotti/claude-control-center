@@ -106,6 +106,16 @@ export function PromptsIcon(props: IconProps = {}) {
   );
 }
 
+export function InstructionsIcon(props: IconProps = {}) {
+  const { size, className } = p(props);
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <rect x="2" y="1.5" width="12" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M5 5h6M5 8h6M5 11h3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function WorkspacesIcon(props: IconProps = {}) {
   const { size, className } = p(props);
   return (
