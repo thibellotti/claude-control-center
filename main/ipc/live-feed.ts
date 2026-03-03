@@ -1,16 +1,13 @@
 import { ipcMain, BrowserWindow } from 'electron';
-import { promises as fs, realpathSync } from 'fs';
+import { promises as fs } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 import chokidar from 'chokidar';
 import { IPC_CHANNELS } from '../../shared/types';
 import { log } from '../helpers/logger';
-import { logSecurityEvent } from '../helpers/security-logger';
+import { decodeClaudePath } from '../helpers/decode-path';
 
 const HOME = homedir();
-let REAL_HOME: string;
-try { REAL_HOME = realpathSync(HOME); } catch { REAL_HOME = HOME; }
-
 const CLAUDE_PROJECTS_DIR = join(HOME, '.claude', 'projects');
 
 interface FeedEntry {
@@ -32,25 +29,6 @@ function getMainWindow(): BrowserWindow | null {
   return windows.length > 0 ? windows[0] : null;
 }
 
-function decodePath(encoded: string): string | null {
-  // Reverse of encodePath: "-Users-thiago-..." → "/Users/thiago/..."
-  const decoded = encoded.replace(/^-/, '/').replace(/-/g, '/');
-  try {
-    const real = realpathSync(decoded);
-    if (!real.startsWith(REAL_HOME)) {
-      logSecurityEvent('path-traversal', 'high', 'Live feed decodePath resolved to path outside home', { encoded, decoded, real });
-      return null;
-    }
-    return real;
-  } catch {
-    // Path doesn't exist on disk — validate with string check
-    if (!decoded.startsWith(HOME)) {
-      logSecurityEvent('path-traversal', 'high', 'Live feed decodePath decoded to path outside home', { encoded, decoded });
-      return null;
-    }
-    return decoded;
-  }
-}
 
 function summarizeLine(obj: Record<string, unknown>): FeedEntry | null {
   try {
@@ -197,8 +175,9 @@ async function startWatching() {
         continue;
       }
 
-      const projectPath = decodePath(dir);
-      if (!projectPath) continue;
+      const projectPath = await decodeClaudePath(dir);
+      // Reject paths that resolve outside the user's home directory
+      if (!projectPath.startsWith(HOME)) continue;
 
       try {
         const dirEntries = await fs.readdir(projectDir);

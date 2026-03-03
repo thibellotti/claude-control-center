@@ -83,6 +83,11 @@ export default function Canvas({ previewUrl, viewport, overlayScript, onOverlayM
           className="w-full h-full border-0"
           style={{ backgroundColor: 'white' }}
           title="Visual Editor Preview"
+          // allow scripts so the overlay injection works; allow-same-origin lets
+          // us access contentDocument for localhost previews. '*' is used in
+          // postMessage because this targets localhost dev servers only — no
+          // sensitive data is passed and the message type is namespaced ('forma:').
+          sandbox="allow-scripts allow-same-origin allow-forms"
         />
       </div>
     </div>

@@ -10,7 +10,9 @@ export default function TerminalPage() {
   const [showFeed, setShowFeed] = useState(true);
   const [feedWidth, setFeedWidth] = useState(320);
 
-  // Start live feed on mount
+  // Start live feed on mount — liveFeed is a stable singleton from the hook,
+  // intentionally omitted from deps to prevent restart loops.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   React.useEffect(() => {
     liveFeed.start();
     return () => liveFeed.stop();

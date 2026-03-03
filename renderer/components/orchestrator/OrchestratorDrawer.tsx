@@ -15,6 +15,9 @@ type DrawerTab = 'feed' | 'tasks';
 function FeedContent({ projectPath }: { projectPath: string | null }) {
   const liveFeed = useLiveFeed();
 
+  // liveFeed is a stable singleton from the hook; intentionally omitted from
+  // deps to prevent restart loops.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     liveFeed.start();
     return () => liveFeed.stop();

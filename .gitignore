@@ -22,3 +22,6 @@ renderer/tsconfig.tsbuildinfo
 # env
 *.env
 *.env.local
+
+# macos
+.DS_Store

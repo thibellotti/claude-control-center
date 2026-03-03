@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron';
-import { readdirSync, readFileSync, statSync, existsSync } from 'fs';
+import { readdir, readFile, stat } from 'fs/promises';
+import { access } from 'fs/promises';
 import path from 'path';
 import { IPC_CHANNELS } from '../../shared/types';
 import type { ComponentInfo, ComponentProp } from '../../shared/types';
@@ -33,16 +34,16 @@ const MAX_FILE_SIZE = 100 * 1024;
  * Recursively collect .tsx and .jsx files from a directory.
  * Respects depth limit and file count cap.
  */
-function collectComponentFiles(
+async function collectComponentFiles(
   dir: string,
   depth: number,
   files: string[]
-): void {
+): Promise<void> {
   if (depth > MAX_DEPTH || files.length >= MAX_FILES) return;
 
   let entries: string[];
   try {
-    entries = readdirSync(dir);
+    entries = await readdir(dir);
   } catch {
     return;
   }
@@ -52,20 +53,20 @@ function collectComponentFiles(
 
     const fullPath = path.join(dir, entry);
 
-    let stat;
+    let fileStat;
     try {
-      stat = statSync(fullPath);
+      fileStat = await stat(fullPath);
     } catch {
       continue;
     }
 
-    if (stat.isDirectory()) {
+    if (fileStat.isDirectory()) {
       if (!SKIP_DIRS.has(entry) && !entry.startsWith('.')) {
-        collectComponentFiles(fullPath, depth + 1, files);
+        await collectComponentFiles(fullPath, depth + 1, files);
       }
-    } else if (stat.isFile()) {
+    } else if (fileStat.isFile()) {
       const ext = path.extname(entry).toLowerCase();
-      if ((ext === '.tsx' || ext === '.jsx') && stat.size <= MAX_FILE_SIZE) {
+      if ((ext === '.tsx' || ext === '.jsx') && fileStat.size <= MAX_FILE_SIZE) {
         // Skip test files, stories, and config files
         const name = entry.toLowerCase();
         if (
@@ -87,7 +88,7 @@ function collectComponentFiles(
 /**
  * Check if a test file exists for a given component file.
  */
-function hasTestFile(filePath: string): boolean {
+async function hasTestFile(filePath: string): Promise<boolean> {
   const dir = path.dirname(filePath);
   const ext = path.extname(filePath);
   const baseName = path.basename(filePath, ext);
@@ -105,15 +106,19 @@ function hasTestFile(filePath: string): boolean {
   ];
 
   for (const pattern of testPatterns) {
-    if (existsSync(path.join(dir, pattern))) return true;
+    try {
+      await access(path.join(dir, pattern));
+      return true;
+    } catch { /* not found */ }
   }
 
   // Check __tests__ directory
   const testsDir = path.join(dir, '__tests__');
-  if (existsSync(testsDir)) {
-    for (const pattern of testPatterns) {
-      if (existsSync(path.join(testsDir, pattern))) return true;
-    }
+  for (const pattern of testPatterns) {
+    try {
+      await access(path.join(testsDir, pattern));
+      return true;
+    } catch { /* not found */ }
   }
 
   return false;
@@ -200,16 +205,16 @@ function extractProps(
 /**
  * Detect React component exports from file content.
  */
-function detectComponents(
+async function detectComponents(
   content: string,
   filePath: string,
   projectPath: string
-): ComponentInfo[] {
+): Promise<ComponentInfo[]> {
   const components: ComponentInfo[] = [];
   const relativePath = path.relative(projectPath, filePath);
   const directory = path.basename(path.dirname(filePath));
   const lineCount = content.split('\n').length;
-  const hasTests = hasTestFile(filePath);
+  const hasTests = await hasTestFile(filePath);
 
   // Pattern 1: export default function ComponentName
   const defaultFuncRegex =
@@ -304,21 +309,23 @@ export function registerComponentHandlers() {
     async (_, projectPath: string): Promise<ComponentInfo[]> => {
       if (!isPathSafe(projectPath)) return [];
       try {
-        if (!existsSync(projectPath)) {
+        try {
+          await access(projectPath);
+        } catch {
           return [];
         }
 
         // Collect all eligible files
         const files: string[] = [];
-        collectComponentFiles(projectPath, 0, files);
+        await collectComponentFiles(projectPath, 0, files);
 
         // Parse each file for components
         const allComponents: ComponentInfo[] = [];
 
         for (const filePath of files) {
           try {
-            const content = readFileSync(filePath, 'utf-8');
-            const components = detectComponents(content, filePath, projectPath);
+            const content = await readFile(filePath, 'utf-8');
+            const components = await detectComponents(content, filePath, projectPath);
             allComponents.push(...components);
           } catch {
             // Skip files we can't read

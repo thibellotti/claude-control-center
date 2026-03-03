@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSupabase } from '../../hooks/useSupabase';
 import { SupabaseIcon, RefreshIcon, SpinnerIcon } from '../icons';
 
@@ -15,11 +15,15 @@ function StatusDot({ active }: { active: boolean }) {
 export default function SupabasePanel({ projectPath }: SupabasePanelProps) {
   const { info, loading, refresh } = useSupabase(projectPath);
   const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef<NodeJS.Timeout>();
+
+  // Clear the copy feedback timer on unmount
+  useEffect(() => () => { if (copyTimerRef.current) clearTimeout(copyTimerRef.current); }, []);
 
   const handleCopy = async (text: string) => {
     await navigator.clipboard.writeText(text);
     setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    copyTimerRef.current = setTimeout(() => setCopied(false), 1500);
   };
 
   if (loading) {

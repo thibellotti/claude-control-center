@@ -210,6 +210,8 @@ export function registerRequestHandlers() {
       createdAt: Date.now(),
     };
     requests.unshift(request);
+    // Cap history to 200 entries to prevent unbounded memory growth
+    if (requests.length > 200) requests.length = 200;
     await saveRequests();
 
     log('info', 'requests', `Created request ${request.id} for project ${data.projectId}`);

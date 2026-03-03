@@ -1,4 +1,4 @@
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useRef, useEffect } from 'react';
 import type { Prompt } from '../../../shared/types';
 import { StarIcon, CopyIcon, PencilIcon } from '../icons';
 
@@ -10,6 +10,10 @@ interface PromptCardProps {
 
 export default memo(function PromptCard({ prompt, onEdit, onToggleFavorite }: PromptCardProps) {
   const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef<NodeJS.Timeout>();
+
+  // Clear the copy feedback timer on unmount
+  useEffect(() => () => { if (copyTimerRef.current) clearTimeout(copyTimerRef.current); }, []);
 
   const handleCopy = useCallback(
     async (e: React.MouseEvent) => {
@@ -28,7 +32,7 @@ export default memo(function PromptCard({ prompt, onEdit, onToggleFavorite }: Pr
         document.body.removeChild(textarea);
       }
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 1500);
     },
     [prompt.content]
   );

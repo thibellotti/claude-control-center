@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useHandoff, HandoffSections } from '../../hooks/useHandoff';
 import MarkdownView from '../shared/MarkdownView';
 import { PackageIcon, DownloadIcon, CopyIcon, CheckIcon } from '../icons';
@@ -40,12 +40,16 @@ export default function HandoffExport({ projectPath }: HandoffExportProps) {
   } = useHandoff(projectPath);
 
   const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef<NodeJS.Timeout>();
+
+  // Clear the copy feedback timer on unmount
+  useEffect(() => () => { if (copyTimerRef.current) clearTimeout(copyTimerRef.current); }, []);
 
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(preview);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
     } catch {
       // Clipboard write failed
     }

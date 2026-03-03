@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron';
-import { readFileSync, existsSync } from 'fs';
+import { readFile } from 'fs/promises';
 import path from 'path';
 import os from 'os';
 import { IPC_CHANNELS, ClaudeSettings, SessionEntry } from '../../shared/types';
@@ -19,11 +19,9 @@ export function registerSettingsHandlers() {
   });
 }
 
-function getClaudeSettings(): ClaudeSettings | null {
+async function getClaudeSettings(): Promise<ClaudeSettings | null> {
   try {
-    if (!existsSync(SETTINGS_PATH)) return null;
-
-    const content = readFileSync(SETTINGS_PATH, 'utf-8');
+    const content = await readFile(SETTINGS_PATH, 'utf-8');
     const parsed = JSON.parse(content);
 
     return {
@@ -38,13 +36,11 @@ function getClaudeSettings(): ClaudeSettings | null {
   }
 }
 
-function getSessions(projectPath?: string): SessionEntry[] {
+async function getSessions(projectPath?: string): Promise<SessionEntry[]> {
   const sessions: SessionEntry[] = [];
 
   try {
-    if (!existsSync(HISTORY_PATH)) return sessions;
-
-    const content = readFileSync(HISTORY_PATH, 'utf-8');
+    const content = await readFile(HISTORY_PATH, 'utf-8');
     const lines = content.trim().split('\n');
 
     // Parse last 200 entries (from the end)

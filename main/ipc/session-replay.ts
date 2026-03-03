@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron';
-import { readdirSync, readFileSync, statSync, existsSync, createReadStream, openSync, readSync, closeSync } from 'fs';
+import { readdirSync, statSync, existsSync, createReadStream, openSync, readSync, closeSync } from 'fs';
+import { readFile } from 'fs/promises';
 import path from 'path';
 import { IPC_CHANNELS } from '../../shared/types';
 import type { SessionTimeline, SessionAction } from '../../shared/types';
@@ -345,7 +346,7 @@ export function registerSessionReplayHandlers() {
           return null;
         }
 
-        const content = readFileSync(filePath, 'utf-8');
+        const content = await readFile(filePath, 'utf-8');
         const lines = content.split('\n').filter((l) => l.trim().length > 0);
 
         const allActions: SessionAction[] = [];

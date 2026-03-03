@@ -42,10 +42,14 @@ function detectStack(project: Project): string[] {
   return tags;
 }
 
+// process.env.HOME is undefined in Electron renderer sandbox mode;
+// fall back gracefully so paths still display without throwing.
+const HOME =
+  (typeof process !== 'undefined' && (process.env.HOME || process.env.USERPROFILE)) || '';
+
 function shortenPath(path: string): string {
-  const home = process.env.HOME || process.env.USERPROFILE || '~';
-  if (path.startsWith(home)) {
-    return '~' + path.slice(home.length);
+  if (HOME && path.startsWith(HOME)) {
+    return '~' + path.slice(HOME.length);
   }
   return path;
 }

@@ -93,8 +93,13 @@ export function registerVisualEditorHandlers() {
 
     log('info', 'visual-editor', `Undoing last change for ${projectPath}`);
     const git = simpleGit({ baseDir: projectPath, timeout: { block: 10000 } });
-    await git.stash(['pop']);
-    return { success: true };
+    try {
+      await git.stash(['pop']);
+      return { success: true };
+    } catch (err) {
+      log('error', 'visual-editor', 'Stash pop failed', err);
+      return { success: false, error: (err as Error).message || 'Undo failed' };
+    }
   });
 
   // Redo: rebuild prompt from action and re-execute

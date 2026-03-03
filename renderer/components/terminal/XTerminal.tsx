@@ -67,7 +67,7 @@ export default function XTerminal({ sessionId, isVisible }: XTerminalProps) {
 
     // Dynamic import to avoid SSR issues (xterm requires browser globals)
     Promise.all([
-      import('xterm'),
+      import('@xterm/xterm'),
       import('@xterm/addon-fit'),
       import('@xterm/addon-web-links'),
     ]).then(([xtermModule, fitModule, linksModule]) => {

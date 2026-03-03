@@ -67,12 +67,17 @@ export default function ClaudeMdEditor({ filePath, onSave }: ClaudeMdEditorProps
     }
   }, [showAddMenu]);
 
+  const saveTimerRef = useRef<NodeJS.Timeout>();
+
+  // Clear the save-success feedback timer on unmount
+  useEffect(() => () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); }, []);
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
       await save();
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 2000);
+      saveTimerRef.current = setTimeout(() => setSaveSuccess(false), 2000);
       onSave?.();
     } catch {
       // Error is already set by the hook

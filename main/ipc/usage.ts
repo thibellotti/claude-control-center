@@ -1,8 +1,9 @@
 import { ipcMain } from 'electron';
-import { readdir, readFile, stat } from 'fs/promises';
+import { readdir, stat } from 'fs/promises';
+import { createReadStream, existsSync } from 'fs';
+import { createInterface } from 'readline';
 import { join, basename } from 'path';
 import { homedir } from 'os';
-import { existsSync } from 'fs';
 import { IPC_CHANNELS } from '../../shared/types';
 import type { UsageEntry, UsageSummary } from '../../shared/types';
 import { decodeClaudePath } from '../helpers/decode-path';
@@ -31,7 +32,8 @@ interface ParsedUsage {
 }
 
 /**
- * Parse a single JSONL file for usage data.
+ * Parse a single JSONL file for usage data using a streaming readline interface.
+ * Processes line-by-line without loading the entire file into memory.
  * Looks for lines with costUSD, usage objects, or top-level token counts.
  */
 async function parseJsonlFile(filePath: string): Promise<ParsedUsage> {
@@ -42,62 +44,65 @@ async function parseJsonlFile(filePath: string): Promise<ParsedUsage> {
     sessionCount: 1,
   };
 
-  let content: string;
-  try {
-    content = await readFile(filePath, 'utf-8');
-  } catch {
-    return result;
-  }
-
-  const lines = content.split('\n').filter((l) => l.trim());
   let hasCostField = false;
 
-  for (const line of lines) {
-    let parsed: Record<string, unknown>;
-    try {
-      parsed = JSON.parse(line);
-    } catch {
-      continue;
-    }
+  try {
+    const rl = createInterface({
+      input: createReadStream(filePath, { encoding: 'utf-8' }),
+      crlfDelay: Infinity,
+    });
 
-    // Case a) Lines with "costUSD" field — use directly
-    if (typeof parsed.costUSD === 'number') {
-      result.costUSD += parsed.costUSD;
-      hasCostField = true;
-    }
+    for await (const line of rl) {
+      if (!line.trim()) continue;
 
-    // Case b) Lines with top-level inputTokens/outputTokens
-    if (typeof parsed.inputTokens === 'number') {
-      result.inputTokens += parsed.inputTokens;
-    }
-    if (typeof parsed.outputTokens === 'number') {
-      result.outputTokens += parsed.outputTokens;
-    }
+      let parsed: Record<string, unknown>;
+      try {
+        parsed = JSON.parse(line);
+      } catch {
+        continue;
+      }
 
-    // Case c) Lines with message.usage.input_tokens/output_tokens
-    const message = parsed.message as Record<string, unknown> | undefined;
-    if (message && typeof message === 'object') {
-      const usage = message.usage as Record<string, unknown> | undefined;
-      if (usage && typeof usage === 'object') {
-        if (typeof usage.input_tokens === 'number') {
-          result.inputTokens += usage.input_tokens;
+      // Case a) Lines with "costUSD" field — use directly
+      if (typeof parsed.costUSD === 'number') {
+        result.costUSD += parsed.costUSD;
+        hasCostField = true;
+      }
+
+      // Case b) Lines with top-level inputTokens/outputTokens
+      if (typeof parsed.inputTokens === 'number') {
+        result.inputTokens += parsed.inputTokens;
+      }
+      if (typeof parsed.outputTokens === 'number') {
+        result.outputTokens += parsed.outputTokens;
+      }
+
+      // Case c) Lines with message.usage.input_tokens/output_tokens
+      const message = parsed.message as Record<string, unknown> | undefined;
+      if (message && typeof message === 'object') {
+        const usage = message.usage as Record<string, unknown> | undefined;
+        if (usage && typeof usage === 'object') {
+          if (typeof usage.input_tokens === 'number') {
+            result.inputTokens += usage.input_tokens;
+          }
+          if (typeof usage.output_tokens === 'number') {
+            result.outputTokens += usage.output_tokens;
+          }
         }
-        if (typeof usage.output_tokens === 'number') {
-          result.outputTokens += usage.output_tokens;
+      }
+
+      // Case d) Top-level usage object
+      const topUsage = parsed.usage as Record<string, unknown> | undefined;
+      if (topUsage && typeof topUsage === 'object') {
+        if (typeof topUsage.input_tokens === 'number') {
+          result.inputTokens += topUsage.input_tokens;
+        }
+        if (typeof topUsage.output_tokens === 'number') {
+          result.outputTokens += topUsage.output_tokens;
         }
       }
     }
-
-    // Case d) Top-level usage object
-    const topUsage = parsed.usage as Record<string, unknown> | undefined;
-    if (topUsage && typeof topUsage === 'object') {
-      if (typeof topUsage.input_tokens === 'number') {
-        result.inputTokens += topUsage.input_tokens;
-      }
-      if (typeof topUsage.output_tokens === 'number') {
-        result.outputTokens += topUsage.output_tokens;
-      }
-    }
+  } catch {
+    return result;
   }
 
   // If no direct costUSD was found, estimate from tokens

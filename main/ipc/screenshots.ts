@@ -62,7 +62,7 @@ export function registerScreenshotHandlers() {
       const dir = ensureDir(projectId);
       const id = randomUUID();
 
-      // Create a hidden BrowserWindow
+      // Create a hidden BrowserWindow — sandbox + webSecurity for renderer isolation
       const win = new BrowserWindow({
         width,
         height,
@@ -71,6 +71,8 @@ export function registerScreenshotHandlers() {
           offscreen: true,
           nodeIntegration: false,
           contextIsolation: true,
+          sandbox: true,
+          webSecurity: true,
         },
       });
 

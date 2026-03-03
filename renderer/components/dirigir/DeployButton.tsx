@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -115,6 +115,10 @@ const DeployButton = React.memo(function DeployButton({
   const [deployUrl, setDeployUrl] = useState<string | null>(null);
   const [errorText, setErrorText] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef<NodeJS.Timeout>();
+
+  // Clear the copy feedback timer on unmount
+  useEffect(() => () => { if (copyTimerRef.current) clearTimeout(copyTimerRef.current); }, []);
 
   // Detect deploy provider on mount
   useEffect(() => {
@@ -170,7 +174,7 @@ const DeployButton = React.memo(function DeployButton({
     try {
       await navigator.clipboard.writeText(deployUrl);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
     } catch {
       // Fallback: silent failure
     }

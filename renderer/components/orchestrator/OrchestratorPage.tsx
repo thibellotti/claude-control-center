@@ -23,7 +23,9 @@ export default function OrchestratorPage({ initialProject }: OrchestratorPagePro
   const { projects } = useProjectContext();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Restore workspace on mount — skip if initialProject will create fresh cells
+  // Restore workspace on mount — skip if initialProject will create fresh cells.
+  // orchestrator is a stable singleton; intentionally omitted from deps.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!initialProject) {
       orchestrator.restoreWorkspace();

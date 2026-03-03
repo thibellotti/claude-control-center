@@ -1,5 +1,6 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { IPC_CHANNELS } from '../../shared/types';
+import { isPathSafe } from '../helpers/path-safety';
 
 // node-pty must be required (not imported) because it's a native module
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -55,6 +56,11 @@ export function registerTerminalHandlers() {
     const id = `pty-${nextId++}`;
     const shell = process.env.SHELL || '/bin/zsh';
     const cwd = opts?.cwd || process.env.HOME || '/';
+
+    // Validate the requested working directory before spawning
+    if (opts?.cwd && !isPathSafe(opts.cwd)) {
+      return { error: 'Access denied: cwd is outside the home directory' };
+    }
 
     const proc = pty.spawn(shell, [], {
       name: 'xterm-256color',

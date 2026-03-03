@@ -5,17 +5,21 @@ interface ActiveSessionsProps {
   sessions?: ActiveSession[];
 }
 
+// process.env.HOME is undefined in Electron renderer sandbox mode;
+// fall back gracefully so paths still display without throwing.
+const HOME =
+  (typeof process !== 'undefined' && (process.env.HOME || process.env.USERPROFILE)) || '';
+
 function shortenPath(path: string): string {
-  const home = process.env.HOME || process.env.USERPROFILE || '~';
-  if (path.startsWith(home)) {
-    return '~' + path.slice(home.length);
+  if (HOME && path.startsWith(HOME)) {
+    return '~' + path.slice(HOME.length);
   }
   return path;
 }
 
 function isHomeDir(path: string): boolean {
-  const home = process.env.HOME || process.env.USERPROFILE || '';
-  return path === home || path === home + '/';
+  if (!HOME) return false;
+  return path === HOME || path === HOME + '/';
 }
 
 function getDisplayName(session: ActiveSession): string {

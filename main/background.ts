@@ -1,5 +1,5 @@
 import path from 'path'
-import { app } from 'electron'
+import { app, dialog } from 'electron'
 import serve from 'electron-serve'
 import { createWindow } from './helpers'
 import { registerProjectHandlers } from './ipc/projects'
@@ -27,6 +27,11 @@ import { registerPageHandlers } from './ipc/pages'
 import { registerTemplateHandlers } from './ipc/templates'
 import { registerAccountHandlers } from './ipc/account'
 import { startProjectWatcher } from './watchers/project-watcher'
+
+// Log unhandled promise rejections so they don't silently crash the main process
+process.on('unhandledRejection', (reason) => {
+  console.error('[forma] Unhandled rejection:', reason)
+})
 
 const isProd = process.env.NODE_ENV === 'production'
 
@@ -95,12 +100,17 @@ if (isProd) {
     cleanupVisualEditor()
   })
 
-  if (isProd) {
-    await mainWindow.loadURL('app://./home')
-  } else {
-    const port = process.argv[2]
-    await mainWindow.loadURL(`http://localhost:${port}/home`)
-    mainWindow.webContents.openDevTools()
+  try {
+    if (isProd) {
+      await mainWindow.loadURL('app://./home')
+    } else {
+      const port = process.argv[2]
+      await mainWindow.loadURL(`http://localhost:${port}/home`)
+      mainWindow.webContents.openDevTools()
+    }
+  } catch (error) {
+    console.error('[forma] Failed to load URL:', error)
+    dialog.showErrorBox('Failed to load', (error as Error).message)
   }
 })()
 

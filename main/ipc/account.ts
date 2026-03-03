@@ -2,6 +2,7 @@ import { ipcMain, shell, safeStorage } from 'electron';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
+import { IPC_CHANNELS } from '../../shared/types';
 import { log } from '../helpers/logger';
 
 const HOME = os.homedir();
@@ -107,11 +108,11 @@ async function saveAccount(config: AccountConfig) {
 }
 
 export function registerAccountHandlers() {
-  ipcMain.handle('get-account', async () => {
+  ipcMain.handle(IPC_CHANNELS.GET_ACCOUNT, async () => {
     return loadAccount();
   });
 
-  ipcMain.handle('save-account', async (_, updates: Partial<AccountConfig>) => {
+  ipcMain.handle(IPC_CHANNELS.SAVE_ACCOUNT, async (_, updates: Partial<AccountConfig>) => {
     const current = await loadAccount();
     const updated = { ...current, ...updates };
     await saveAccount(updated);
@@ -119,7 +120,7 @@ export function registerAccountHandlers() {
     return updated;
   });
 
-  ipcMain.handle('get-plan-limits', async () => {
+  ipcMain.handle(IPC_CHANNELS.GET_PLAN_LIMITS, async () => {
     const account = await loadAccount();
     switch (account.plan) {
       case 'free':
@@ -133,7 +134,7 @@ export function registerAccountHandlers() {
     }
   });
 
-  ipcMain.handle('open-billing-portal', async () => {
+  ipcMain.handle(IPC_CHANNELS.OPEN_BILLING_PORTAL, async () => {
     // For MVP, open Stripe payment link
     shell.openExternal('https://buy.stripe.com/placeholder');
   });

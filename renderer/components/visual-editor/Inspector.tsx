@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { SelectedElement, VisualAction } from '../../../shared/types';
 import PropsTab from './PropsTab';
 import StylesTab from './StylesTab';
+import TreeTab from './TreeTab';
 
 interface InspectorProps {
   selectedElement: SelectedElement | null;
@@ -82,10 +83,13 @@ export default function Inspector({ selectedElement, onExecuteAction }: Inspecto
           />
         )}
         {effectiveTab === 'tree' && (
-          <div className="p-4 text-text-tertiary text-xs">
-            {/* TreeTab placeholder — will be replaced by Step 9 */}
-            Tree view coming soon
-          </div>
+          <TreeTab
+            element={selectedElement}
+            onExecuteAction={onExecuteAction}
+            // onScrollTo: scrolling the canvas to a selector is not yet wired
+            // at the Inspector level — pass a no-op for now.
+            onScrollTo={() => {}}
+          />
         )}
       </div>
     </div>

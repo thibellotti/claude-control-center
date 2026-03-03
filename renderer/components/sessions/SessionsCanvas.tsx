@@ -263,7 +263,9 @@ export default function SessionsCanvas() {
   const liveFeed = useLiveFeed();
   const [showMenu, setShowMenu] = useState(false);
 
-  // Start live feed on mount
+  // Start live feed on mount — liveFeed is a stable singleton from the hook,
+  // intentionally omitted from deps to prevent restart loops.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     liveFeed.start();
     return () => liveFeed.stop();

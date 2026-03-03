@@ -2,6 +2,7 @@ import { ipcMain, dialog } from 'electron';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
+import { IPC_CHANNELS } from '../../shared/types';
 import { log } from '../helpers/logger';
 
 interface Template {
@@ -48,11 +49,11 @@ Keep it minimal — just the foundation for building on.`,
 ];
 
 export function registerTemplateHandlers() {
-  ipcMain.handle('get-templates', async () => {
+  ipcMain.handle(IPC_CHANNELS.GET_TEMPLATES, async () => {
     return TEMPLATES.map(({ id, name, description }) => ({ id, name, description }));
   });
 
-  ipcMain.handle('create-from-template', async (_, opts: { templateId: string; projectName: string; parentDir?: string }) => {
+  ipcMain.handle(IPC_CHANNELS.CREATE_FROM_TEMPLATE, async (_, opts: { templateId: string; projectName: string; parentDir?: string }) => {
     const template = TEMPLATES.find((t) => t.id === opts.templateId);
     if (!template) throw new Error(`Template not found: ${opts.templateId}`);
 
@@ -79,7 +80,7 @@ export function registerTemplateHandlers() {
     };
   });
 
-  ipcMain.handle('pick-directory', async () => {
+  ipcMain.handle(IPC_CHANNELS.PICK_DIRECTORY, async () => {
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory', 'createDirectory'],
       title: 'Choose project location',

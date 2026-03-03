@@ -84,6 +84,7 @@ export default function FigmaLinkCard({ link, onDelete }: FigmaLinkCardProps) {
             style={{ height: '400px' }}
             allow="clipboard-write"
             title={`Figma embed: ${link.label}`}
+            sandbox="allow-scripts allow-same-origin allow-popups"
           />
         </div>
       )}

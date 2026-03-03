@@ -2,6 +2,7 @@ import { BrowserWindow } from 'electron';
 import chokidar from 'chokidar';
 import { join, relative } from 'path';
 import { homedir } from 'os';
+import { IPC_CHANNELS } from '../../shared/types';
 import { invalidateProjectCache } from '../ipc/projects';
 
 const CLAUDE_DIR = join(homedir(), '.claude');
@@ -90,7 +91,7 @@ export function startProjectWatcher(mainWindow: BrowserWindow) {
 
           pendingHints.clear();
 
-          mainWindow.webContents.send('project-updated', { refresh: true, hints });
+          mainWindow.webContents.send(IPC_CHANNELS.PROJECT_UPDATED, { refresh: true, hints });
         }
       } catch {
         // Window may have been destroyed between check and send
