@@ -26,7 +26,7 @@ export default memo(function ClientWorkspaceCard({
           onClick();
         }
       }}
-      className="group bg-surface-1 border border-border-subtle rounded-card p-5 cursor-pointer hover:border-border-default transition-colors"
+      className="group bg-surface-1 border border-border-subtle rounded-card p-5 cursor-pointer hover:border-border-default hover:border-l-accent/50 hover:border-l-2 transition-all duration-150"
     >
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors">
@@ -51,7 +51,7 @@ export default memo(function ClientWorkspaceCard({
       </div>
 
       {workspace.notes && (
-        <p className="mt-2 text-xs text-text-secondary line-clamp-2">
+        <p className="mt-2 text-xs text-text-secondary line-clamp-2" title={workspace.notes}>
           {workspace.notes}
         </p>
       )}

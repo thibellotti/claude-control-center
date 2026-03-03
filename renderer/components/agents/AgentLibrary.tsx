@@ -5,7 +5,7 @@ import { useProjectContext } from '../../hooks/useProjectContext';
 import AgentCard from './AgentCard';
 import AgentEditor from './AgentEditor';
 import AgentRunner from './AgentRunner';
-import { PlusIcon, CloseIcon, PlayIcon } from '../icons';
+import { PlusIcon, CloseIcon, PlayIcon, AgentsIcon } from '../icons';
 
 // ---------------------------------------------------------------------------
 // Run dialog — select project + task, then confirm
@@ -37,7 +37,7 @@ function RunDialog({ agent, projects, onConfirm, onClose }: RunDialogProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm modal-backdrop"
       onClick={onClose}
       onKeyDown={handleKeyDown}
       role="dialog"
@@ -45,7 +45,7 @@ function RunDialog({ agent, projects, onConfirm, onClose }: RunDialogProps) {
       aria-labelledby="run-dialog-title"
     >
       <div
-        className="w-full max-w-md mx-4 bg-surface-1 border border-border-subtle rounded-card shadow-2xl"
+        className="w-full max-w-md mx-4 bg-surface-1 border border-border-subtle rounded-card shadow-2xl modal-content"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -193,10 +193,30 @@ export default function AgentLibrary() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex items-center gap-2 text-text-tertiary text-sm">
-          <span className="w-1.5 h-1.5 rounded-full bg-text-tertiary animate-pulse" />
-          Loading agents...
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="h-5 w-20 bg-surface-2 rounded animate-pulse" />
+            <div className="h-3 w-48 bg-surface-2 rounded animate-pulse mt-2" />
+          </div>
+          <div className="h-8 w-24 bg-surface-2 rounded-button animate-pulse" />
+        </div>
+        <div
+          className="grid gap-4"
+          style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}
+        >
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-surface-1 border border-border-subtle rounded-card p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-7 h-7 bg-surface-2 rounded animate-pulse shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-24 bg-surface-2 rounded animate-pulse" />
+                  <div className="h-3 w-full bg-surface-2 rounded animate-pulse" />
+                </div>
+              </div>
+              <div className="h-3 w-20 bg-surface-2 rounded animate-pulse" />
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -239,10 +259,20 @@ export default function AgentLibrary() {
         </div>
       ) : (
         <div className="text-center py-16">
-          <p className="text-text-tertiary text-sm">No agents yet.</p>
-          <p className="text-text-tertiary text-xs mt-1">
-            Create your first agent to get started.
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-surface-2 text-text-tertiary mb-4">
+            <AgentsIcon size={24} />
+          </div>
+          <p className="text-text-primary text-sm font-medium">Create your first AI agent</p>
+          <p className="text-text-tertiary text-xs mt-1 max-w-xs mx-auto">
+            Agents run Claude Code with custom system prompts on your projects
           </p>
+          <button
+            onClick={handleNewAgent}
+            className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
+          >
+            <PlusIcon />
+            New Agent
+          </button>
         </div>
       )}
 

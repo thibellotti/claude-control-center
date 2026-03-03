@@ -168,7 +168,7 @@ export default function ClientDetail({ workspace, onBack }: ClientDetailProps) {
                 />
               ) : (
                 <h1
-                  className="text-xl font-bold text-text-primary cursor-pointer hover:text-accent transition-colors"
+                  className="text-xl font-bold text-text-primary cursor-pointer hover:text-accent hover:underline hover:underline-offset-4 hover:decoration-accent/30 transition-colors"
                   onClick={() => setEditingName(true)}
                   title="Click to edit"
                 >
@@ -223,7 +223,7 @@ export default function ClientDetail({ workspace, onBack }: ClientDetailProps) {
                   <label className="block text-xs text-text-tertiary mb-1">Colors</label>
                   <div className="flex flex-wrap gap-2">
                     {colors.map((color, i) => (
-                      <div key={i} className="flex items-center gap-1">
+                      <div key={`${color}-${i}`} className="flex items-center gap-1">
                         <input
                           type="color"
                           value={color}
@@ -370,7 +370,7 @@ export default function ClientDetail({ workspace, onBack }: ClientDetailProps) {
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-text-primary truncate">
+                        <span className="text-sm font-medium text-text-primary truncate" title={project.name}>
                           {project.name}
                         </span>
                         {session && (
@@ -380,7 +380,7 @@ export default function ClientDetail({ workspace, onBack }: ClientDetailProps) {
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-text-tertiary truncate block">
+                      <span className="text-xs text-text-tertiary truncate block" title={project.path}>
                         {project.path.replace(/^\/Users\/[^/]+/, '~')}
                       </span>
                     </div>

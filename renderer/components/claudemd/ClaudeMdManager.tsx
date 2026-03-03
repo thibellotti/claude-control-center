@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useClaudeMd } from '../../hooks/useClaudeMd';
-import { ChevronDownIcon, SaveIcon, SpinnerIcon } from '../icons';
+import { ChevronDownIcon, SaveIcon, SpinnerIcon, FileIcon } from '../icons';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -48,12 +48,15 @@ export default function ClaudeMdManager({ projects }: ClaudeMdManagerProps) {
     loading,
     selectedFile,
     content,
+    savedContent,
     saving,
     scan,
     selectFile,
     setContent,
     saveContent,
   } = useClaudeMd();
+
+  const hasUnsavedChanges = selectedFile !== null && content !== savedContent;
 
   const [collapsedClients, setCollapsedClients] = useState<Set<string>>(new Set());
 
@@ -118,7 +121,7 @@ export default function ClaudeMdManager({ projects }: ClaudeMdManagerProps) {
                 <button
                   type="button"
                   onClick={() => toggleClient(client)}
-                  className="flex items-center gap-1.5 w-full px-3 py-1.5 text-micro font-medium uppercase tracking-wider text-text-tertiary hover:text-text-secondary transition-colors"
+                  className="flex items-center gap-1.5 w-full px-3 py-1.5 text-micro font-medium uppercase tracking-wider text-text-tertiary hover:text-text-secondary transition-colors duration-150"
                 >
                   <ChevronDownIcon
                     size={10}
@@ -138,7 +141,7 @@ export default function ClaudeMdManager({ projects }: ClaudeMdManagerProps) {
                       <button
                         key={file.path}
                         onClick={() => selectFile(file)}
-                        className={`flex items-center gap-2 w-full pl-7 pr-3 py-1.5 rounded-button text-sm transition-colors ${
+                        className={`flex items-center gap-2 w-full pl-7 pr-3 py-1.5 rounded-button text-sm transition-colors duration-150 ${
                           isSelected
                             ? 'bg-accent-muted text-accent'
                             : 'text-text-secondary hover:text-text-primary hover:bg-surface-2'
@@ -175,6 +178,9 @@ export default function ClaudeMdManager({ projects }: ClaudeMdManagerProps) {
                 <h3 className="text-sm font-medium text-text-primary truncate">
                   {selectedFile.projectName}
                   <span className="text-text-tertiary font-normal"> / CLAUDE.md</span>
+                  {hasUnsavedChanges && (
+                    <span className="inline-block w-2 h-2 rounded-full bg-accent ml-2 align-middle" title="Unsaved changes" />
+                  )}
                 </h3>
                 <p className="text-micro text-text-tertiary truncate mt-0.5">
                   {selectedFile.path}
@@ -215,10 +221,13 @@ export default function ClaudeMdManager({ projects }: ClaudeMdManagerProps) {
           // Empty state
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <div className="text-text-tertiary text-sm">
-                Select a CLAUDE.md file to edit
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-surface-2 text-text-tertiary mb-4">
+                <FileIcon size={24} />
               </div>
-              <p className="text-micro text-text-tertiary mt-1 opacity-60">
+              <p className="text-text-secondary text-sm font-medium">
+                Select a CLAUDE.md file from the tree to view and edit
+              </p>
+              <p className="text-micro text-text-tertiary mt-1 max-w-xs mx-auto">
                 Project instructions for Claude Code
               </p>
             </div>

@@ -66,12 +66,12 @@ export default function TopBar({
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="no-drag p-1 rounded text-text-tertiary hover:text-text-primary transition-colors"
+            className="no-drag p-1 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
             title="Back to Dashboard"
           >
             <ChevronLeftIcon size={14} />
           </button>
-          <span className="text-sm font-medium text-text-primary">{activeProject.name}</span>
+          <span className="text-sm font-medium text-text-primary truncate" title={activeProject.name}>{activeProject.name}</span>
           {activeProject.client && (
             <span className="px-1 py-1 rounded bg-surface-2 text-micro text-text-tertiary">
               {activeProject.client}
@@ -97,7 +97,7 @@ export default function TopBar({
               onClick={() => setShowSwitcher(!showSwitcher)}
               aria-haspopup="listbox"
               aria-expanded={showSwitcher}
-              className="flex items-center gap-1 px-2 py-1 rounded-button text-xs text-text-tertiary hover:text-text-secondary hover:bg-surface-2 transition-colors"
+              className="flex items-center gap-1 px-2 py-1 rounded-button text-xs text-text-tertiary hover:text-text-secondary hover:bg-surface-2 transition-colors duration-150"
               title="Switch project"
             >
               <ChevronDownIcon size={12} />
@@ -137,13 +137,11 @@ export default function TopBar({
         <button
           onClick={onOpenSearch}
           aria-label="Search projects (Cmd+K)"
-          className="no-drag flex items-center gap-2 px-3 py-1 rounded-button bg-surface-2 border border-border-subtle text-text-tertiary hover:text-text-secondary hover:border-border-default transition-colors text-xs"
+          title="Search projects (Cmd+K)"
+          className="no-drag flex items-center gap-2 px-3 py-1 rounded-button bg-surface-2 border border-border-subtle text-text-tertiary hover:text-text-secondary hover:border-border-default transition-colors duration-150 text-xs"
         >
           <SearchIcon />
-          <span>Search</span>
-          <kbd className="ml-1 px-1 py-1 rounded bg-surface-3 border border-border-subtle text-micro font-mono">
-            {'\u2318'}K
-          </kbd>
+          <span className="font-mono text-micro">{'\u2318'}K</span>
         </button>
       </div>
     </header>

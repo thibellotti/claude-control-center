@@ -79,7 +79,7 @@ export default function AgentEditor({ agent, onSave, onDelete, onClose }: AgentE
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm modal-backdrop"
       onClick={onClose}
       onKeyDown={handleKeyDown}
       role="dialog"
@@ -87,7 +87,7 @@ export default function AgentEditor({ agent, onSave, onDelete, onClose }: AgentE
       aria-labelledby="agent-editor-title"
     >
       <div
-        className="w-full max-w-lg mx-4 bg-surface-1 border border-border-subtle rounded-card shadow-2xl"
+        className="w-full max-w-lg mx-4 bg-surface-1 border border-border-subtle rounded-card shadow-2xl modal-content"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

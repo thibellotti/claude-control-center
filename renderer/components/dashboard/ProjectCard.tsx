@@ -75,12 +75,12 @@ export default memo(function ProjectCard({
         }
       }}
       aria-label={project.name}
-      className="group relative min-w-0 bg-surface-1 border border-border-subtle rounded-card p-4 cursor-pointer hover:border-border-default transition-colors"
+      className="group relative min-w-0 bg-surface-1 border border-border-subtle rounded-card p-4 cursor-pointer hover:border-border-default transition-all duration-150"
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-2 min-w-0">
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors truncate flex items-center gap-1">
+          <h3 className="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors truncate flex items-center gap-1" title={project.name}>
             {project.name}
             {isLive && (
               <span className="relative flex h-2 w-2 ml-1 flex-shrink-0">
@@ -89,7 +89,7 @@ export default memo(function ProjectCard({
               </span>
             )}
           </h3>
-          <p className="text-xs font-mono text-text-tertiary truncate mt-1">
+          <p className="text-xs font-mono text-text-tertiary truncate mt-1" title={project.path}>
             {shortenPath(project.path)}
           </p>
         </div>
@@ -114,7 +114,7 @@ export default memo(function ProjectCard({
           {stack.map((tag) => (
             <span
               key={tag}
-              className="px-1 py-1 rounded bg-surface-3 text-micro font-mono text-text-tertiary"
+              className="px-1 py-1 rounded bg-surface-2 text-micro font-mono text-text-secondary"
             >
               {tag}
             </span>
@@ -146,7 +146,7 @@ export default memo(function ProjectCard({
               e.stopPropagation();
               onOpenProject(project.path, 'claude');
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-colors duration-150"
           >
             <ClaudeIcon size={12} />
             Open

@@ -18,6 +18,7 @@ export function useClaudeMd() {
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<ClaudeMdFile | null>(null);
   const [content, setContent] = useState<string>('');
+  const [savedContent, setSavedContent] = useState<string>('');
   const [saving, setSaving] = useState(false);
 
   // Keep a ref to content so saveContent doesn't need content in its dep array
@@ -43,6 +44,7 @@ export function useClaudeMd() {
     try {
       const data = await window.api.readClaudeMd(file.path);
       setContent(data);
+      setSavedContent(data);
       setError(null);
     } catch (err) {
       console.error('Failed to read CLAUDE.md:', err);
@@ -56,6 +58,7 @@ export function useClaudeMd() {
     setSaving(true);
     try {
       await window.api.writeClaudeMd(selectedFile.path, contentRef.current);
+      setSavedContent(contentRef.current);
       setError(null);
     } catch (err) {
       console.error('Failed to save CLAUDE.md:', err);
@@ -65,5 +68,5 @@ export function useClaudeMd() {
     }
   }, [selectedFile]);
 
-  return { tree, loading, error, selectedFile, content, saving, scan, selectFile, setContent, saveContent };
+  return { tree, loading, error, selectedFile, content, savedContent, saving, scan, selectFile, setContent, saveContent };
 }

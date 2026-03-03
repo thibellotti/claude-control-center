@@ -171,7 +171,7 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-6 space-y-6">
       {/* Stats bar */}
       <div className="flex flex-wrap gap-4">
         <StatCard label="Projects" value={projects.length} />
@@ -200,7 +200,7 @@ export default function Dashboard() {
       {/* Client workspace cards */}
       {clientCardData.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-text-tertiary">
+          <h2 className="text-xs font-medium tracking-wide uppercase text-text-tertiary pb-2 border-b border-border-subtle">
             Clients
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -246,10 +246,10 @@ export default function Dashboard() {
 
       {/* Empty state */}
       {projects.length === 0 && (
-        <div className="text-center py-16">
-          <p className="text-text-tertiary text-sm">No projects found.</p>
-          <p className="text-text-tertiary text-xs mt-1">
-            Projects with a .claude directory will appear here.
+        <div className="text-center py-16 space-y-2">
+          <p className="text-text-secondary text-sm font-medium">No projects yet</p>
+          <p className="text-text-tertiary text-xs">
+            Add a project folder to get started. Projects with a <code className="px-1 py-0.5 rounded bg-surface-2 text-text-secondary font-mono">.claude</code> directory will appear here.
           </p>
         </div>
       )}

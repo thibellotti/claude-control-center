@@ -41,7 +41,16 @@ function getSubtitle(session: ActiveSession): string | null {
 }
 
 export default function ActiveSessions({ sessions, onJumpToSession }: ActiveSessionsProps) {
-  if (!sessions || sessions.length === 0) return null;
+  if (!sessions || sessions.length === 0) {
+    return (
+      <section>
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-text-tertiary mb-3">
+          Live Sessions
+        </h2>
+        <p className="text-xs text-text-tertiary">No active sessions</p>
+      </section>
+    );
+  }
 
   return (
     <section>
@@ -65,7 +74,7 @@ export default function ActiveSessions({ sessions, onJumpToSession }: ActiveSess
                   onJumpToSession(session.projectPath);
                 }
               } : undefined}
-              className={`flex items-center gap-3 px-4 py-3${onJumpToSession ? ' cursor-pointer hover:bg-surface-3 transition-colors' : ''}`}
+              className={`flex items-center gap-3 px-4 py-3${onJumpToSession ? ' cursor-pointer hover:bg-surface-3 transition-colors duration-150' : ''}`}
             >
               {/* Pulsing live indicator */}
               <span className="relative flex h-2 w-2 flex-shrink-0">
@@ -76,7 +85,7 @@ export default function ActiveSessions({ sessions, onJumpToSession }: ActiveSess
               {/* Session info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-sm font-medium text-text-primary truncate">
+                  <span className="text-sm font-medium text-text-primary truncate" title={displayName}>
                     {displayName}
                   </span>
                   <span className="text-xs text-text-tertiary font-mono shrink-0">
@@ -89,7 +98,7 @@ export default function ActiveSessions({ sessions, onJumpToSession }: ActiveSess
                   </p>
                 )}
                 {!isHomeDir(session.projectPath) && (
-                  <p className="text-micro text-text-tertiary font-mono truncate mt-1">
+                  <p className="text-micro text-text-tertiary font-mono truncate mt-1" title={session.projectPath}>
                     {shortenPath(session.projectPath)}
                   </p>
                 )}

@@ -92,13 +92,13 @@ export default function Sidebar({
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className={`flex items-center gap-3 w-full px-3 py-2 rounded-button text-sm transition-colors ${
+              className={`flex items-center gap-3 w-full px-3 py-2 rounded-button text-sm transition-colors duration-150 ${
                 isActive
                   ? 'bg-surface-3 text-text-primary'
-                  : 'text-text-secondary hover:text-text-primary hover:bg-surface-2'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-surface-3'
               } ${collapsed ? 'justify-center' : ''}`}
               aria-label={item.label}
-              title={collapsed ? item.label : undefined}
+              title={item.label}
             >
               <span className="shrink-0">{item.icon}</span>
               {!collapsed && <span>{item.label}</span>}
@@ -119,6 +119,9 @@ export default function Sidebar({
             Projects
           </span>
         )}
+        {clientGroups.length === 0 && !collapsed && (
+          <p className="px-3 py-2 text-micro text-text-tertiary">No projects found</p>
+        )}
         {clientGroups.map((group) => {
           const isGroupCollapsed = collapsedClients.has(group.client);
           return (
@@ -128,7 +131,8 @@ export default function Sidebar({
                 <button
                   type="button"
                   onClick={() => toggleClient(group.client)}
-                  className="flex items-center gap-1 w-full px-3 py-1 text-micro font-medium uppercase tracking-wider text-text-tertiary hover:text-text-secondary transition-colors"
+                  className="flex items-center gap-1 w-full px-3 py-1 text-micro font-medium uppercase tracking-wider text-text-tertiary hover:text-text-secondary transition-colors duration-150"
+                  title={group.client}
                 >
                   <ChevronDownIcon
                     size={10}
@@ -147,23 +151,29 @@ export default function Sidebar({
                     <button
                       key={project.path}
                       onClick={() => onSelectProject(project)}
-                      className={`flex items-center gap-2 w-full py-1 rounded-button text-sm transition-colors ${
-                        collapsed ? 'px-3 justify-center' : 'pl-6 pr-3'
+                      className={`flex items-center gap-2 w-full py-1 rounded-button text-sm transition-colors duration-150 ${
+                        collapsed ? 'px-0 justify-center' : 'pl-6 pr-3'
                       } ${
                         isActive
                           ? 'bg-accent/10 text-accent border-l-2 border-accent'
                           : isSelected
                           ? 'bg-accent-muted text-accent'
-                          : 'text-text-secondary hover:text-text-primary hover:bg-surface-2'
+                          : 'text-text-secondary hover:text-text-primary hover:bg-surface-3'
                       }`}
                       aria-label={project.name}
-                      title={collapsed ? project.name : isActive ? `${project.name} (active)` : undefined}
+                      title={isActive ? `${project.name} (active)` : project.name}
                     >
                       <span
-                        className={`shrink-0 w-1.5 h-1.5 rounded-full ${
-                          isActive ? 'bg-accent' : project.status === 'active' ? 'bg-status-active' : 'bg-status-idle'
+                        className={`shrink-0 rounded-full ${
+                          collapsed ? 'p-1.5' : ''
                         }`}
-                      />
+                      >
+                        <span
+                          className={`block w-1.5 h-1.5 rounded-full ${
+                            isActive ? 'bg-accent' : project.status === 'active' ? 'bg-status-active' : 'bg-status-idle'
+                          }`}
+                        />
+                      </span>
                       {!collapsed && (
                         <span className="truncate text-left">{project.name}</span>
                       )}

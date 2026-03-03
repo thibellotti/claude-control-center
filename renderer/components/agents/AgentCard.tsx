@@ -11,10 +11,11 @@ interface AgentCardProps {
 
 export default memo(function AgentCard({ agent, runCount, onEdit, onRun }: AgentCardProps) {
   // Take the first line of the system prompt as a short description
-  const description = agent.systemPrompt.split('\n')[0].slice(0, 120);
+  const rawDesc = agent.systemPrompt.trim();
+  const description = rawDesc ? rawDesc.split('\n')[0].slice(0, 120) : 'No description';
 
   return (
-    <div className="group relative bg-surface-1 border border-border-subtle rounded-card p-4 hover:border-accent/40 transition-all duration-200">
+    <div className="group relative bg-surface-1 border border-border-subtle rounded-card p-4 hover:border-accent/60 transition-all duration-150">
       {/* Header row */}
       <div className="flex items-start gap-3 mb-2">
         <span className="text-lg shrink-0 select-none" role="img" aria-label={agent.name}>
@@ -38,7 +39,7 @@ export default memo(function AgentCard({ agent, runCount, onEdit, onRun }: Agent
           </span>
         )}
         <span className="text-micro text-text-tertiary">
-          {Math.floor(agent.timeoutSeconds / 60)}m timeout
+          {Math.floor(agent.timeoutSeconds / 60)} min timeout
         </span>
       </div>
 

@@ -111,7 +111,7 @@ export default function ClientAnalytics({ clientName, projects }: ClientAnalytic
             <button
               key={r.days}
               onClick={() => handleDateRange(r.days)}
-              className={`px-3 py-1 rounded-button text-xs font-medium transition-colors ${
+              className={`px-3 py-1 rounded-button text-xs font-medium transition-colors duration-150 ${
                 dateRange === r.days
                   ? 'bg-accent text-white'
                   : 'bg-surface-2 text-text-secondary hover:bg-surface-3'
@@ -133,7 +133,7 @@ export default function ClientAnalytics({ clientName, projects }: ClientAnalytic
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <SummaryCard label="Total Cost" value={formatCost(totalCost)} />
         <SummaryCard
           label="Total Tokens"
@@ -144,6 +144,12 @@ export default function ClientAnalytics({ clientName, projects }: ClientAnalytic
       </div>
 
       {/* Project breakdown table */}
+      {clientProjects.length === 0 && !loading && (
+        <div className="text-center py-12 bg-surface-1 border border-border-subtle rounded-card">
+          <p className="text-text-secondary text-sm">No usage data for this period</p>
+          <p className="text-text-tertiary text-xs mt-1">Try selecting a different date range above</p>
+        </div>
+      )}
       {clientProjects.length > 0 && (
         <div className="bg-surface-1 border border-border-subtle rounded-card overflow-hidden">
           <table className="w-full text-xs">

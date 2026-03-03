@@ -10,16 +10,23 @@ interface AgentRunnerProps {
 
 function StatusBadge({ status }: { status: AgentRun['status'] }) {
   const styles: Record<AgentRun['status'], string> = {
-    running: 'bg-status-active/20 text-status-active',
-    completed: 'bg-status-active/20 text-status-active',
-    failed: 'bg-feedback-error-muted text-feedback-error',
-    killed: 'bg-feedback-warning-muted text-feedback-warning',
+    running: 'bg-blue-500/15 text-blue-500',
+    completed: 'bg-emerald-500/15 text-emerald-500',
+    failed: 'bg-red-500/15 text-red-500',
+    killed: 'bg-amber-500/15 text-amber-500',
+  };
+
+  const dotColors: Record<AgentRun['status'], string> = {
+    running: 'bg-blue-500',
+    completed: 'bg-emerald-500',
+    failed: 'bg-red-500',
+    killed: 'bg-amber-500',
   };
 
   return (
     <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-micro font-medium ${styles[status]}`}>
       {status === 'running' && (
-        <span className="w-1.5 h-1.5 rounded-full bg-status-active animate-pulse" />
+        <span className={`w-1.5 h-1.5 rounded-full ${dotColors[status]} animate-pulse`} />
       )}
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
@@ -65,7 +72,7 @@ export default function AgentRunner({ run, onKill, onClose }: AgentRunnerProps) 
           {isRunning && (
             <button
               onClick={() => onKill(run.id)}
-              className="flex items-center gap-1 px-2 py-1 rounded-button text-xs text-feedback-error hover:bg-feedback-error-muted transition-colors"
+              className="flex items-center gap-1 px-2 py-1 rounded-button text-xs text-feedback-error hover:bg-feedback-error-muted transition-colors duration-150"
               title="Kill agent"
             >
               <StopIcon />
@@ -83,12 +90,14 @@ export default function AgentRunner({ run, onKill, onClose }: AgentRunnerProps) 
       </div>
 
       {/* Output area */}
-      <pre
-        ref={outputRef}
-        className="p-4 text-xs font-mono text-text-secondary leading-relaxed overflow-y-auto max-h-[400px] bg-surface-0 whitespace-pre-wrap break-words"
-      >
-        {run.output || (isRunning ? 'Waiting for output...' : 'No output.')}
-      </pre>
+      <div className="m-3 border border-border-subtle rounded-card overflow-hidden">
+        <pre
+          ref={outputRef}
+          className="p-4 text-xs font-mono text-text-secondary leading-relaxed overflow-y-auto max-h-[400px] bg-surface-0 whitespace-pre-wrap break-words"
+        >
+          {run.output || (isRunning ? 'Waiting for output...' : 'No output.')}
+        </pre>
+      </div>
 
       {/* Footer with timing info */}
       {run.completedAt && (

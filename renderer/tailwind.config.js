@@ -60,7 +60,7 @@ const config = {
         mono: ['JetBrains Mono', 'monospace'],
       },
       fontSize: {
-        micro: ['10px', { lineHeight: '14px' }],
+        micro: ['11px', { lineHeight: '16px' }],
       },
       spacing: {
         '0': '0px',
