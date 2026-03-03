@@ -9,6 +9,8 @@ import type {
   RequestAttachment,
   VisualAction,
 } from '../shared/types';
+import type { ClientWorkspace } from '../shared/client-types';
+import type { Agent } from '../shared/agent-types';
 import { IPC_CHANNELS } from '../shared/types';
 
 const api = {
@@ -56,11 +58,34 @@ const api = {
   getSupabaseInfo: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_SUPABASE_INFO, projectPath),
   getGitHubInfo: (projectPath: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_GITHUB_INFO, projectPath),
 
+  // CLAUDE.md Manager
+  scanClaudeMd: (projects: { path: string; name: string; client?: string | null }[]) => ipcRenderer.invoke(IPC_CHANNELS.SCAN_CLAUDEMD, projects),
+  readClaudeMd: (filePath: string) => ipcRenderer.invoke(IPC_CHANNELS.READ_CLAUDEMD, filePath),
+  writeClaudeMd: (filePath: string, content: string) => ipcRenderer.invoke(IPC_CHANNELS.WRITE_CLAUDEMD, filePath, content),
+
   // Client Workspaces
   getClients: () => ipcRenderer.invoke(IPC_CHANNELS.GET_CLIENTS),
-  saveClient: (client: any) => ipcRenderer.invoke(IPC_CHANNELS.SAVE_CLIENT, client),
+  saveClient: (client: ClientWorkspace) => ipcRenderer.invoke(IPC_CHANNELS.SAVE_CLIENT, client),
   deleteClient: (clientId: string) => ipcRenderer.invoke(IPC_CHANNELS.DELETE_CLIENT, clientId),
   seedClientsFromProjects: (projects: { client?: string | null }[]) => ipcRenderer.invoke(IPC_CHANNELS.SEED_CLIENTS_FROM_PROJECTS, projects),
+
+  // CC Agents
+  getAgents: () => ipcRenderer.invoke(IPC_CHANNELS.GET_AGENTS),
+  saveAgent: (agent: Agent) => ipcRenderer.invoke(IPC_CHANNELS.SAVE_AGENT, agent),
+  deleteAgent: (agentId: string) => ipcRenderer.invoke(IPC_CHANNELS.DELETE_AGENT, agentId),
+  runAgent: (opts: { agentId: string; projectPath: string; task: string }) => ipcRenderer.invoke(IPC_CHANNELS.RUN_AGENT, opts),
+  killAgentRun: (runId: string) => ipcRenderer.invoke(IPC_CHANNELS.KILL_AGENT_RUN, runId),
+  getAgentRuns: (projectPath?: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_AGENT_RUNS, projectPath),
+  onAgentOutput: (callback: (data: { runId: string; data: string }) => void) => {
+    const handler = (_: unknown, payload: { runId: string; data: string }) => callback(payload);
+    ipcRenderer.on(IPC_CHANNELS.AGENT_OUTPUT, handler);
+    return () => { ipcRenderer.removeListener(IPC_CHANNELS.AGENT_OUTPUT, handler); };
+  },
+  onAgentExit: (callback: (data: { runId: string; status: string }) => void) => {
+    const handler = (_: unknown, payload: { runId: string; status: string }) => callback(payload);
+    ipcRenderer.on(IPC_CHANNELS.AGENT_EXIT, handler);
+    return () => { ipcRenderer.removeListener(IPC_CHANNELS.AGENT_EXIT, handler); };
+  },
 
   // Terminal (PTY)
   ptyCreate: (opts: { cwd?: string; command?: string }) => ipcRenderer.invoke(IPC_CHANNELS.PTY_CREATE, opts),

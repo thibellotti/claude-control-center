@@ -27,6 +27,8 @@ import { registerPageHandlers } from './ipc/pages'
 import { registerTemplateHandlers } from './ipc/templates'
 import { registerAccountHandlers } from './ipc/account'
 import { registerClientHandlers } from './ipc/clients'
+import { registerClaudeMdHandlers } from './ipc/claudemd'
+import { registerAgentHandlers, cleanupAgents } from './ipc/agents'
 import { startProjectWatcher } from './watchers/project-watcher'
 
 // Log unhandled promise rejections so they don't silently crash the main process
@@ -71,6 +73,8 @@ if (isProd) {
   registerAccountHandlers()
   registerVisualEditorHandlers()
   registerClientHandlers()
+  registerClaudeMdHandlers()
+  registerAgentHandlers()
 
   const mainWindow = createWindow('main', {
     width: 1400,
@@ -100,6 +104,7 @@ if (isProd) {
     cleanupLiveFeed()
     cleanupRequests()
     cleanupVisualEditor()
+    cleanupAgents()
   })
 
   try {
