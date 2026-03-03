@@ -3,6 +3,7 @@ import type { ActiveSession } from '../../../shared/types';
 
 interface ActiveSessionsProps {
   sessions?: ActiveSession[];
+  onJumpToSession?: (projectPath: string) => void;
 }
 
 // process.env.HOME is undefined in Electron renderer sandbox mode;
@@ -39,7 +40,7 @@ function getSubtitle(session: ActiveSession): string | null {
   return session.sessionLabel || null;
 }
 
-export default function ActiveSessions({ sessions }: ActiveSessionsProps) {
+export default function ActiveSessions({ sessions, onJumpToSession }: ActiveSessionsProps) {
   if (!sessions || sessions.length === 0) return null;
 
   return (
@@ -53,7 +54,19 @@ export default function ActiveSessions({ sessions }: ActiveSessionsProps) {
           const subtitle = getSubtitle(session);
 
           return (
-            <div key={session.pid} className="flex items-center gap-3 px-4 py-3">
+            <div
+              key={session.pid}
+              role={onJumpToSession ? 'button' : undefined}
+              tabIndex={onJumpToSession ? 0 : undefined}
+              onClick={() => onJumpToSession?.(session.projectPath)}
+              onKeyDown={onJumpToSession ? (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onJumpToSession(session.projectPath);
+                }
+              } : undefined}
+              className={`flex items-center gap-3 px-4 py-3${onJumpToSession ? ' cursor-pointer hover:bg-surface-3 transition-colors' : ''}`}
+            >
               {/* Pulsing live indicator */}
               <span className="relative flex h-2 w-2 flex-shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-active opacity-75" />

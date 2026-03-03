@@ -617,6 +617,12 @@ function InfoSection() {
           </div>
         ))}
       </div>
+      <button
+        onClick={() => window.api.openInEditor('~/.claude/settings.json')}
+        className="mt-3 px-3 py-1.5 rounded-button text-xs font-medium text-text-secondary border border-border-subtle hover:border-border-default hover:text-text-primary transition-colors"
+      >
+        Edit in editor
+      </button>
     </section>
   );
 }

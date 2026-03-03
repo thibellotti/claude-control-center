@@ -746,3 +746,26 @@ export function BarChartIcon(props: IconProps = {}) {
     </svg>
   );
 }
+
+export function AgentsIcon(props: IconProps = {}) {
+  const { size, className } = p(props);
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <circle cx="8" cy="5" r="2.5" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      <circle cx="12.5" cy="3.5" r="1.5" stroke="currentColor" strokeWidth="1" />
+      <path d="M14.5 8c0-1.38-0.9-2.5-2-2.5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function AnalyticsIcon(props: IconProps = {}) {
+  const { size, className } = p(props);
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <path d="M2 12l3.5-4 3 2.5L13 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="13" cy="5" r="1.5" stroke="currentColor" strokeWidth="1" />
+      <path d="M2 14.5h12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    </svg>
+  );
+}

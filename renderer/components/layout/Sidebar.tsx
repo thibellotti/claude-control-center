@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useProjectContext } from '../../hooks/useProjectContext';
-import { DashboardIcon, SettingsIcon, PromptsIcon, InstructionsIcon, ChevronLeftIcon, ChevronRightIcon, ClaudeIcon, ChevronDownIcon } from '../icons';
+import { DashboardIcon, SettingsIcon, PromptsIcon, InstructionsIcon, AgentsIcon, AnalyticsIcon, ChevronLeftIcon, ChevronRightIcon, ClaudeIcon, ChevronDownIcon } from '../icons';
 
 interface SidebarProps {
   onNavigate: (page: string) => void;
@@ -48,7 +48,9 @@ export default function Sidebar({
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon size={16} /> },
+    { id: 'agents', label: 'Agents', icon: <AgentsIcon size={16} /> },
     { id: 'sessions', label: 'Orchestrator', icon: <ClaudeIcon size={16} /> },
+    { id: 'analytics', label: 'Analytics', icon: <AnalyticsIcon size={16} /> },
     { id: 'instructions', label: 'Instructions', icon: <InstructionsIcon size={16} /> },
     { id: 'prompts', label: 'Prompts', icon: <PromptsIcon size={16} /> },
     { id: 'settings', label: 'Settings', icon: <SettingsIcon size={16} /> },

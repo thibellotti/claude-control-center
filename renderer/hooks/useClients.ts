@@ -21,15 +21,25 @@ export function useClients() {
   }, [refresh]);
 
   const saveClient = useCallback(async (client: ClientWorkspace) => {
-    const updated = await window.api.saveClient(client);
-    setClients(updated);
-    return updated;
+    try {
+      const updated = await window.api.saveClient(client);
+      setClients(updated);
+      return updated;
+    } catch (err) {
+      console.error('Failed to save client:', err);
+      return null;
+    }
   }, []);
 
   const deleteClient = useCallback(async (clientId: string) => {
-    const updated = await window.api.deleteClient(clientId);
-    setClients(updated);
-    return updated;
+    try {
+      const updated = await window.api.deleteClient(clientId);
+      setClients(updated);
+      return updated;
+    } catch (err) {
+      console.error('Failed to delete client:', err);
+      return null;
+    }
   }, []);
 
   return { clients, loading, saveClient, deleteClient, refresh };

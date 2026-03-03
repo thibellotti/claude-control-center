@@ -3,12 +3,11 @@ import type { Project } from '../../../shared/types';
 import StatusBadge from '../shared/StatusBadge';
 import GitBadge from '../shared/GitBadge';
 import HealthBadge from '../shared/HealthBadge';
-import { PencilIcon, ClaudeIcon } from '../icons';
+import { ClaudeIcon } from '../icons';
 
 interface ProjectCardProps {
   project: Project;
   onClick: (project: Project) => void;
-  onOpenEditor: (path: string) => void;
   onOpenProject?: (path: string, mode: 'claude' | 'claude --dangerously-skip-permissions') => void;
   isLive?: boolean;
 }
@@ -58,7 +57,6 @@ function shortenPath(path: string): string {
 export default memo(function ProjectCard({
   project,
   onClick,
-  onOpenEditor,
   onOpenProject,
   isLive,
 }: ProjectCardProps) {
@@ -140,43 +138,21 @@ export default memo(function ProjectCard({
         </div>
       )}
 
-      {/* Quick actions (visible on hover) */}
-      <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity">
-        {onOpenProject && (
-          <>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenProject(project.path, 'claude');
-              }}
-              className="p-1 rounded-button bg-surface-3 text-text-tertiary hover:text-accent hover:bg-surface-4 transition-colors"
-              title="Open with Claude"
-            >
-              <ClaudeIcon size={14} />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenProject(project.path, 'claude --dangerously-skip-permissions');
-              }}
-              className="p-1 rounded-button bg-surface-3 text-feedback-warning/60 hover:text-feedback-warning hover:bg-surface-4 transition-colors"
-              title="Open with Autopilot"
-            >
-              <ClaudeIcon size={14} />
-            </button>
-          </>
-        )}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenEditor(project.path);
-          }}
-          className="p-1 rounded-button bg-surface-3 text-text-tertiary hover:text-text-primary hover:bg-surface-4 transition-colors"
-          title="Open in editor"
-        >
-          <PencilIcon size={14} />
-        </button>
-      </div>
+      {/* Open button */}
+      {onOpenProject && (
+        <div className="mt-3 pt-3 border-t border-border-subtle">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenProject(project.path, 'claude');
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-button text-xs font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-colors"
+          >
+            <ClaudeIcon size={12} />
+            Open
+          </button>
+        </div>
+      )}
     </div>
   );
 })

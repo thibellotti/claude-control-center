@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { usePreview } from '../../hooks/usePreview';
-import { useProjectContext } from '../../hooks/useProjectContext';
 import PreviewToolbar from './PreviewToolbar';
 import { PlayCircleIcon, SpinnerIcon, TrashIcon, ErrorCircleIcon, ExternalLinkIcon } from '../icons';
 import type { VercelProjectInfo, DeployConfig } from '../../../shared/types';
@@ -56,7 +55,6 @@ function statusLabel(status: string): string {
 // ---------------------------------------------------------------------------
 
 export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
-  const { onOpenVisualEditor } = useProjectContext();
   const {
     state,
     viewport,
@@ -141,7 +139,6 @@ export default function PreviewPanel({ projectPath }: PreviewPanelProps) {
         onViewportChange={setViewport}
         onToggleConsole={() => setShowConsole(!showConsole)}
         onOpenBrowser={handleOpenBrowser}
-        onOpenVisualEditor={onOpenVisualEditor && state.url ? () => onOpenVisualEditor(projectPath, state.url!) : undefined}
       />
 
       {/* Main content area */}
