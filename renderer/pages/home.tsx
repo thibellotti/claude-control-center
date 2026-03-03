@@ -9,6 +9,7 @@ import CommandPalette from '../components/search/CommandPalette';
 import ProjectDetail from '../components/project/ProjectDetail';
 import ClientDetail from '../components/client/ClientDetail';
 import ClaudeMdManager from '../components/claudemd/ClaudeMdManager';
+import AgentLibrary from '../components/agents/AgentLibrary';
 import dynamic from 'next/dynamic';
 
 const OrchestratorPage = dynamic(() => import('../components/orchestrator/OrchestratorPage'), { ssr: false });
@@ -65,7 +66,7 @@ export default function Home() {
   const { projects, loading } = useProjects(handleRefresh);
   const { sessions: activeSessions, getSessionForProject } = useActiveSessions();
   const { clients } = useClients();
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts' | 'sessions' | 'client' | 'instructions'>('dashboard');
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts' | 'sessions' | 'agents' | 'instructions' | 'analytics' | 'client'>('dashboard');
   const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(null);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const { project: selectedProject } = useProjectDetail(
@@ -103,7 +104,7 @@ export default function Home() {
   }, []);
 
   const handleNavigate = useCallback((page: string) => {
-    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'sessions' || page === 'instructions') {
+    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'sessions' || page === 'instructions' || page === 'agents' || page === 'analytics') {
       setCurrentPage(page);
       setSelectedProjectPath(null);
       setSelectedClientId(null);
@@ -141,6 +142,10 @@ export default function Home() {
       ? 'Prompt Library'
       : currentPage === 'sessions'
       ? 'Orchestrator'
+      : currentPage === 'agents'
+      ? 'Agents'
+      : currentPage === 'analytics'
+      ? 'Analytics'
       : currentPage === 'instructions'
       ? 'Instructions'
       : currentPage === 'client'
@@ -216,6 +221,13 @@ export default function Home() {
           <ClaudeMdManager
             projects={projects.map(p => ({ path: p.path, name: p.name, client: p.client }))}
           />
+        )}
+        {currentPage === 'agents' && <AgentLibrary />}
+        {currentPage === 'analytics' && (
+          <div className="flex flex-col items-center justify-center h-full text-text-tertiary">
+            <p className="text-sm">Select a client workspace to view analytics.</p>
+            <p className="text-xs mt-1 opacity-60">Aggregated analytics across all clients coming soon.</p>
+          </div>
         )}
         {currentPage === 'settings' && <SettingsPage />}
       </AppLayout>
