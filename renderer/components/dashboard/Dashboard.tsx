@@ -1,6 +1,8 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useProjectContext } from '../../hooks/useProjectContext';
+import { useClients } from '../../hooks/useClients';
 import ProjectCard from './ProjectCard';
+import ClientWorkspaceCard from './ClientWorkspaceCard';
 import ActiveSessions from './ActiveSessions';
 import { ChevronDownIcon } from '../icons';
 import type { Project } from '../../../shared/types';
@@ -20,7 +22,6 @@ interface ClientGroup {
 interface ClientAccordionProps {
   group: ClientGroup;
   onSelectProject: (project: Project) => void;
-  onOpenEditor: (path: string) => void;
   onOpenProject?: (path: string, mode: 'claude' | 'claude --dangerously-skip-permissions') => void;
   getSessionForProject: (projectPath: string) => ReturnType<ReturnType<typeof useProjectContext>['getSessionForProject']>;
   defaultOpen: boolean;
@@ -29,7 +30,6 @@ interface ClientAccordionProps {
 function ClientAccordion({
   group,
   onSelectProject,
-  onOpenEditor,
   onOpenProject,
   getSessionForProject,
   defaultOpen,
@@ -76,7 +76,6 @@ function ClientAccordion({
                 key={project.path}
                 project={project}
                 onClick={onSelectProject}
-                onOpenEditor={onOpenEditor}
                 onOpenProject={onOpenProject}
                 isLive={!!getSessionForProject(project.path)}
               />
@@ -95,7 +94,8 @@ function ClientAccordion({
 const UNCATEGORIZED = 'Uncategorized';
 
 export default function Dashboard() {
-  const { projects, onSelectProject, onOpenProject, activeSessions, getSessionForProject } = useProjectContext();
+  const { projects, onSelectProject, onOpenProject, onSelectClient, activeSessions, getSessionForProject } = useProjectContext();
+  const { clients } = useClients();
 
   // Compute stats
   const { totalTasks, activeTasks, uncommitted, clientCount } = useMemo(() => {
@@ -147,11 +147,28 @@ export default function Dashboard() {
     return groups;
   }, [projects]);
 
-  const handleOpenEditor = useCallback((path: string) => {
-    window.api.openInEditor(path);
-  }, []);
-
   const liveCount = activeSessions.length;
+
+  // Compute per-client project lists and active session counts
+  const clientCardData = useMemo(() => {
+    return clients.map((ws) => {
+      const wsProjects = projects.filter((p) => p.client === ws.name);
+      const sessionCount = wsProjects.filter((p) => !!getSessionForProject(p.path)).length;
+      return { workspace: ws, projects: wsProjects, activeSessions: sessionCount };
+    });
+  }, [clients, projects, getSessionForProject]);
+
+  // Projects without a client workspace
+  const uncategorizedGroup = useMemo(
+    () => clientGroups.find((g) => g.client === UNCATEGORIZED),
+    [clientGroups],
+  );
+
+  // Client groups excluding Uncategorized (shown separately)
+  const categorizedGroups = useMemo(
+    () => clientGroups.filter((g) => g.client !== UNCATEGORIZED),
+    [clientGroups],
+  );
 
   return (
     <div className="p-6 space-y-8">
@@ -172,23 +189,59 @@ export default function Dashboard() {
       </div>
 
       {/* Live sessions section */}
-      <ActiveSessions sessions={activeSessions} />
+      <ActiveSessions
+        sessions={activeSessions}
+        onJumpToSession={(projectPath) => {
+          const project = projects.find(p => p.path === projectPath);
+          if (project) onSelectProject(project);
+        }}
+      />
 
-      {/* Client-grouped project sections */}
-      {clientGroups.length > 0 && (
+      {/* Client workspace cards */}
+      {clientCardData.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-text-tertiary">
+            Clients
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {clientCardData.map((data) => (
+              <ClientWorkspaceCard
+                key={data.workspace.id}
+                workspace={data.workspace}
+                projects={data.projects}
+                activeSessions={data.activeSessions}
+                onClick={() => onSelectClient(data.workspace.id)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Client-grouped project sections (excluding Uncategorized) */}
+      {categorizedGroups.length > 0 && (
         <div className="space-y-4">
-          {clientGroups.map((group) => (
+          {categorizedGroups.map((group) => (
             <ClientAccordion
               key={group.client}
               group={group}
               onSelectProject={onSelectProject}
-              onOpenEditor={handleOpenEditor}
               onOpenProject={onOpenProject}
               getSessionForProject={getSessionForProject}
               defaultOpen={group.hasActive}
             />
           ))}
         </div>
+      )}
+
+      {/* Uncategorized projects */}
+      {uncategorizedGroup && uncategorizedGroup.projects.length > 0 && (
+        <ClientAccordion
+          group={uncategorizedGroup}
+          onSelectProject={onSelectProject}
+          onOpenProject={onOpenProject}
+          getSessionForProject={getSessionForProject}
+          defaultOpen={uncategorizedGroup.hasActive}
+        />
       )}
 
       {/* Empty state */}

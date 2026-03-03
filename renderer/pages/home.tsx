@@ -7,6 +7,8 @@ import SettingsPage from '../components/settings/SettingsPage';
 import PromptLibrary from '../components/prompts/PromptLibrary';
 import CommandPalette from '../components/search/CommandPalette';
 import ProjectDetail from '../components/project/ProjectDetail';
+import ClientDetail from '../components/client/ClientDetail';
+import ClaudeMdManager from '../components/claudemd/ClaudeMdManager';
 import dynamic from 'next/dynamic';
 
 const OrchestratorPage = dynamic(() => import('../components/orchestrator/OrchestratorPage'), { ssr: false });
@@ -14,6 +16,7 @@ import { useProjects, useProjectDetail } from '../hooks/useProjects';
 import { useCommandPalette } from '../hooks/useCommandPalette';
 import { useToast } from '../hooks/useToast';
 import { useActiveSessions } from '../hooks/useSessions';
+import { useClients } from '../hooks/useClients';
 import { ProjectProvider } from '../hooks/useProjectContext';
 
 // ---------------------------------------------------------------------------
@@ -61,8 +64,10 @@ export default function Home() {
 
   const { projects, loading } = useProjects(handleRefresh);
   const { sessions: activeSessions, getSessionForProject } = useActiveSessions();
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts' | 'sessions'>('dashboard');
+  const { clients } = useClients();
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'project' | 'settings' | 'prompts' | 'sessions' | 'client' | 'instructions'>('dashboard');
   const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(null);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const { project: selectedProject } = useProjectDetail(
     currentPage === 'project' ? selectedProjectPath : null
   );
@@ -84,6 +89,12 @@ export default function Home() {
     setCurrentPage('project');
   }, []);
 
+  // Clicking a client card opens the Client Detail page
+  const handleSelectClient = useCallback((clientId: string) => {
+    setSelectedClientId(clientId);
+    setCurrentPage('client');
+  }, []);
+
   // Explicit open with a chosen mode (from inline buttons or project switcher)
   const handleLaunchProject = useCallback((projectPath: string, mode: 'claude' | 'claude --dangerously-skip-permissions') => {
     saveMode(projectPath, mode);
@@ -92,9 +103,10 @@ export default function Home() {
   }, []);
 
   const handleNavigate = useCallback((page: string) => {
-    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'sessions') {
+    if (page === 'dashboard' || page === 'settings' || page === 'prompts' || page === 'sessions' || page === 'instructions') {
       setCurrentPage(page);
       setSelectedProjectPath(null);
+      setSelectedClientId(null);
       if (page !== 'sessions') {
         setLaunchProject(null);
       }
@@ -115,6 +127,11 @@ export default function Home() {
     [setOpen]
   );
 
+  const selectedClient = useMemo(
+    () => (selectedClientId ? clients.find((c) => c.id === selectedClientId) : undefined),
+    [selectedClientId, clients],
+  );
+
   const pageTitle =
     currentPage === 'dashboard'
       ? 'Dashboard'
@@ -124,6 +141,10 @@ export default function Home() {
       ? 'Prompt Library'
       : currentPage === 'sessions'
       ? 'Orchestrator'
+      : currentPage === 'instructions'
+      ? 'Instructions'
+      : currentPage === 'client'
+      ? selectedClient?.name || 'Client'
       : selectedProject?.name || 'Project';
 
   const contextValue = useMemo(
@@ -132,11 +153,12 @@ export default function Home() {
       selectedProjectPath,
       onSelectProject: handleSelectProject,
       onOpenProject: handleLaunchProject,
+      onSelectClient: handleSelectClient,
       activeProjectPath: launchProject?.path || null,
       activeSessions: activeSessions || [],
       getSessionForProject: getSessionForProject || (() => null),
     }),
-    [projects, selectedProjectPath, handleSelectProject, handleLaunchProject, launchProject, activeSessions, getSessionForProject]
+    [projects, selectedProjectPath, handleSelectProject, handleLaunchProject, handleSelectClient, launchProject, activeSessions, getSessionForProject]
   );
 
   if (loading) {
@@ -177,11 +199,22 @@ export default function Home() {
             onBack={() => handleNavigate('dashboard')}
           />
         )}
+        {currentPage === 'client' && selectedClient && (
+          <ClientDetail
+            workspace={selectedClient}
+            onBack={() => handleNavigate('dashboard')}
+          />
+        )}
         {currentPage === 'dashboard' && <Dashboard />}
         {currentPage === 'prompts' && <PromptLibrary />}
         {currentPage === 'sessions' && (
           <OrchestratorPage
             initialProject={launchProject ? { path: launchProject.path, mode: launchProject.mode as 'claude' | 'claude --dangerously-skip-permissions' } : undefined}
+          />
+        )}
+        {currentPage === 'instructions' && (
+          <ClaudeMdManager
+            projects={projects.map(p => ({ path: p.path, name: p.name, client: p.client }))}
           />
         )}
         {currentPage === 'settings' && <SettingsPage />}
